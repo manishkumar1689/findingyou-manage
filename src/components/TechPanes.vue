@@ -30,9 +30,9 @@ import { bus } from "@/main";
 })
 export default class TechPanes extends Vue {
   @State("user") user: UserState;
-  private activeTab = 0;
+  activeTab = 0;
 
-  private tabs = [
+  tabs = [
     { key: "files", className: "file-listing" },
     { key: "transitions", className: "lanetary-transitions-table" },
   ];

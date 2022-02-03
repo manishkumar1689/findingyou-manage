@@ -102,14 +102,14 @@ import { bus } from "../main";
 })
 export default class SnippetList extends Vue {
   @State("user") user: UserState;
-  private snippets: Array<SnippetSchema> = [];
-  private categories: Array<string> = [];
-  private category = "-";
-  private selectedSnippet = new SnippetSchema();
-  private loaded = false;
-  private filter = "";
+  snippets: Array<SnippetSchema> = [];
+  categories: Array<string> = [];
+  category = "-";
+  selectedSnippet = new SnippetSchema();
+  loaded = false;
+  filter = "";
   private showAll = false;
-  private expandedIndices: number[] = [];
+  expandedIndices: number[] = [];
 
   created() {
     this.loadData();
