@@ -79,21 +79,21 @@ import { PreferenceOption, Role } from "../api/interfaces";
 })
 export default class UsersListView extends Vue {
   @State("user") user: UserState;
-  private result: any = null;
+  result: any = null;
 
-  private users: Array<User> = [];
+  users: Array<User> = [];
 
-  private criteria = new Map<string, string | number | boolean>();
+  criteria = new Map<string, string | number | boolean>();
 
-  private searchString = "";
+  searchString = "";
 
-  private selectedUser = null;
+  selectedUser = null;
 
-  private showForm = false;
+  showForm = false;
 
-  private preferenceOptions: Array<PreferenceOption> = [];
+  preferenceOptions: Array<PreferenceOption> = [];
 
-  private roles: Array<Role> = [];
+  roles: Array<Role> = [];
 
   created() {
     this.loadData();

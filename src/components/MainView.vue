@@ -29,7 +29,7 @@
 </template>
 
 <script lang="ts">
-import { Component, Prop, Watch, Vue } from "vue-property-decorator";
+import { Component, Vue } from "vue-property-decorator";
 import { fetchLanguages } from "@/api/methods";
 import { LanguageItem } from "@/api/interfaces";
 import { saveEnabledLangsFromQueryString } from "@/store/local";
@@ -39,11 +39,11 @@ import { saveEnabledLangsFromQueryString } from "@/store/local";
   filters: {},
 })
 export default class MainView extends Vue {
-  private langOpts: Array<LanguageItem> = [];
+  langOpts: Array<LanguageItem> = [];
 
-  private enabledLangOpts: any = {};
+  enabledLangOpts: any = {};
 
-  private defaultLang = "en";
+  defaultLang = "en";
 
   created() {
     saveEnabledLangsFromQueryString(this.$ls);

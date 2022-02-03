@@ -36,7 +36,7 @@
 <script lang="ts">
 import { Action } from "vuex-class";
 import { authenticate } from "../api/methods";
-import { Component, Prop, Watch, Vue } from "vue-property-decorator";
+import { Component, Vue } from "vue-property-decorator";
 import { bus } from "../main";
 import { saveEnabledLangsFromQueryString } from "@/store/local";
 
@@ -46,10 +46,10 @@ import { saveEnabledLangsFromQueryString } from "@/store/local";
 })
 export default class Login extends Vue {
   @Action("assignUser", { namespace: "user" }) assignUser: any;
-  private email = "";
-  private password = "";
-  private error = false;
-  private errorMsg = "";
+  email = "";
+  password = "";
+  error = false;
+  errorMsg = "";
 
   created() {
     saveEnabledLangsFromQueryString(this.$ls);

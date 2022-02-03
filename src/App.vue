@@ -39,8 +39,10 @@
           <b-icon icon="clock"></b-icon>
           <dl class="inner">
             <template v-for="item in dateInfo">
-              <dt :key="item.key">{{item.label}}</dt>
-              <dd :key="item.key2">{{item.value}}</dd>
+              <template>
+                <dt :key="item.key">{{item.label}}</dt>
+                <dd :key="item.key2">{{item.value}}</dd>
+              </template>
             </template>
           </dl>
         </div>
@@ -69,11 +71,10 @@
 <script lang="ts">
 import { Component, Vue } from "vue-property-decorator";
 import { State, Action } from "vuex-class";
-import { fetchLexemes, fetchRoddenValues } from "./api/methods";
+import { fetchLexemes } from "./api/methods";
 import Login from "./components/Login.vue";
 import { bus } from "./main";
 import { UserState } from "./store/types";
-import { exitFullScreen } from "./api/dom";
 import { notEmptyString } from "./api/validators";
 import { currentJulianDate, JulDate } from "./api/julian-date";
 import { decPlaces } from "./api/converters";
@@ -126,7 +127,7 @@ export default class App extends Vue {
       }
     }
     this.loadDictionary();
-    bus.$on("login", (valid: boolean) => {
+    bus.$on("login", () => {
       this.isLoggedIn = true;
     });
     bus.$on("show-chart-sidebar", (active: boolean) => {
@@ -140,20 +141,6 @@ export default class App extends Vue {
 
     window.addEventListener("keydown", this.handleKeyDown);
 
-    window.addEventListener("keypress", (e) => {
-      switch (e.which) {
-        case 13:
-          exitFullScreen();
-          break;
-      }
-    });
-    document.addEventListener("fullscreenchange", (e) => {
-      if (!document.fullscreenElement) {
-        exitFullScreen();
-      }
-      bus.$emit("resize", true);
-      bus.$emit("fullscreen", document.fullscreen);
-    });
     this.julianDate = currentJulianDate();
   }
 
@@ -162,7 +149,7 @@ export default class App extends Vue {
     if (lexItems instanceof Array) {
       this.assignItems(lexItems);
     } else {
-      const data = fetchLexemes("").then((data) => {
+      fetchLexemes("").then((data) => {
         if (data.valid) {
           if (data.items instanceof Array) {
             this.assignItems(data.items);
@@ -170,7 +157,6 @@ export default class App extends Vue {
           }
         }
       });
-      fetchRoddenValues();
     }
   }
 

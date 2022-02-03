@@ -102,17 +102,17 @@ import ReassignTagForm from "./ReassignTagForm.vue";
 }})
 export default class TagOptionForm extends Vue {
   @State("user") user: UserState;
-  private items: Array<TagOptionSet> = [];
+  items: Array<TagOptionSet> = [];
 
-  private editableSlug = [-1, -1];
+  editableSlug = [-1, -1];
 
-  private stats: Map<string, KeyNumValue> = new Map();
+  stats: Map<string, KeyNumValue> = new Map();
 
-  private statsChecked = false;
+  statsChecked = false;
 
-  private selectedTag: SlugName = Object.assign({}, defaultPairedTag);
+  selectedTag: SlugName = Object.assign({}, defaultPairedTag);
 
-  private coreTagSets = [
+  coreTagSets = [
     'type',
     'quality',
     'end_how',

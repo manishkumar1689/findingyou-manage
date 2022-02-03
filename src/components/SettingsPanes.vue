@@ -109,16 +109,16 @@ import { bus } from "../main";
 })
 export default class SettingsPanes extends Vue {
   @State("user") user: UserState;
-  private permissions: Array<KeyName> = [];
-  private permissionLimits: Array<KeyNumValue> = [];
-  private settings: Array<Setting> = [];
-  private countries: Array<CountryOption> = [];
-  private roles: Array<Role> = [];
-  private paymentOptions: Array<PaymentOption> = [];
-  private preferenceOptions: Array<PreferenceOption> = [];
-  private surveyKey = "preference_options";
-  private _newSurveyKey = "";
-  private sectionKeys = [
+  permissions: Array<KeyName> = [];
+  permissionLimits: Array<KeyNumValue> = [];
+  settings: Array<Setting> = [];
+  countries: Array<CountryOption> = [];
+  roles: Array<Role> = [];
+  paymentOptions: Array<PaymentOption> = [];
+  preferenceOptions: Array<PreferenceOption> = [];
+  surveyKey = "preference_options";
+  _newSurveyKey = "";
+  sectionKeys = [
     "roles",
     "payment-options",
     "preference-options",
@@ -130,10 +130,10 @@ export default class SettingsPanes extends Vue {
     "advanced",
     "exports",
   ];
-  private preferenceTypes = [];
-  private activeTab = 0;
+  preferenceTypes = [];
+  activeTab = 0;
   private saving = false;
-  private promptOptions = [];
+  promptOptions = [];
   private showingToast = false;
 
   created() {
