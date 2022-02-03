@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="1442px" height="1442px" viewBox="0 0 1442 1442" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>vedic-chart</title>
+    <g id="north-indian-chart" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="vedic-chart" transform="translate(-360.0, -360.0)" stroke="#979797">
+            <rect id="Rectangle" stroke-opacity="0" fill-opacity="0" fill="#FFFFFF" x="360.782476" y="361" width="1440" height="1440"></rect>
+            <g id="outer-lines" transform="translate(1081.000000, 1080.883118) rotate(15.000000) translate(-1081.000000, -1080.883118) translate(199.000000, 198.883118)" stroke-linecap="square">
+                <line x1="0.616204695" y1="373.40587" x2="1763.63645" y2="1391.28608" id="Line" transform="translate(882.126326, 882.345976) rotate(-0.000000) translate(-882.126326, -882.345976) "></line>
+                <line x1="-0.0331693463" y1="373.358481" x2="1762.63352" y2="1391.85106" id="Line" transform="translate(881.165594, 882.433190) rotate(-90.000000) translate(-881.165594, -882.433190) "></line>
+                <line x1="203.030154" y1="542.814278" x2="1560.62755" y2="1221.58917" id="Line" transform="translate(881.828855, 882.201724) rotate(30.000000) translate(-881.828855, -882.201724) "></line>
+                <line x1="203.415888" y1="542.870016" x2="1560.70735" y2="1221.33897" id="Line" transform="translate(882.061621, 882.104494) rotate(-60.000000) translate(-882.061621, -882.104494) "></line>
+            </g>
+            <g id="outer-right-angle" transform="translate(1080.299513, 1080.870590) rotate(15.000000) translate(-1080.299513, -1080.870590) translate(321.799513, 322.870590)" stroke-linecap="square">
+                <line x1="0.933871334" y1="712.656924" x2="1516.58317" y2="803.472486" id="Line"></line>
+                <line x1="804.472486" y1="0.416834247" x2="713.527514" y2="1515.58317" id="Line"></line>
+            </g>
+            <rect id="Rectangle" fill="#FFFFFF" x="720.782476" y="721" width="720" height="720"></rect>
+            <g id="inner" transform="translate(588.874323, 721.000000)" stroke-linecap="square">
+                <line x1="851.908154" y1="0" x2="131.908154" y2="720" id="Line"></line>
+                <line x1="51" y1="105.441559" x2="932.816307" y2="614.558441" id="Line" transform="translate(491.908154, 360.000000) rotate(15.000000) translate(-491.908154, -360.000000) "></line>
+            </g>
+            <rect id="Rectangle" fill="#FFFFFF" transform="translate(1080.782476, 901.000000) rotate(45.000000) translate(-1080.782476, -901.000000) " x="953.503256" y="773.720779" width="254.558441" height="254.558441"></rect>
+            <rect id="Rectangle" fill="#FFFFFF" transform="translate(1260.782476, 1081.000000) rotate(45.000000) translate(-1260.782476, -1081.000000) " x="1133.50326" y="953.720779" width="254.558441" height="254.558441"></rect>
+            <rect id="Rectangle" fill="#FFFFFF" transform="translate(1080.782476, 1261.000000) rotate(45.000000) translate(-1080.782476, -1261.000000) " x="953.503256" y="1133.72078" width="254.558441" height="254.558441"></rect>
+            <rect id="Rectangle" fill="#FFFFFF" transform="translate(900.782476, 1081.000000) rotate(45.000000) translate(-900.782476, -1081.000000) " x="773.503256" y="953.720779" width="254.558441" height="254.558441"></rect>
+        </g>
+    </g>
+</svg>

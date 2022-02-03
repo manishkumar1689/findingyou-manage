@@ -1,0 +1,795 @@
+@font-face {
+  font-family: 'icomoon';
+  src:  url('fonts/icomoon.eot?5o9wz4');
+  src:  url('fonts/icomoon.eot?5o9wz4#iefix') format('embedded-opentype'),
+    url('fonts/icomoon.ttf?5o9wz4') format('truetype'),
+    url('fonts/icomoon.woff?5o9wz4') format('woff'),
+    url('fonts/icomoon.svg?5o9wz4#icomoon') format('svg');
+  font-weight: normal;
+  font-style: normal;
+  font-display: block;
+}
+
+[class^="icon-"], [class*=" icon-"] {
+  /* use !important to prevent issues with browser extensions that change fonts */
+  font-family: 'icomoon' !important;
+  speak: never;
+  font-style: normal;
+  font-weight: normal;
+  font-variant: normal;
+  text-transform: none;
+  line-height: 1;
+
+  /* Better Font Rendering =========== */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.icon-sign-1:before {
+  content: "\e900";
+}
+.icon-1:before {
+  content: "\e900";
+}
+.icon-aries:before {
+  content: "\e900";
+}
+.icon-ar1:before {
+  content: "\e900";
+}
+.icon-sign-2:before {
+  content: "\e901";
+}
+.icon-2:before {
+  content: "\e901";
+}
+.icon-taurus:before {
+  content: "\e901";
+}
+.icon-ta:before {
+  content: "\e901";
+}
+.icon-sign-3:before {
+  content: "\e902";
+}
+.icon-3:before {
+  content: "\e902";
+}
+.icon-gemini:before {
+  content: "\e902";
+}
+.icon-ge:before {
+  content: "\e902";
+}
+.icon-sign-4:before {
+  content: "\e903";
+}
+.icon-4:before {
+  content: "\e903";
+}
+.icon-cancer:before {
+  content: "\e903";
+}
+.icon-cn:before {
+  content: "\e903";
+}
+.icon-sign-5:before {
+  content: "\e904";
+}
+.icon-5:before {
+  content: "\e904";
+}
+.icon-leo:before {
+  content: "\e904";
+}
+.icon-le:before {
+  content: "\e904";
+}
+.icon-sign-6:before {
+  content: "\e905";
+}
+.icon-6:before {
+  content: "\e905";
+}
+.icon-virgo:before {
+  content: "\e905";
+}
+.icon-vi:before {
+  content: "\e905";
+}
+.icon-sign-7:before {
+  content: "\e906";
+}
+.icon-7:before {
+  content: "\e906";
+}
+.icon-libra:before {
+  content: "\e906";
+}
+.icon-li:before {
+  content: "\e906";
+}
+.icon-sign-8:before {
+  content: "\e907";
+}
+.icon-8:before {
+  content: "\e907";
+}
+.icon-scorpio:before {
+  content: "\e907";
+}
+.icon-sc:before {
+  content: "\e907";
+}
+.icon-sign-9:before {
+  content: "\e908";
+}
+.icon-9:before {
+  content: "\e908";
+}
+.icon-sagittarius:before {
+  content: "\e908";
+}
+.icon-sg:before {
+  content: "\e908";
+}
+.icon-sign-10:before {
+  content: "\e909";
+}
+.icon-10:before {
+  content: "\e909";
+}
+.icon-capricorn:before {
+  content: "\e909";
+}
+.icon-cp:before {
+  content: "\e909";
+}
+.icon-sign-11:before {
+  content: "\e90a";
+}
+.icon-11:before {
+  content: "\e90a";
+}
+.icon-aquarius:before {
+  content: "\e90a";
+}
+.icon-aq:before {
+  content: "\e90a";
+}
+.icon-sign-12:before {
+  content: "\e90b";
+}
+.icon-12:before {
+  content: "\e90b";
+}
+.icon-pisces:before {
+  content: "\e90b";
+}
+.icon-pi:before {
+  content: "\e90b";
+}
+.icon-ASC:before {
+  content: "\e90c";
+}
+.icon-house-1:before {
+  content: "\e90c";
+}
+.icon-su:before {
+  content: "\e90d";
+}
+.icon-chandra:before {
+  content: "\e90e";
+}
+.icon-mo:before {
+  content: "\e90e";
+}
+.icon-kuja:before {
+  content: "\e90f";
+}
+.icon-ma:before {
+  content: "\e90f";
+}
+.icon-budha:before {
+  content: "\e910";
+}
+.icon-me:before {
+  content: "\e910";
+}
+.icon-guru:before {
+  content: "\e911";
+}
+.icon-ju:before {
+  content: "\e911";
+}
+.icon-shukra:before {
+  content: "\e912";
+}
+.icon-ve:before {
+  content: "\e912";
+}
+.icon-shani:before {
+  content: "\e913";
+}
+.icon-sa:before {
+  content: "\e913";
+}
+.icon-ra:before {
+  content: "\e914";
+}
+.icon-ke:before {
+  content: "\e915";
+}
+.icon-north-node:before {
+  content: "\e916";
+}
+.icon-true-node:before {
+  content: "\e916";
+}
+.icon-ra1:before {
+  content: "\e916";
+}
+.icon-south-node:before {
+  content: "\e917";
+}
+.icon-true:before {
+  content: "\e917";
+}
+.icon-node:before {
+  content: "\e917";
+}
+.icon-ke1:before {
+  content: "\e917";
+}
+.icon-ur:before {
+  content: "\e918";
+}
+.icon-uranus:before {
+  content: "\e918";
+}
+.icon-ne:before {
+  content: "\e919";
+}
+.icon-neptune:before {
+  content: "\e919";
+}
+.icon-pl:before {
+  content: "\e91a";
+}
+.icon-pluto:before {
+  content: "\e91a";
+}
+.icon-kala:before {
+  content: "\e91b";
+}
+.icon-ka:before {
+  content: "\e91b";
+}
+.icon-parivesha:before {
+  content: "\e91c";
+}
+.icon-pa:before {
+  content: "\e91c";
+}
+.icon-mrtyu:before {
+  content: "\e91d";
+}
+.icon-mr:before {
+  content: "\e91d";
+}
+.icon-dhuma:before {
+  content: "\e91e";
+}
+.icon-dh:before {
+  content: "\e91e";
+}
+.icon-ardhaprahara:before {
+  content: "\e91f";
+}
+.icon-ar:before {
+  content: "\e91f";
+}
+.icon-yamaghantka:before {
+  content: "\e920";
+}
+.icon-ya:before {
+  content: "\e920";
+}
+.icon-indracapa:before {
+  content: "\e921";
+}
+.icon-in:before {
+  content: "\e921";
+}
+.icon-gulika:before {
+  content: "\e922";
+}
+.icon-gul:before {
+  content: "\e922";
+}
+.icon-mandi:before {
+  content: "\e923";
+}
+.icon-ma1:before {
+  content: "\e923";
+}
+.icon-vyatipata:before {
+  content: "\e924";
+}
+.icon-vy:before {
+  content: "\e924";
+}
+.icon-upaketu:before {
+  content: "\e925";
+}
+.icon-up:before {
+  content: "\e925";
+}
+.icon-ashvini:before {
+  content: "\e9cd";
+}
+.icon-n27-01:before {
+  content: "\e9cd";
+}
+.icon-n01:before {
+  content: "\e9cd";
+}
+.icon-bharani:before {
+  content: "\e9ce";
+}
+.icon-n27-02:before {
+  content: "\e9ce";
+}
+.icon-n02:before {
+  content: "\e9ce";
+}
+.icon-krittika:before {
+  content: "\e9cf";
+}
+.icon-n27-03:before {
+  content: "\e9cf";
+}
+.icon-n03:before {
+  content: "\e9cf";
+}
+.icon-rohini:before {
+  content: "\e9d0";
+}
+.icon-n27-04:before {
+  content: "\e9d0";
+}
+.icon-n04:before {
+  content: "\e9d0";
+}
+.icon-mrigashira:before {
+  content: "\e9d1";
+}
+.icon-n27-05:before {
+  content: "\e9d1";
+}
+.icon-n05:before {
+  content: "\e9d1";
+}
+.icon-ardra:before {
+  content: "\e9d2";
+}
+.icon-n27-06:before {
+  content: "\e9d2";
+}
+.icon-n06:before {
+  content: "\e9d2";
+}
+.icon-punarvasu:before {
+  content: "\e9d3";
+}
+.icon-n27-07:before {
+  content: "\e9d3";
+}
+.icon-n07:before {
+  content: "\e9d3";
+}
+.icon-pushya:before {
+  content: "\e9d4";
+}
+.icon-n27-08:before {
+  content: "\e9d4";
+}
+.icon-n08:before {
+  content: "\e9d4";
+}
+.icon-ashlesha:before {
+  content: "\e9d5";
+}
+.icon-n27-09:before {
+  content: "\e9d5";
+}
+.icon-n09:before {
+  content: "\e9d5";
+}
+.icon-n27-10:before {
+  content: "\e9d6";
+}
+.icon-n10:before {
+  content: "\e9d6";
+}
+.icon-magha:before {
+  content: "\e9d6";
+}
+.icon-purva-phalguni:before {
+  content: "\e9d7";
+}
+.icon-n27-11:before {
+  content: "\e9d7";
+}
+.icon-n11:before {
+  content: "\e9d7";
+}
+.icon-uttara-phalguni:before {
+  content: "\e9d8";
+}
+.icon-n27-12:before {
+  content: "\e9d8";
+}
+.icon-n12:before {
+  content: "\e9d8";
+}
+.icon-hasta:before {
+  content: "\e9d9";
+}
+.icon-n27-13:before {
+  content: "\e9d9";
+}
+.icon-n13:before {
+  content: "\e9d9";
+}
+.icon-chitra:before {
+  content: "\e9da";
+}
+.icon-n27-14:before {
+  content: "\e9da";
+}
+.icon-n14:before {
+  content: "\e9da";
+}
+.icon-svati:before {
+  content: "\e9db";
+}
+.icon-n27-15:before {
+  content: "\e9db";
+}
+.icon-n15:before {
+  content: "\e9db";
+}
+.icon-vishakha:before {
+  content: "\e9dc";
+}
+.icon-n27-16:before {
+  content: "\e9dc";
+}
+.icon-n16:before {
+  content: "\e9dc";
+}
+.icon-anuradha:before {
+  content: "\e9dd";
+}
+.icon-n27-17:before {
+  content: "\e9dd";
+}
+.icon-n17:before {
+  content: "\e9dd";
+}
+.icon-jyestha:before {
+  content: "\e9de";
+}
+.icon-n27-18:before {
+  content: "\e9de";
+}
+.icon-n18:before {
+  content: "\e9de";
+}
+.icon-mula:before {
+  content: "\e9df";
+}
+.icon-n27-19:before {
+  content: "\e9df";
+}
+.icon-n19:before {
+  content: "\e9df";
+}
+.icon-purva-ashada:before {
+  content: "\e9e0";
+}
+.icon-n27-20:before {
+  content: "\e9e0";
+}
+.icon-n20:before {
+  content: "\e9e0";
+}
+.icon-uttara-ashada:before {
+  content: "\e9e1";
+}
+.icon-n27-21:before {
+  content: "\e9e1";
+}
+.icon-n21:before {
+  content: "\e9e1";
+}
+.icon-abhijit:before {
+  content: "\e9e2";
+}
+.icon-n28-22:before {
+  content: "\e9e2";
+}
+.icon-shravana:before {
+  content: "\e9e3";
+}
+.icon-n27-22:before {
+  content: "\e9e3";
+}
+.icon-n28-23:before {
+  content: "\e9e3";
+}
+.icon-n22:before {
+  content: "\e9e3";
+}
+.icon-dhanishta:before {
+  content: "\e9e4";
+}
+.icon-n27-23:before {
+  content: "\e9e4";
+}
+.icon-n28-24:before {
+  content: "\e9e4";
+}
+.icon-n23:before {
+  content: "\e9e4";
+}
+.icon-shatabisha:before {
+  content: "\e9e5";
+}
+.icon-n27-24:before {
+  content: "\e9e5";
+}
+.icon-n28-25:before {
+  content: "\e9e5";
+}
+.icon-n24:before {
+  content: "\e9e5";
+}
+.icon-purva-bhadrapada:before {
+  content: "\e9e6";
+}
+.icon-n27-25:before {
+  content: "\e9e6";
+}
+.icon-n28-26:before {
+  content: "\e9e6";
+}
+.icon-n25:before {
+  content: "\e9e6";
+}
+.icon-uttara-bhadrapada:before {
+  content: "\e9e7";
+}
+.icon-n27-26:before {
+  content: "\e9e7";
+}
+.icon-n28-27:before {
+  content: "\e9e7";
+}
+.icon-n26:before {
+  content: "\e9e7";
+}
+.icon-revati:before {
+  content: "\e9e8";
+}
+.icon-n27-27:before {
+  content: "\e9e8";
+}
+.icon-n28-28:before {
+  content: "\e9e8";
+}
+.icon-n27:before {
+  content: "\e9e8";
+}
+.icon-moon_shukla_tithi_01:before {
+  content: "\ea20";
+}
+.icon-moon_shukla_tithi_02:before {
+  content: "\ea21";
+}
+.icon-moon_shukla_tithi_03:before {
+  content: "\ea22";
+}
+.icon-moon_shukla_tithi_04:before {
+  content: "\ea23";
+}
+.icon-moon_shukla_tithi_05:before {
+  content: "\ea24";
+}
+.icon-moon_shukla_tithi_06:before {
+  content: "\ea25";
+}
+.icon-moon_shukla_tithi_07:before {
+  content: "\ea26";
+}
+.icon-moon_shukla_tithi_08:before {
+  content: "\ea27";
+}
+.icon-moon_shukla_tithi_09:before {
+  content: "\ea28";
+}
+.icon-moon_shukla_tithi_10:before {
+  content: "\ea29";
+}
+.icon-moon_shukla_tithi_11:before {
+  content: "\ea2a";
+}
+.icon-moon_shukla_tithi_12:before {
+  content: "\ea2b";
+}
+.icon-moon_shukla_tithi_13:before {
+  content: "\ea2c";
+}
+.icon-moon_shukla_tithi_14:before {
+  content: "\ea2d";
+}
+.icon-moon_shukla_tithi_15:before {
+  content: "\ea2e";
+}
+.icon-moon_krishna_tithi_16:before {
+  content: "\ea2f";
+}
+.icon-moon_krishna_tithi_17:before {
+  content: "\ea30";
+}
+.icon-moon_krishna_tithi_18:before {
+  content: "\ea31";
+}
+.icon-moon_krishna_tithi_19:before {
+  content: "\ea32";
+}
+.icon-moon_krishna_tithi_20:before {
+  content: "\ea33";
+}
+.icon-moon_krishna_tithi_21:before {
+  content: "\ea34";
+}
+.icon-moon_krishna_tithi_22:before {
+  content: "\ea35";
+}
+.icon-moon_krishna_tithi_23:before {
+  content: "\ea36";
+}
+.icon-moon_krishna_tithi_24:before {
+  content: "\ea37";
+}
+.icon-moon_krishna_tithi_25:before {
+  content: "\ea38";
+}
+.icon-moon_krishna_tithi_26:before {
+  content: "\ea39";
+}
+.icon-moon_krishna_tithi_27:before {
+  content: "\ea3a";
+}
+.icon-moon_krishna_tithi_28:before {
+  content: "\ea3b";
+}
+.icon-moon_krishna_tithi_29:before {
+  content: "\ea3c";
+}
+.icon-moon_krishna_tithi_30:before {
+  content: "\ea3d";
+}
+.icon-e-d_1000-conjunction:before {
+  content: "\e926";
+}
+.icon-e-d_1018-virgintile:before {
+  content: "\e927";
+}
+.icon-e-d_1024-quindecile:before {
+  content: "\e928";
+}
+.icon-e-d_1030-semi-sextile:before {
+  content: "\e929";
+}
+.icon-e-d_1036-dectile2:before {
+  content: "\e92a";
+}
+.icon-e-d_1040-novile-2:before {
+  content: "\e92b";
+}
+.icon-e-d_1045-semi-square-octile:before {
+  content: "\e92c";
+}
+.icon-e-d_1051-septile-2:before {
+  content: "\e92d";
+}
+.icon-e-d_1060-sextile:before {
+  content: "\e92e";
+}
+.icon-e-d_10721-quintile:before {
+  content: "\e92f";
+}
+.icon-e-d_10722-quintile:before {
+  content: "\e930";
+}
+.icon-e-d_10801-bi-novile:before {
+  content: "\e931";
+}
+.icon-e-d_10802-bi-novile:before {
+  content: "\e932";
+}
+.icon-e-d_1090-square:before {
+  content: "\e933";
+}
+.icon-e-d_1102-bi-septile:before {
+  content: "\e934";
+}
+.icon-e-d_1108-tri-dectile-2:before {
+  content: "\e935";
+}
+.icon-e-d_1120-trine:before {
+  content: "\e936";
+}
+.icon-e-d_1135-sesqui-square:before {
+  content: "\e937";
+}
+.icon-e-d_11441-bi-quintile:before {
+  content: "\e938";
+}
+.icon-e-d_11442-bi-quintile:before {
+  content: "\e939";
+}
+.icon-e-d_1150-inconjunction---Copy:before {
+  content: "\e93a";
+}
+.icon-e-d_1154-tri-septile:before {
+  content: "\e93b";
+}
+.icon-e-d_11601-quad-novile:before {
+  content: "\e93c";
+}
+.icon-e-d_11602-quad-novile:before {
+  content: "\e93d";
+}
+.icon-e-d_1180-opposition:before {
+  content: "\e93e";
+}
+.icon-e-d_291-parallel:before {
+  content: "\e93f";
+}
+.icon-e-d_292-contra-parallel:before {
+  content: "\e940";
+}
+.icon-e-d_2036-dectile:before {
+  content: "\e941";
+}
+.icon-e-d_2040-novile:before {
+  content: "\e942";
+}
+.icon-e-d_2051-septile:before {
+  content: "\e943";
+}
+.icon-e-d_2072-quintile:before {
+  content: "\e944";
+}
+.icon-e-d_2080-bi-novile:before {
+  content: "\e945";
+}
+.icon-e-d_2102-bi-septile:before {
+  content: "\e946";
+}
+.icon-e-d_2108-tri-dectile:before {
+  content: "\e947";
+}
+.icon-e-d_2144-bi-quintile:before {
+  content: "\e948";
+}
+.icon-e-d_2154-tri-septile:before {
+  content: "\e949";
+}
+.icon-e-d_2160-quad-novile:before {
+  content: "\e94a";
+}

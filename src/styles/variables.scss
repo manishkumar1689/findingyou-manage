@@ -1,0 +1,54 @@
+$max-narrow-mobile-width: 480px;
+$min-large-mobile-width: 480.25px;
+$max-mobile-width: 720px;
+$min-tablet-width: 720.25px;
+$min-medium-width: 900px;
+$max-tablet-width: 1080px;
+$min-standard-width: 1080px;
+$min-mlarge-width: 1280px;
+$min-large-width: 1440px;
+$min-xlarge-width: 1560px;
+
+$dark-color: #222222;
+$active-color: #42b983;
+$green: #009933;
+$success: #23d160;
+$danger: #ff3860;
+$blue: #000099;
+$orange: #ff6600;
+$dark-grey: #888888;
+$link-color: $blue;
+$highlight-color: #ffff66;
+
+$light-fg: #aaaaaa;
+$bright-shade: #eeeeee;
+$light-bg: #f4f4f4;
+$medium-grey: #808080;
+$light-grey: #cccccc;
+$warning-color: #990000;
+$red-label: rgba(204, 0, 0, 0.75);
+$blue-label: rgba(0, 0, 204, 0.75);
+$green-label: $green;
+$yellow-label: rgba(255, 255, 0, 0.75);
+$yellow-translucent: rgba(255, 255, 0, 0.25);
+$bright-green: #ccffcc;
+$light-green: #aaffaa;
+$light-blue: #5577ff;
+$bright-blue: #ddeeff;
+$purple: #cc33cc;
+$purple-translucent: rgba($purple, 0.25);
+
+/* Object colours */
+$su-rgb: #ffcc00;
+$mo-rgb: #888888;
+$ma-rgb: #ff0000;
+$me-rgb: #00ff00;
+$ju-rgb: #cc6633;
+$ve-rgb: #bb0099;
+$sa-rgb: #000099;
+$ra-rgb: #000066;
+$ke-rgb: #660000;
+$benefic-rgb: #0000ff;
+$malefic-rgb: #cc7777;
+$selected-rgb: #445599;
+$all-rgb: #995544;
