@@ -1392,3 +1392,19 @@ export const saveIpWhitelist = async (userID: string, ips: string[]) => {
   });
   return ips;
 };
+
+export const fetchRoddenValues = async () => {
+  const rv = Vue.ls.get("rodden-values");
+  let rows = [];
+  if (rv instanceof Array) {
+    rows = rv;
+  } else {
+    fetchSetting("rodden_scale_values").then((data) => {
+      if (data instanceof Object && data.value instanceof Array) {
+        Vue.ls.set("rodden-values", data.value);
+        rows = data.value.filter((rv) => rv.enabled);
+      }
+    });
+  }
+  return rows;
+};
