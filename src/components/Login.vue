@@ -91,10 +91,7 @@ export default class Login extends Vue {
       this.$ls.set("user", data);
       if (roles.length > 0 && roles.includes("blocked") === false) {
         const { path } = this.$route;
-        const tgPath =
-          roles.includes("superadmin") || roles.includes("admin")
-            ? "/testing"
-            : "/";
+        const tgPath = "/";
         if (path !== tgPath) {
           this.$router.push(tgPath);
         }
