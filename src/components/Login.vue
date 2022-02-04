@@ -87,9 +87,9 @@ export default class Login extends Vue {
     const adminRoles = ["superadmin", "admin", "moderator"];
     if (data.roles instanceof Array) {
       roles = data.roles.filter((r) => adminRoles.includes(r));
-      this.assignUser(data);
-      this.$ls.set("user", data);
       if (roles.length > 0 && roles.includes("blocked") === false) {
+        this.assignUser(data);
+        this.$ls.set("user", data);
         const { path } = this.$route;
         const tgPath = "/";
         if (path !== tgPath) {
