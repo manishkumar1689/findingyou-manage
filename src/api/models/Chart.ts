@@ -8,7 +8,6 @@ import {
   KeySet,
 } from "../interfaces";
 import {
-  calcJdPeriodRange,
   calcSign,
   subtractSign,
   deepClone,
@@ -18,14 +17,11 @@ import {
 } from "../helpers";
 import {
   subtractLng360,
-  julToISODate,
-  weekDayNum,
   relativeAngle,
   toDateTime,
   shortTzAbbr,
   hourMinTz,
   julToDateFormat,
-  weekDayNumIso,
   julToISODateObj,
   mediumDate,
   smartCastFloat,

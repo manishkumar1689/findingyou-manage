@@ -208,54 +208,54 @@ export default class ChartInfoForm extends Vue {
   @Prop({ default: [] }) statusOptions: KeyName[];
   @Prop({ default: [] }) pairedItems: PairedRef[];
 
-  private datetime = new Date();
+  datetime = new Date();
 
-  private dateVal = 0;
+  dateVal = 0;
 
-  private timeVal = "12:00:00";
+  timeVal = "12:00:00";
 
-  private maxYear = 2030;
+  maxYear = 2030;
 
-  private minYear = 1600;
+  minYear = 1600;
 
-  private form = new ChartForm();
+  form = new ChartForm();
 
-  private geo = new GeoLoc([0, 0, 0]);
+  geo = new GeoLoc([0, 0, 0]);
 
-  private geoChanged = false;
+  geoChanged = false;
 
-  private dateChanged = false;
+  dateChanged = false;
 
-  private error = false;
+  error = false;
 
-  private messages = [];
+  messages = [];
 
-  private _id = "";
-  private name = "";
-  private altNames: string[] = [];
-  private gender = "-";
-  private isDefaultBirthChart = false;
-  private type = "person";
-  private eventType = "birth";
-  private notes = "";
-  private status = "";
-  private sources: string[] = [];
-  private roddenScale = "";
-  private roddenValue = -1;
-  private roddenValues: Array<KeyName> = [];
-  private selectedChartId = "";
-  private initialized = false;
-  private suggestedLocations = [];
-  private tempLocMatch = "";
-  private mode = "current";
-  private expanded = true;new
-  private notesExpanded = false;
-  private editMode = true;
-  private isFetching = false;
-  private editLocalityMode = false;
-  private saving = false;
+  _id = "";
+  name = "";
+  altNames: string[] = [];
+  gender = "-";
+  isDefaultBirthChart = false;
+  type = "person";
+  eventType = "birth";
+  notes = "";
+  status = "";
+  sources: string[] = [];
+  roddenScale = "";
+  roddenValue = -1;
+  roddenValues: Array<KeyName> = [];
+  selectedChartId = "";
+  initialized = false;
+  suggestedLocations = [];
+  tempLocMatch = "";
+  mode = "current";
+  expanded = true;new
+  notesExpanded = false;
+  editMode = true;
+  isFetching = false;
+  editLocalityMode = false;
+  saving = false;
 
-  private tzInfo = '';
+  tzInfo = '';
 
   created() {
     fetchRoddenValues().then((items) => {
@@ -665,7 +665,7 @@ export default class ChartInfoForm extends Vue {
       if (showMessages) {
         this.messages.push("Please select a location");
       }
-      const isZero = geo.lat === 0 && geo.lng === 0;
+      
     }
     if (roddenValue < 0 && this.eventType === 'birth') {
       valid = false;

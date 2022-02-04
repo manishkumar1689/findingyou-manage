@@ -76,34 +76,34 @@
     <div class="editing-overlay relationship-overlay" :class="overlayClasses">
 
           
-      <div class="inner-panel">
+      <div class="inner-panel" v-if="showEditOverlay">
         <b-icon class="close" icon="close" @click.native="close" />
-        <chart-info-form v-if="singleChartExpanded" :chart="selectedChart" :statusOptions="formStatusOptions" :pairedItems="currentPairedItems" />
-        <relationship-form v-if="pairedExpanded"
-              :paired="selectedPaired"
-              :label="selectedLabel"
-              :autosubmit="false"
-              :showNotes="true"
-              :tooltip="true"
-              >
-              <b-field v-if="showPairedNameSearch" class="horizontal partner-search" label="Partner">
-                <b-autocomplete
-              :data="suggestedChartNames"
-              placeholder="Name"
-              field="name"
-              v-model="matchedName"
-              class="name"
-              @typing="matchChartName"
-              @select="selectChartName"
-            ><template slot-scope="props">
-                <div class="row">
-                  {{ props.option.name }}
-                </div>
-              </template>
-            </b-autocomplete>
-              </b-field>
-            <b-button class="save" @click="savePaired" icon-left="send" type="is-success">Save</b-button>
-        </relationship-form>
+          <chart-info-form v-if="singleChartExpanded" :chart="selectedChart" :statusOptions="formStatusOptions" :pairedItems="currentPairedItems" />
+          <relationship-form v-if="pairedExpanded"
+                :paired="selectedPaired"
+                :label="selectedLabel"
+                :autosubmit="false"
+                :showNotes="true"
+                :tooltip="true"
+                >
+                <b-field v-if="showPairedNameSearch" class="horizontal partner-search" label="Partner">
+                  <b-autocomplete
+                :data="suggestedChartNames"
+                placeholder="Name"
+                field="name"
+                v-model="matchedName"
+                class="name"
+                @typing="matchChartName"
+                @select="selectChartName"
+              ><template slot-scope="props">
+                  <div class="row">
+                    {{ props.option.name }}
+                  </div>
+                </template>
+              </b-autocomplete>
+                </b-field>
+              <b-button class="save" @click="savePaired" icon-left="send" type="is-success">Save</b-button>
+          </relationship-form>
       </div>
     </div>
   </div>
@@ -133,34 +133,36 @@ import { Chart, PairedChart } from "@/api/models/Chart";
 })
 export default class ChartsListView extends Vue {
   @State("user") user: UserState;
-  private result: any = null;
+  result: any = null;
 
-  private items: Array<ChartItem> = [];
+  items: Array<ChartItem> = [];
 
-  private searchString = "";
-  private status = "reference";
-  private selectedIndex = -1;
-  private page = 1;
+  searchString = "";
+  status = "reference";
+  selectedIndex = -1;
+  page = 1;
 
-  private limit = 25;
+  limit = 25;
 
-  private roddenValues: Array<KeyName> = [];
+  roddenValues: Array<KeyName> = [];
 
-  private numCharts = 0;
+  numCharts = 0;
 
-  private selectedPaired = null;
+  selectedPaired = new PairedChart();
 
-  private selectedChart = null;
+  selectedChart = new Chart();
 
-  private matchedName = "";
+  matchedName = "";
 
-  private suggestedChartNames = [];
+  suggestedChartNames = [];
 
-  private newPairedMode = false;
+  newPairedMode = false;
 
-  private isFetching = false;
+  isFetching = false;
 
-  private currentPairedItems: PairedRef[] = [];
+  currentPairedItems: PairedRef[] = [];
+  
+  showEditOverlay = false;
 
   created() {
     fetchRoddenValues().then((items) => {
@@ -192,7 +194,7 @@ export default class ChartsListView extends Vue {
     bus.$on("load-chart-form", (chartRef) => {
       if (chartRef instanceof Chart) {
         this.selectedChart = chartRef;
-        this.selectedPaired = null;
+        this.selectedPaired = new PairedChart();
         this.currentPairedItems = [];
 
         getPairedItems(chartRef._id).then(items => {
@@ -251,11 +253,11 @@ export default class ChartsListView extends Vue {
   }
 
   get singleChartExpanded() {
-    return this.selectedChart instanceof Chart;
+    return this.selectedChart instanceof Chart && this.selectedChart.hasId;
   }
 
   get pairedExpanded() {
-    return this.selectedPaired instanceof PairedChart;
+    return this.selectedPaired instanceof PairedChart && notEmptyString(this.selectedPaired._id, 12);
   }
 
   get showPairedNameSearch() {
@@ -266,8 +268,10 @@ export default class ChartsListView extends Vue {
     let str = "";
     if (this.pairedExpanded) {
       const { c1, c2 } = this.selectedPaired;
-      const second = c2 instanceof Chart && notEmptyString(c2.subject.name)? c2.nameGender : '[unknown]';
-      str = [c1.nameGender, second].join(" & ");
+      if (c1 instanceof Chart && c2 instanceof Chart ) {
+        const second = notEmptyString(c2.subject.name)? c2.nameGender : '[unknown]';
+        str = [c1.nameGender, second].join(" & ");
+      }
     }
     return str;
   }
@@ -281,7 +285,7 @@ export default class ChartsListView extends Vue {
     if (this.selectedIndex >= 0) {
       cls.push("show-item");
     }
-    if (this.pairedExpanded || this.singleChartExpanded) {
+    if (this.showEditOverlay && (this.pairedExpanded || this.singleChartExpanded)) {
       cls.push("show-editing-overlay");
     }
     return cls;
@@ -320,9 +324,11 @@ export default class ChartsListView extends Vue {
   editRow(row) {
     fetchChart(this.user._id, row._id).then(result => {
       if (result.chart) {
-        const c2 = new Chart(null);
         this.selectedChart = new Chart(result.chart);
         this.currentPairedItems = row.paired;
+        setTimeout(() => {
+          this.showEditOverlay = true;
+        }, 250);
       }
     });
   }
@@ -366,10 +372,12 @@ export default class ChartsListView extends Vue {
   deletePaired(partner = null, row: ChartItem) {
     if (partner instanceof Object) {
       deletePairedChart(partner.id, this.user._id).then(result => {
-        this.selectedPaired = null;
-        const index = this.items.findIndex(row => row._id === row._id);
-        row.paired = row.paired.filter(p => p.id !== partner.id);
-        this.items.splice(index,1,row);    
+        if (result) {
+          this.selectedPaired = new PairedChart();
+          const index = this.items.findIndex(row => row._id === row._id);
+          row.paired = row.paired.filter(p => p.id !== partner.id);
+          this.items.splice(index,1,row);    
+        }
       });
     }
   }
@@ -387,7 +395,7 @@ export default class ChartsListView extends Vue {
           }
         });
         if (pc instanceof Object) {
-          this.selectedChart = null;
+          this.selectedChart = new Chart();
           this.selectedPaired = new PairedChart(pc);
         }
       }
@@ -428,11 +436,11 @@ export default class ChartsListView extends Vue {
       item instanceof Object &&
       notEmptyString(item.id)
     ) {
-      const inData = {
+      /* const inData = {
         user: this.user._id,
         c1: this.selectedPaired.c1._id,
         c2: item.id,
-      };
+      }; */
       fetchChart(this.user._id, item.id).then(result => {
         if (result.chart instanceof Object) {
           if (this.selectedPaired instanceof PairedChart) {
@@ -499,8 +507,9 @@ export default class ChartsListView extends Vue {
   }
 
   close() {
-    this.selectedPaired = null;
-    this.selectedChart = null;
+    /* this.selectedPaired = new PairedChart();
+    this.selectedChart = new Chart(); */
+    this.showEditOverlay = false;
   }
 
   @Watch('status')
@@ -518,7 +527,9 @@ export default class ChartsListView extends Vue {
       return { _id, isDefaultBirthChart: false, name, gender, lat, lng, tzOffset, datetime, roddenValue, eventType: 'birth', type: 'person', user: this.user._id };
     });
     saveChartsBulk(saveItems).then(result => {
-      this.toast("saved");
+      if (result) {
+        this.toast("saved");
+      }
     });
   }
 }

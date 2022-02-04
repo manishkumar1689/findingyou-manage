@@ -340,31 +340,6 @@ export const inSignDegree = (lng: number) => {
   return lng % 30;
 };
 
-export const calcDrishti = (gr1: Graha, gr2: Graha) => {
-  const [lng1, lng2] = [gr1.longitude, gr2.longitude];
-  const signs = [lng1, lng2].map(degToSign);
-  const diff = calcDist360(lng1, lng2);
-  const signDiff = calcInclusiveTwelfths(signs[0], signs[1]);
-  const diffStrength = diff % 30;
-  const applying = calcAspectIsApplying(gr1, gr2);
-  return { signs, distance: signDiff, strength: diffStrength, applying };
-};
-
-export const calcJdPeriodRange = (
-  num: number,
-  startJd = 0,
-  periodLength = 1
-) => {
-  const start = startJd + (num - 1) * periodLength;
-  const end = startJd + num * periodLength;
-  return {
-    start,
-    end,
-    startDt: julToISODate(start),
-    endDt: julToISODate(end),
-  };
-};
-
 export const matchRelations = (
   rel1: string,
   rel2: string,

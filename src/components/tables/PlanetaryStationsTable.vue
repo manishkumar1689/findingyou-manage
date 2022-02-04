@@ -128,15 +128,15 @@ import { capitalize } from "@/api/converters";
 })
 export default class PlanetaryStationsTable  extends Vue {
   @State("user") user: UserState;
-  private result: any = null;
-  private minYear = 1900;
-  private yearSpan = 20;
-  private startYear = 2010;
-  private maxYear = 2030;
+  result: any = null;
+  minYear = 1900;
+  yearSpan = 20;
+  startYear = 2010;
+  maxYear = 2030;
 
-  private yearRange = [2010, 2030];
+  yearRange = [2010, 2030];
 
-  private planets = {
+  planets = {
     2: "me",
     3: "ve",
     4: "ma",
@@ -147,9 +147,9 @@ export default class PlanetaryStationsTable  extends Vue {
     9: "pl", */
   };
 
-  private planetsEnabled: any = {};
+  planetsEnabled: any = {};
 
-  private changing = false;
+  changing = false;
 
   created() {
     bus.$on("change-tech-data-tab", (tabKey) => {
@@ -278,7 +278,7 @@ export default class PlanetaryStationsTable  extends Vue {
   selectOnePlanet(e, key) {
     e.stopPropagation();
     Object.entries(this.planetsEnabled).forEach((entry) => {
-      const [k, v] = entry;
+      const k = entry[0];
       this.planetsEnabled[k] = k === key;
     });
   }
