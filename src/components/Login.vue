@@ -63,11 +63,8 @@ export default class Login extends Vue {
       authenticate(this.email, this.password).then((data) => {
         let success = false;
         if (data instanceof Object) {
-          if (data.active) {
-            if (data.roles) {
-              success = this.handleUserData(data);
-              bus.$emit("login", true);
-            }
+          if (data.active && data.roles instanceof Array) {
+            success = this.handleUserData(data);
           }
         }
         if (!success) {
@@ -90,11 +87,13 @@ export default class Login extends Vue {
       if (roles.length > 0 && roles.includes("blocked") === false) {
         this.assignUser(data);
         this.$ls.set("user", data);
-        const { path } = this.$route;
-        const tgPath = "/";
+        /* const { path } = this.$route;
+        const tgPath = "/welcome";
         if (path !== tgPath) {
           this.$router.push(tgPath);
-        }
+        } */
+        //bus.$emit("login", true);
+        window.location.reload();
       }
     }
     return roles.length > 0;

@@ -54,7 +54,6 @@
         </p>
       </footer>
     </aside>
-
     <main id="main" :class="mainClassNames">
       <template v-if="isLoggedIn">
         <router-view />
@@ -118,17 +117,12 @@ export default class App extends Vue {
         this.$ls.set("version", this.version);
       }, 1000);
     }
-    const user = this.$ls.get("user");
-    if (user instanceof Object) {
-      const { active } = user;
-      if (active) {
-        this.isLoggedIn = true;
-        this.assignUser(user);
-      }
-    }
+    this.checkUser(true);
     this.loadDictionary();
-    bus.$on("login", () => {
-      this.isLoggedIn = true;
+    bus.$on("login", (ok: boolean) => {
+      if (ok) {
+        this.checkUser();
+      }
     });
     bus.$on("show-chart-sidebar", (active: boolean) => {
       if (active) {
@@ -142,6 +136,22 @@ export default class App extends Vue {
     window.addEventListener("keydown", this.handleKeyDown);
 
     this.julianDate = currentJulianDate();
+  }
+
+  checkUser(assignNewUser = false) {
+    const user = this.$ls.get("user");
+    let valid = false;
+    if (user instanceof Object) {
+      const { active } = user;
+      valid = active === true;
+      if (valid) {
+        this.isLoggedIn = true;
+        if (assignNewUser) {
+          this.assignUser(user);
+        }
+      }
+    }
+    return valid;
   }
 
   loadDictionary() {
@@ -163,7 +173,10 @@ export default class App extends Vue {
   logout() {
     this.$ls.remove("user");
     this.isLoggedIn = false;
-    this.$router.push("/");
+    const { path } = this.$route;
+    if (path !== "/") {
+      this.$router.push("/");
+    }
   }
 
   handleKeyDown(e) {
@@ -283,7 +296,7 @@ export default class App extends Vue {
   get mainClassNames() {
     const { path } = this.$route;
     const parts = path.length > 2 ? path.substring(1).split("/") : ["home"];
-    const first = parts[0] === "testing" ? "astro" : parts[0];
+    const first = parts[0];
     const cls = [first];
     if (parts.length > 1) {
       cls.push(parts.slice(0, 2).join("--"));

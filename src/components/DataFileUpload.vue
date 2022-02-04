@@ -43,15 +43,15 @@ export default class DataFileUpload extends Vue {
   @Prop({ default: [] }) files: FileInfo[];
   @State("user") user: UserState;
 
-  private file = null;
+  file = null;
 
-  private newName = '';
+  newName = '';
 
-  private uploadFileName = '';
+  uploadFileName = '';
 
-  private mimetype = '';
+  mimetype = '';
 
-  private valid = false;
+  valid = false;
 
   setNewName() {
     this.newName = this.currFileName;
