@@ -1,6 +1,10 @@
 <template>
   <div class="main-view" :class="wrapperClasses">
-    <h1 class="main-title">Users</h1>
+    <h1 class="main-title">
+      <span class="text-label">Users</span>
+      <em v-if="showSubtotal" class="total rounded-box">{{subtotal}}</em>
+      <em class="total rounded-box">{{total}}</em>
+    </h1>
     <form class="search-form">
       <b-input
         icon-right="magnify"
@@ -83,6 +87,10 @@ export default class UsersListView extends Vue {
 
   users: Array<User> = [];
 
+  total = 0;
+
+  subtotal = 0;
+
   criteria = new Map<string, string | number | boolean>();
 
   searchString = "";
@@ -122,6 +130,7 @@ export default class UsersListView extends Vue {
   }
 
   async loadData() {
+    this.criteria.set('totals', 1);
     const filter = Object.fromEntries(this.criteria);
     await listUsers(0, 100, filter).then((result) => {
       if (result.valid) {
@@ -129,6 +138,10 @@ export default class UsersListView extends Vue {
           const fullName = notEmptyString(user.fullName)? user.fullName : user.nickName;
           return { ...user, fullName }
         });
+        this.subtotal = result.total;
+        if (result.grandTotal) {
+          this.total = result.grandTotal;
+        }
       }
       fetchPreferenceOptions().then((data) => {
         if (data.items instanceof Array) {
@@ -158,8 +171,12 @@ export default class UsersListView extends Vue {
     }
   }
 
-  get hasUsers() {
+  get hasUsers(): boolean {
     return this.users.length > 0;
+  }
+
+  get showSubtotal(): boolean {
+    return this.subtotal > 0 && this.subtotal !== this.total;
   }
 
   edit(user: User) {

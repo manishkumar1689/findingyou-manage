@@ -699,6 +699,28 @@ li {
     }
   }
 
+  h1 {
+    span,
+    em,
+    strong {
+      display: inline-block;
+    }
+    .text-label {
+      &.left {
+        margin-right: 0.5em;
+      }
+      &.right {
+        margin-left: 0.5em;
+      }
+    }
+    .rounded-box {
+      border: solid 1px $dark-color;
+      border-radius: 0.5em;
+      margin: 0 0.75em;
+      padding: 0.15em 0.25em;
+    }
+  }
+
   span.circle,
   div.circle {
     display: block;
