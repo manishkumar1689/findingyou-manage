@@ -112,10 +112,10 @@ export default class RolesForm extends Vue {
   @Prop({ default: () => [] }) readonly roles: Array<Role>;
   @Prop({ default: () => [] }) readonly permissions: Array<KeyName>;
   @Prop({ default: () => [] }) readonly limits: Array<KeyName>;
-  private editedRoles: Array<Role> = [];
-  private selectedRoleKey = "";
-  private limitValues: Array<KeyName> = [];
-  private showLimits = false;
+  editedRoles: Array<Role> = [];
+  selectedRoleKey = "";
+  limitValues: Array<KeyName> = [];
+  showLimits = false;
 
   created() {
     this.sync();

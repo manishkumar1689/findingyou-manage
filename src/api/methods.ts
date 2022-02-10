@@ -1,12 +1,12 @@
 import Vue from "vue";
 import axios from "axios";
-import { isNumeric, notEmptyString, validDateTimeString } from "./validators";
+import { isNumeric, notEmptyString } from "./validators";
 import { api } from "../.config";
 import { GeoLoc } from "./models/GeoLoc";
 import { KeyNumValue, Lexeme, SlugName, Snippet } from "./interfaces";
 import { ChartInput, PairedInput } from "./models/ChartForm";
 import { buildOptions, extractUserId } from "./build-headers";
-import { julToISODate, smartCastFloat } from "./converters";
+import { julToISODate } from "./converters";
 import { currentJulianDay } from "./julian-date";
 
 const extractDataObj = (res: any) => {
@@ -610,6 +610,12 @@ export const fetchSnippetCategories = async () => {
 
 export const fetchSnippets = async (lang: string) => {
   const parts = ["snippet", "list", lang, 0, 0, 0];
+  const path = parts.join("/");
+  return await fetchDataObject(path);
+};
+
+export const fetchMessages = async (lang: string) => {
+  const parts = ["message", "list", lang, 0, 0, 0];
   const path = parts.join("/");
   return await fetchDataObject(path);
 };

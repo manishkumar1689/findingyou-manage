@@ -92,7 +92,7 @@ export default class App extends Vue {
 
   private showMainNav = false;
 
-  private version = 0.6;
+  private version = 0.61;
 
   private julianDate = currentJulianDate();
 

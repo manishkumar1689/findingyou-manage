@@ -108,7 +108,7 @@ export default class SnippetList extends Vue {
   selectedSnippet = new SnippetSchema();
   loaded = false;
   filter = "";
-  private showAll = false;
+  showAll = false;
   expandedIndices: number[] = [];
 
   created() {
