@@ -159,7 +159,6 @@ export default class MessageList extends Vue {
   updateByRoute() {
     const { path } = this.$route;
     const parts = path.substring(1).split('/');
-    console.log(parts)
     if (parts.length > 1) {
       const key = parts[1];
       if (notEmptyString(key, 3)) {
