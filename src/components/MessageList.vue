@@ -13,14 +13,14 @@
           }}</b-tooltip>
         </b-table-column>
         <b-table-column class="versions" field="values" label="Versions">
-          <ul v-if="isNotUpdating(props.row.key)" class="versions vertical">
+          <ul v-if="isNotUpdating(props.row.key)" class="versions text-preview vertical">
             <li
               v-for="(item, vi) in props.row.items"
               :key="['version', props.row.key, vi].join('-')"
               class="row"
             >
               <div class="language circle">{{ item | langType }}</div>
-              <div class="text" v-html="item.body"></div>
+              <div class="text small" v-html="formatBody(item.body)"></div>
               
             </li>
           </ul>
@@ -34,7 +34,7 @@
   </div>
 </template>
 <script lang="ts">
-import { Component, Watch, Vue } from "vue-property-decorator";
+import { Component, Vue } from "vue-property-decorator";
 import { State } from "vuex-class";
 import {
   fetchMessages,
@@ -107,8 +107,12 @@ export default class MessageList extends Vue {
   }
 
   close() {
-    this.selectedMessage = new MessageSet();
-    this.selectedIndex = -1;
+    this.selectItem("", true);
+  }
+
+  formatBody(body = "") {
+    const rgx = /<\w+[^>]*?>\s*(<br[^>]*?>\s*)*\s*<\/\w+>/g;
+    return body.replace(rgx, '');
   }
 
   get hasMessages() {
@@ -166,10 +170,5 @@ export default class MessageList extends Vue {
       }
     }
   }
-
-  /* @Watch("$route")
-  changeRoute() {
-    this.updateByRoute();
-  } */
 }
 </script>
