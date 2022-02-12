@@ -1,6 +1,7 @@
 import { validDateString, notEmptyString } from "../validators";
 import { Translation, Version } from "../interfaces";
 import { toDateTime } from "../converters";
+import { toWords } from "../helpers";
 
 export class UserSchema {
   _id: "";
@@ -210,5 +211,97 @@ export class SnippetSchema {
       str = `${num} translations: ${transList}${dots}`;
     }
     return str;
+  }
+}
+
+export class Message {
+  key: string;
+  langCode?: string;
+  lang: string;
+  locale?: string;
+  subject: string;
+  body: string;
+  fromName?: string;
+  fromMail?: string;
+  createdAt?: Date;
+  modifiedAt?: Date;
+  constructor(data = null) {
+    if (data instanceof Object) {
+      Object.entries(data).forEach(([k, v]) => {
+        if (
+          typeof v === "string" &&
+          ["key", "subject", "body", "fromName", "fromMail"].includes(k)
+        ) {
+          this[k] = v;
+        } else if (["createdAt", "modifiedAt"].includes(k)) {
+          if (typeof v === "string") {
+            this[k] = new Date(v);
+          } else if (v instanceof Date) {
+            this[k] = v;
+          }
+        } else if (typeof v === "string" && k === "lang") {
+          this.assignLang(v);
+        }
+      });
+    }
+  }
+
+  assignLang(lang = "") {
+    const parts = lang.split("-");
+    this.lang = lang;
+    this.langCode = parts[0];
+    this.locale = parts.length > 1 ? parts[1] : "";
+  }
+
+  get hasLocale() {
+    return notEmptyString(this.locale);
+  }
+}
+
+export class MessageSet {
+  key = "";
+  items: Array<Message> = [];
+
+  constructor(data = null) {
+    if (data instanceof Object) {
+      const keys = Object.keys(data);
+      if (keys.includes("key")) {
+        const { key } = data;
+        if (notEmptyString(key)) {
+          this.key = key;
+        }
+      }
+      if (keys.includes("items") && data.items instanceof Array) {
+        this.items = data.items.map((row) => new Message(row));
+      } else if (keys.includes("rows") && data.rows instanceof Array) {
+        this.items = data.rows.map((row) => new Message(row));
+      }
+    }
+  }
+
+  get subject() {
+    let subj = toWords(this.key);
+    if (this.items.length > 0) {
+      subj = this.items[0].subject;
+    }
+    return subj;
+  }
+
+  get numTranslations(): number {
+    return this.items.length;
+  }
+
+  get hasTranslations(): boolean {
+    return this.items.length > 1;
+  }
+
+  toSaveValues() {
+    return this.items.map((row) => {
+      const { key, langCode, locale, subject, body, fromName, fromMail } = row;
+      const lang = [langCode, locale]
+        .filter((p) => notEmptyString(p))
+        .join("-");
+      return { key, lang, subject, body, fromName, fromMail };
+    });
   }
 }

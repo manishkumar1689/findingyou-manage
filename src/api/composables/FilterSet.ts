@@ -213,4 +213,12 @@ export const FilterSet = {
     const opt = genderOptions.find((op) => op.key === key);
     return opt instanceof Object ? opt.name : key;
   },
+  langType(ref: any) {
+    let str = "";
+    if (ref instanceof Object) {
+      const { lang, type, alpha } = ref;
+      str = [lang, type, alpha].filter((s) => notEmptyString(s, 1)).join(":");
+    }
+    return str;
+  },
 };

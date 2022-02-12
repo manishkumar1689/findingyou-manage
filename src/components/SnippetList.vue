@@ -90,14 +90,6 @@ import { bus } from "../main";
   },
   filters: {
     ...FilterSet,
-    langType(ref: any) {
-      let str = "";
-      if (ref instanceof Object) {
-        const { lang, type, alpha } = ref;
-        str = [lang, type, alpha].filter((s) => notEmptyString(s, 1)).join(":");
-      }
-      return str;
-    },
   },
 })
 export default class SnippetList extends Vue {

@@ -141,12 +141,11 @@
 
 <script lang="ts">
 //import { Action } from "vuex-class";
-import { saveSnippet, fetchLanguages } from "../../api/methods";
+import { saveSnippet, retrieveLangOpts, buildEnabledLangOptions } from "../../api/methods";
 import { Component, Prop, Watch, Vue } from "vue-property-decorator";
 import { KeyLabel, Version, Snippet, LanguageItem } from "../../api/interfaces";
 import { SnippetSchema } from "../../api/schemas";
 import { notEmptyString  } from "../../api/validators";
-import langOptions from "../../api/mappings/lang-options";
 import { bus } from "../../main";
 import { cleanString } from "../../api/converters";
 
@@ -169,22 +168,22 @@ export default class SnippetForm extends Vue {
   @Prop({ default: () => [] }) readonly categoryOptions: Array<KeyLabel>;
   @Prop({ default: "-" }) readonly listCategory: string;
 
-  private category = "-";
-  private newCategory = "";
-  private subkey = "";
-  private notes = "";
-  private published = false;
-  private format = "text";
-  private values: Array<Version> = [emptyVersion];
-  private isNew = false;
-  private extraVersions = 1;
-  private errors: Array<string> = [];
-  private draggingIndex = -1;
-  private draggingRow: any = null;
-  private langOpts: Array<LanguageItem> = [];
-  private autoTranslate = true;
-  private saving = false;
-  private overrideMode = 0;
+  category = "-";
+  newCategory = "";
+  subkey = "";
+  notes = "";
+  published = false;
+  format = "text";
+  values: Array<Version> = [emptyVersion];
+  isNew = false;
+  extraVersions = 1;
+  errors: Array<string> = [];
+  draggingIndex = -1;
+  draggingRow: any = null;
+  langOpts: Array<LanguageItem> = [];
+  autoTranslate = true;
+  saving = false;
+  overrideMode = 0;
 
   created() {
     this.sync();
@@ -222,21 +221,9 @@ export default class SnippetForm extends Vue {
   }
 
   loadLangOpts() {
-    const langs = this.$ls.get("languages");
-    const mapLangOpts = (opt) => {
-      const name = opt.name
-        .split(",")
-        .shift()
-        .trim();
-      return { ...opt, name };
-    };
-    if (langs instanceof Array && langs.length > 0) {
-      this.langOpts = langs.map(mapLangOpts);
-    } else {
-      fetchLanguages("app").then((data) => {
-        this.langOpts = data.languages.map(mapLangOpts);
-      });
-    }
+    retrieveLangOpts().then((items) => {
+      this.langOpts = items;
+    });
   }
 
   addTranslation() {
@@ -313,15 +300,7 @@ export default class SnippetForm extends Vue {
   }
 
   get langOptions() {
-    const storedEnabledLangs = this.$ls.get("enabled_langs");
-    const enabledLangs =
-      storedEnabledLangs instanceof Array ? storedEnabledLangs : [];
-    const showAll = enabledLangs.length < 1;
-    const langs =
-      this.langOpts.length > 0
-        ? this.langOpts.filter((lg) => showAll || enabledLangs.includes(lg.key))
-        : langOptions;
-    return [{ key: "-", label: "---" }, ...langs];
+    return buildEnabledLangOptions(this.langOpts);
   }
 
   get allCategoryOptions(): Array<KeyLabel> {

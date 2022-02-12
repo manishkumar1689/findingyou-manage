@@ -29,6 +29,11 @@ const routes = [
     component: lazyLoad("Snippets"),
   },
   {
+    path: "/messages/:key?",
+    name: "Messages",
+    component: lazyLoad("Messages"),
+  },
+  {
     path: "/settings/:section?/:key?",
     name: "Settings",
     component: lazyLoad("Settings"),

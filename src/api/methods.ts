@@ -3,11 +3,19 @@ import axios from "axios";
 import { isNumeric, notEmptyString } from "./validators";
 import { api } from "../.config";
 import { GeoLoc } from "./models/GeoLoc";
-import { KeyNumValue, Lexeme, SlugName, Snippet } from "./interfaces";
+import {
+  KeyNumValue,
+  LanguageItem,
+  Lexeme,
+  SlugName,
+  Snippet,
+} from "./interfaces";
 import { ChartInput, PairedInput } from "./models/ChartForm";
 import { buildOptions, extractUserId } from "./build-headers";
 import { julToISODate } from "./converters";
 import { currentJulianDay } from "./julian-date";
+import { MessageSet } from "./schemas";
+import langOptions from "./mappings/lang-options";
 
 const extractDataObj = (res: any) => {
   if (res instanceof Object) {
@@ -614,10 +622,27 @@ export const fetchSnippets = async (lang: string) => {
   return await fetchDataObject(path);
 };
 
-export const fetchMessages = async (lang: string) => {
-  const parts = ["message", "list", lang, 0, 0, 0];
+export const fetchMessages = async () => {
+  const parts = ["message", "list"];
   const path = parts.join("/");
   return await fetchDataObject(path);
+};
+
+export const fetchMessageVariants = async (key: string) => {
+  const parts = ["message", "by-key", key];
+  const path = parts.join("/");
+  return await fetchDataObject(path);
+};
+
+export const saveMessageSet = async (msgSet: MessageSet) => {
+  const path = ["message", "edit-set", msgSet.key].join("/");
+  const rsp = await putData(path, msgSet.items);
+  const { data } = rsp;
+  if (data instanceof Object && Object.keys(data).includes("result")) {
+    return data;
+  } else {
+    return { valid: false };
+  }
 };
 
 export const fetchSnippet = async (category: string, subkey: string) => {
@@ -817,6 +842,35 @@ export const fetchLanguages = async (mode = "all", userId = "") => {
   const modeStr = ["all", "app", "both", "dict"].includes(mode) ? mode : "all";
   const path = ["setting", "languages", modeStr].join("/");
   return await fetchDataObject(path, userId);
+};
+
+export const retrieveLangOpts = async (): Promise<LanguageItem[]> => {
+  const langs = Vue.ls.get("languages");
+  const mapLangOpts = (opt) => {
+    const name = opt.name.split(",").shift().trim();
+    return { ...opt, name };
+  };
+  if (langs instanceof Array && langs.length > 0) {
+    return langs.map(mapLangOpts);
+  } else {
+    const lData = await fetchLanguages("app");
+    if (lData.languages instanceof Array) {
+      return lData.languages.map(mapLangOpts);
+    }
+  }
+  return [];
+};
+
+export const buildEnabledLangOptions = (langOpts: LanguageItem[] = []) => {
+  const storedEnabledLangs = Vue.ls.get("enabled_langs");
+  const enabledLangs =
+    storedEnabledLangs instanceof Array ? storedEnabledLangs : [];
+  const showAll = enabledLangs.length < 1;
+  const langs =
+    langOpts.length > 0
+      ? langOpts.filter((lg) => showAll || enabledLangs.includes(lg.key))
+      : langOptions;
+  return [{ key: "-", name: "---" }, ...langs];
 };
 
 export const fetchPairedTagOptions = async (latest = false) => {
