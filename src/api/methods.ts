@@ -634,8 +634,13 @@ export const fetchMessageVariants = async (key: string) => {
   return await fetchDataObject(path);
 };
 
-export const saveMessageSet = async (msgSet: MessageSet) => {
-  const path = ["message", "edit-set", msgSet.key].join("/");
+export const saveMessageSet = async (
+  msgSet: MessageSet,
+  deleteIds: string[] = []
+) => {
+  const qStr =
+    deleteIds.length > 0 ? buildQueryString({ del: deleteIds.join(",") }) : "";
+  const path = ["message", "edit-set", msgSet.key].join("/") + qStr;
   const rsp = await putData(path, msgSet.items);
   const { data } = rsp;
   if (data instanceof Object && Object.keys(data).includes("result")) {

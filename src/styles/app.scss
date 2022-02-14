@@ -2886,4 +2886,28 @@ body {
       }
     }
   }
+  .message-form {
+    .actions {
+      justify-content: flex-start;
+      align-items: flex-start;
+      padding-left: 14em;
+      margin: 0.5em 0 1.5em 0;
+      .remove {
+        height: 1.25em;
+        line-height: 1.5em;
+        i {
+          font-size: 2em;
+          &::before {
+            font-size: 1em;
+          }
+        }
+      }
+    }
+  }
+  .remove {
+    cursor: pointer;
+    &:hover {
+      color: $red-label;
+    }
+  }
 }

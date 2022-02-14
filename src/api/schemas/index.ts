@@ -215,9 +215,11 @@ export class SnippetSchema {
 }
 
 export class Message {
+  _id: string;
   key: string;
   langCode?: string;
   lang: string;
+  active = true;
   locale?: string;
   subject: string;
   body: string;
@@ -230,7 +232,7 @@ export class Message {
       Object.entries(data).forEach(([k, v]) => {
         if (
           typeof v === "string" &&
-          ["key", "subject", "body", "fromName", "fromMail"].includes(k)
+          ["_id", "key", "subject", "body", "fromName", "fromMail"].includes(k)
         ) {
           this[k] = v;
         } else if (["createdAt", "modifiedAt"].includes(k)) {
@@ -241,6 +243,8 @@ export class Message {
           }
         } else if (typeof v === "string" && k === "lang") {
           this.assignLang(v);
+        } else if (typeof v === "boolean" && k === "active") {
+          this.active = v;
         }
       });
     }
@@ -251,6 +255,16 @@ export class Message {
     this.lang = lang;
     this.langCode = parts[0];
     this.locale = parts.length > 1 ? parts[1] : "";
+    return this;
+  }
+
+  updateLang(code = "", locale = "") {
+    const parts = notEmptyString(code) ? [code.split("-").shift()] : [];
+    if (notEmptyString(locale)) {
+      parts.push(locale);
+    }
+    this.lang = parts.join("-");
+    return this;
   }
 
   get hasLocale() {
@@ -277,6 +291,10 @@ export class MessageSet {
         this.items = data.rows.map((row) => new Message(row));
       }
     }
+  }
+
+  get activeItems() {
+    return this.items.filter((item) => item.active);
   }
 
   get subject() {

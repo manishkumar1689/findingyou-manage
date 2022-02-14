@@ -15,13 +15,12 @@
         <b-table-column class="versions" field="values" label="Versions">
           <ul v-if="isNotUpdating(props.row.key)" class="versions text-preview vertical">
             <li
-              v-for="(item, vi) in props.row.items"
+              v-for="(item, vi) in props.row.activeItems"
               :key="['version', props.row.key, vi].join('-')"
               class="row"
             >
               <div class="language circle">{{ item | langType }}</div>
               <div class="text small" v-html="formatBody(item.body)"></div>
-              
             </li>
           </ul>
         </b-table-column>
@@ -81,6 +80,8 @@ export default class MessageList extends Vue {
             const itemIndex = this.rows[rowIndex].items.findIndex(it => it.lang === item.lang);
             if (itemIndex >= 0) {
               this.rows[rowIndex].items[itemIndex] = new Message(item);
+            } else {
+              this.rows[rowIndex].items.push(new Message(item));
             }
           })
           this.toast("Message saved successfully", 3000);

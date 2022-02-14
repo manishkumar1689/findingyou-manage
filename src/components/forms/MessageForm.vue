@@ -1,5 +1,5 @@
 <template>
-  <form class="edit-form snippet-form">
+  <form class="edit-form message-form">
     <div class="close" @click="close">
       <b-icon icon="close" size="is-large" />
     </div>
@@ -13,7 +13,7 @@
       />
     </b-field>
     
-      <fieldset class="version" v-for="(item, itemIndex) in items" :key="['msg-version', itemIndex].join('-')">
+      <fieldset class="version" v-for="(item, itemIndex) in items" :key="['msg-version', itemIndex].join('-')" :class="versionClasses(item)">
         
           <b-field
             class="horizontal lang with-locale"
@@ -74,7 +74,10 @@
               :has-counter="false"
             />
           </b-field>
-          <b-icon v-if="itemIndex > 0" @click.native="handleRemove(itemIndex)" icon="minus-circle-outline" class="remove right" />
+          <b-field class="actions row">
+            <b-switch v-model="item.active">Active</b-switch>
+            <b-icon v-if="itemIndex > 0 && !item.active" @click.native="handleRemove(itemIndex)" icon="minus-circle-outline" class="remove right" />
+          </b-field>
       </fieldset>
       <b-button @click="addVersion" icon="plus" class="add right">Add new version</b-button>
     <ol v-if="hasErrors" class="errors">
@@ -96,6 +99,7 @@ import { LanguageItem } from "../../api/interfaces";
 import { Message, MessageSet } from "../../api/schemas";
 import { bus } from "../../main";
 import { customToolbar } from "@/api/wysiwyg";
+import { notEmptyString } from "@/api/validators";
 
 @Component({
   components: {
@@ -111,6 +115,8 @@ export default class MessageForm extends Vue {
   langOpts: Array<LanguageItem> = [];
   extraVersions = 0;
   errors: string[] = [];
+
+  deleteIds: string[] = []
 
   created() {
     this.sync();
@@ -157,17 +163,14 @@ export default class MessageForm extends Vue {
     }
   }
 
-  rowClassNames(row, index = 0) {
-    const cls = [];
-    if (!row.show && index > 0) {
-      cls.push('hide')
-    }
-    return [];
+  versionClasses(item: Message) {
+    const activeCl = item.active ? 'active' : "inactive"
+    return [['lang', item.langCode].join('-'), activeCl];
   }
 
   addVersion() {
     const first = this.items.length > 0? this.items[0] : null;
-    const msg = new Message(first);
+    const msg = new Message({...first, lang: "", _id: ""});
     this.items.push(msg)
   }
 
@@ -187,7 +190,11 @@ export default class MessageForm extends Vue {
 
   removeVersion(index = 0) {
     if (index > 0 && index < this.items.length) {
-      this.items.splice(index, 1);
+      const _id = this.items[index]._id;
+      if (notEmptyString(_id)) {
+        this.items.splice(index, 1);
+        this.deleteIds.push(_id);
+      }
     }
   }
 
@@ -223,7 +230,17 @@ export default class MessageForm extends Vue {
 
   save(close = false) {
     this.errors = [];
-    saveMessageSet(new MessageSet({key: this.key, items: this.items})).then(rsp => {
+    const langs: string[] = [];
+    for (let i = 0; i < this.items.length; i++) {
+      const item = this.items[i];
+      item.updateLang(item.langCode, item.locale);
+      if (langs.includes(item.lang)) {
+        this.removeVersion(i);
+      } else {
+        langs.push(item.lang);
+      }
+    }
+    saveMessageSet(new MessageSet({key: this.key, items: this.items}), this.deleteIds).then(rsp => {
       if (rsp.valid) {
         bus.$emit('message-set-saved', rsp.result);
         if (close) {
