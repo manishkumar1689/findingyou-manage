@@ -74,13 +74,15 @@
               :has-counter="false"
             />
           </b-field>
+          <b-icon v-if="itemIndex > 0" @click.native="handleRemove(itemIndex)" icon="minus-circle-outline" class="remove right" />
       </fieldset>
+      <b-button @click="addVersion" icon="plus" class="add right">Add new version</b-button>
     <ol v-if="hasErrors" class="errors">
       <li v-for="(error, ei) in errors" :key="['error', ei].join('-')">
         {{ error }}
       </li>
     </ol>
-    <b-button type="is-success" @click="submit" icon-left="content-save-outline"
+    <b-button type="is-success" size="is-large" @click="submit" icon-left="content-save-outline"
       >Save</b-button>
   </form>
 </template>
@@ -161,6 +163,32 @@ export default class MessageForm extends Vue {
       cls.push('hide')
     }
     return [];
+  }
+
+  addVersion() {
+    const first = this.items.length > 0? this.items[0] : null;
+    const msg = new Message(first);
+    this.items.push(msg)
+  }
+
+  handleRemove(index = 0) {
+    if (index > 0 && index < this.items.length) {
+      const item = this.items[index];
+      this.$buefy.dialog.confirm({
+        message: `Are you sure you wish to remove "${item.subject}" (${item.lang})`,
+        cancelText: "Keep",
+        confirmText: "Delete",
+        type: "is-danger",
+        onConfirm: () => this.removeVersion(index),
+      });
+      
+    }
+  }
+
+  removeVersion(index = 0) {
+    if (index > 0 && index < this.items.length) {
+      this.items.splice(index, 1);
+    }
   }
 
   get hasErrors(): boolean {
