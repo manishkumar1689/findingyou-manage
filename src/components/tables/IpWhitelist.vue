@@ -1,7 +1,8 @@
 <template>
   <div class="main-view" :class="wrapperClasses">
+    <h1 class="main-title">Enable direct API access</h1>
     <form class="ip-list">
-      <h3>Enable direct API access</h3>
+      <p>Add the current IP address you use for Internet Access to bypass dynamic security keys for direct API access. This should only be used for development and debugging.</p>
       <template v-if="hasIpAddresses">
         <b-field v-for="(ip, ipi) in ipList" :key="['ip', ipi].join('-')" class="row horizontal">
           <b-input
@@ -38,7 +39,7 @@ import { Component, Vue } from "vue-property-decorator";
 import { State } from "vuex-class";
 import { UserState } from "../../store/types";
 import { getIpWhitelist, saveIpWhitelist } from "../../api/methods";
-import { bus } from "@/main";
+import { bus } from "../../main";
 
 interface Export {
   key: string;

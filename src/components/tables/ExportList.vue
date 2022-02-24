@@ -30,6 +30,9 @@
         </b-table-column>
       </template>
     </b-table>
+    <div class="actions other-actions">
+      <router-link to="/ip-whitelist" :active="true">IP Whitelist</router-link>
+    </div>
   </div>
 </template>
 <script lang="ts">

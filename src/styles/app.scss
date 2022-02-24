@@ -674,12 +674,9 @@ li {
     justify-content: center;
     align-items: center;
     h1 {
-      position: absolute;
-      top: 0;
-      left: 10%;
-      right: 10%;
+      position: relative;
       font-size: 3vw;
-      margin: 1em 0;
+      margin: 0 auto 0.5em auto;
     }
     .signs {
       position: absolute;
@@ -2921,5 +2918,11 @@ body {
   .ql-editor p,
   .ql-editor ul {
     padding-bottom: 1em;
+  }
+  .other-actions {
+    margin-top: 0.75em;
+    padding-top: 0.75em;
+    border-top: dashed 1px $dark-color;
+    text-align: left;
   }
 }

@@ -1,6 +1,22 @@
 <template>
   <div class="main-view">
-    <h3>Welcome</h3>
+    <h1 class="main-title">Welcome</h1>
+    <nav class="welcome-nav">
+        <ul class="menu">
+          <li
+            v-for="item in mainMenu"
+            :key="item.key"
+            :class="item.classNames"
+          >
+            <template v-if="item.reload">
+              <a :href="item.to" class="reload">{{item.label}}</a>
+            </template>
+            <template v-else>
+              <router-link :to="item.to">{{item.label}}</router-link>
+            </template>
+          </li>
+        </ul>
+      </nav>
     <form class="user-preference-form">
       <b-field class="grid-3">
         <b-checkbox
@@ -33,6 +49,7 @@ import { Component, Vue } from "vue-property-decorator";
 import { fetchLanguages } from "@/api/methods";
 import { LanguageItem } from "@/api/interfaces";
 import { saveEnabledLangsFromQueryString } from "@/store/local";
+import { mainMenuItems } from "@/api/menu";
 
 @Component({
   components: {},
@@ -119,6 +136,20 @@ export default class MainView extends Vue {
     this.loadLangOpts();
   }
 
+  get mainMenu() {
+    return mainMenuItems.filter(mi => mi.to.length > 2).map((mi) => {
+      const baseClass = mi.to.substring(1).replace(/\//, '--');
+      const classNames = [baseClass];
+      const keys = Object.keys(mi);
+      const reload = keys.includes('reload') ? mi.reload : false;
+      const key = ['home','nav']
+      if (reload) {
+        classNames.push("astro");
+      }
+      return { ...mi, key, classNames, reload };
+    });
+  }
+
   get selectAllMode() {
     return this.numSelected < this.langOpts.length / 3;
   }
@@ -137,3 +168,26 @@ export default class MainView extends Vue {
   }
 }
 </script>
+<style lang="scss">
+
+#app {
+  .welcome-nav {
+    margin: 0 auto;
+    max-width: 80em;
+    ul {
+      display: grid;
+      justify-content: center;
+      align-items: center;
+      grid-template-columns: 1fr 1fr 1fr;
+      column-gap: 2em;
+      margin: 1em auto 3em auto;
+      li {
+        font-size: 1.25em;
+        font-weight: bold;
+        margin: 0.5em;
+      }
+    }
+  }
+}
+
+</style>

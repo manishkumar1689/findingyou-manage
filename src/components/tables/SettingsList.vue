@@ -52,9 +52,8 @@
   </div>
 </template>
 <script lang="ts">
-import { Component, Prop, Watch, Vue } from "vue-property-decorator";
-import { State, Action, Getter } from "vuex-class";
-import { smartCastFloat, camelToTitle } from "../../api/converters";
+import { Component, Vue } from "vue-property-decorator";
+import { State } from "vuex-class";
 import { UserState } from "../../store/types";
 import { listCustomSettings, deleteSetting } from "../../api/methods";
 import { FilterSet } from "../../api/composables/FilterSet";
@@ -83,9 +82,9 @@ interface CustomSetting {
 export default class SettingsList extends Vue {
   @State("user") user: UserState;
 
-  private items: Array<CustomSetting> = [];
+  items: Array<CustomSetting> = [];
 
-  private customKey = "";
+  customKey = "";
 
   created() {
     this.loadData();

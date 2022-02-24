@@ -70,23 +70,20 @@
 </template>
 <script lang="ts">
 import { Component, Prop, Watch, Vue } from "vue-property-decorator";
-import { State, Action, Getter } from "vuex-class";
+import { State } from "vuex-class";
 import {
-  fetchSwissephFileList,
   fetchLexemes,
   fetchLexemeCategories,
   deleteLexeme,
 } from "../api/methods";
 import {
-  smartCastFloat,
-  camelToTitle,
   smartSortNumPad,
 } from "../api/converters";
-import { isNumeric, notEmptyString } from "../api/validators";
+import { notEmptyString } from "../api/validators";
 import { FilterSet } from "../api/composables/FilterSet";
 import LexemeForm from "./forms/LexemeForm.vue";
 import { UserState } from "../store/types";
-import { Lexeme, KeyObject, KeyLabel, Translation } from "../api/interfaces";
+import { Lexeme, KeyLabel } from "../api/interfaces";
 import { LexemeSchema } from "../api/schemas";
 import { toWords } from "../api/helpers";
 import { bus } from "../main";
@@ -109,13 +106,13 @@ import { bus } from "../main";
 })
 export default class LexemeView extends Vue {
   @State("user") user: UserState;
-  private lexemes: Array<Lexeme> = [];
-  private categories: Array<string> = [];
-  private category = "-";
-  private selectedLexeme: Lexeme = new LexemeSchema();
-  private loaded = false;
-  private filter = "";
-  private showAll = false;
+  lexemes: Array<Lexeme> = [];
+  categories: Array<string> = [];
+  category = "-";
+  selectedLexeme: Lexeme = new LexemeSchema();
+  loaded = false;
+  filter = "";
+  showAll = false;
 
   created() {
     this.loadData();
@@ -144,9 +141,9 @@ export default class LexemeView extends Vue {
     bus.$on("escape", this.close);
   }
 
-  async loadData(save = false) {
+  async loadData() {
     const strCat = this.hasCategory ? this.category : "";
-    const data = await fetchLexemes(strCat).then((data) => {
+    await fetchLexemes(strCat).then((data) => {
       if (data.valid) {
         this.lexemes = data.items;
         this.sortLexemes();

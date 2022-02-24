@@ -77,6 +77,7 @@ import { UserState } from "./store/types";
 import { notEmptyString } from "./api/validators";
 import { currentJulianDate, JulDate } from "./api/julian-date";
 import { decPlaces } from "./api/converters";
+import { mainMenuItems } from "./api/menu";
 const nsUser = "user";
 const nsDict = "dictionary";
 @Component({
@@ -90,25 +91,13 @@ export default class App extends Vue {
   @Action("assignItems", { namespace: nsDict }) assignItems: any;
   isLoggedIn = false;
 
-  private showMainNav = false;
+  showMainNav = false;
 
-  private version = 0.61;
+  version = 0.61;
 
-  private julianDate = currentJulianDate();
+  julianDate = currentJulianDate();
 
-  private mainMenuItems = [
-    { to: "/", label: "Home" },
-    { to: "/astro/ui", label: "Astro", reload: true },
-    { to: "/astro/compatibility", label: "Compatibility Protocols", reload: true },
-    { to: "/users", label: "Users" },
-    { to: "/dictionary", label: "Dictionary", icon: "book-alphabet" },
-    { to: "/snippets", label: "Snippets" },
-    { to: "/messages", label: "Messages" },
-    { to: "/settings", label: "Settings" },
-    { to: "/charts", label: "Chart List" },
-    { to: "/tech", label: "Files & Planetary Stations" },
-    { to: "/ip-whitelist", label: "IP Whitelist" },
-  ];
+  
 
   created() {
     const storedVersion = this.$ls.get("version");
@@ -264,7 +253,7 @@ export default class App extends Vue {
       localPath.length > 2 ? localPath.substring(1).split("/") : ["home"];
     const { path } = this.$route;
     const pathSection = toParts(path).shift();
-    return this.mainMenuItems.map((mi) => {
+    return mainMenuItems.map((mi) => {
       const parts = toParts(mi.to);
       const refName = parts.join("--");
       const key = ["menu-item", refName].join("-");

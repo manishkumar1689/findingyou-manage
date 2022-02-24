@@ -58,13 +58,11 @@
 
 <script lang="ts">
 import { State } from "vuex-class";
-import { saveLexeme, fetchSetting, saveSetting } from "../../api/methods";
-import { Component, Prop, Watch, Vue } from "vue-property-decorator";
-import { LookupSet, LookupItem } from "../../api/models/LookupSet";
-import { LexemeSchema } from "../../api/schemas";
+import { fetchSetting, saveSetting } from "../../api/methods";
+import { Component, Prop, Vue } from "vue-property-decorator";
+import { LookupSet } from "../../api/models/LookupSet";
 import { notEmptyString } from "../../api/validators";
 import { bus } from "../../main";
-import { toCharCode } from "../../api/converters";
 import { UserState } from "../../store/types";
 
 @Component({
@@ -74,10 +72,10 @@ import { UserState } from "../../store/types";
 export default class LookupSetForm extends Vue {
   @Prop({ default: "" }) readonly settingKey: string;
   @State("user") user: UserState;
-  private editedSet = new LookupSet();
-  private draggingIndex = -1;
-  private draggingRow: any = null;
-  private hasNumValues = false;
+  editedSet = new LookupSet();
+  draggingIndex = -1;
+  draggingRow: any = null;
+  hasNumValues = false;
 
   created() {
     this.sync();
