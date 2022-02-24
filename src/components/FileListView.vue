@@ -90,11 +90,10 @@
   </div>
 </template>
 <script lang="ts">
-import { Component, Prop, Watch, Vue } from "vue-property-decorator";
-import { State, Action, Getter } from "vuex-class";
+import { Component, Vue } from "vue-property-decorator";
+import { State } from "vuex-class";
 import { deleteSwissEpheFile, fetchSwissephFileList } from "../api/methods";
-import { smartCastFloat, camelToTitle } from "../api/converters";
-import { isNumeric, notEmptyString } from "../api/validators";
+import { notEmptyString } from "../api/validators";
 import { FilterSet } from "../api/composables/FilterSet";
 import { FileInfo } from "../api/models/FileInfo";
 import { UserState } from "../store/types";
@@ -109,11 +108,11 @@ import { bus } from "@/main";
 })
 export default class FileListView extends Vue {
   @State("user") user: UserState;
-  private result: any = null;
+  result: any = null;
 
-  private subDir = '';
+  subDir = '';
 
-  private selectedFile: FileInfo = null;
+  selectedFile: FileInfo = null;
 
   created() {
     this.matchRoute()

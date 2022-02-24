@@ -29,11 +29,9 @@
   </b-table>
 </template>
 <script lang="ts">
-import { Graha } from "../../api/models/Graha";
 import { Component, Prop, Vue, Watch } from "vue-property-decorator";
 import { FilterSet } from "../../api/composables/FilterSet";
 import {
-  PlanetStation,
   PlanetStationSet,
 } from "../../api/models/PlanetStation";
 import { fetchAllPlanetStations } from "../../api/methods";
@@ -59,9 +57,9 @@ import { KeyObject } from "../../api/interfaces";
 export default class PlanetStationsTable extends Vue {
   @Prop({ default: () => new Date() }) readonly datetime: Date;
 
-  private planets: Array<Array<KeyObject>>;
+  planets: Array<Array<KeyObject>>;
 
-  private loading = false;
+  loading = false;
 
   created() {
     this.loadStations();

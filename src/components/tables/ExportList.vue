@@ -30,30 +30,16 @@
         </b-table-column>
       </template>
     </b-table>
-    <form class="ip-list">
-      <h3>Enable direct API access</h3>
-      <template v-if="hasIpAddresses">
-        <b-field v-for="(ip, ipi) in ipList" :key="['ip', ipi].join('-')" class="row horizontal">
-          <b-input type="text" v-model="ipList[ipi]" :has-counter="false" size="16" pattern="[0-9][0-9]?[0-9]?\.[0-9][0-9]?[0-9]?\.[0-9][0-9]?[0-9]?\.[0-9][0-9]?[0-9]?" />
-          <b-icon class="remove" icon="minus-circle" @click.native="removeIpAddress(ipi)" size="is-medium" type="is-danger" />
-        </b-field>
-      </template>
-      <div class="actions row horizontal">
-        <b-icon class="add-new" icon="plus-circle" @click.native="addIpAddress" size="is-large" type="is-success" />
-        <b-button @click="saveIpAddresses" icon-left="content-save">Save IP address overrides</b-button>
-      </div>
-    </form>
   </div>
 </template>
 <script lang="ts">
 import { Component, Vue } from "vue-property-decorator";
 import { State } from "vuex-class";
 import { UserState } from "../../store/types";
-import { listFiles, generateExport, downloadResource, getIpWhitelist, saveIpWhitelist } from "../../api/methods";
+import { listFiles, generateExport, downloadResource } from "../../api/methods";
 import { FilterSet } from "../../api/composables/FilterSet";
 import { fileSize, longDate } from "@/api/converters";
 import { notEmptyString } from "@/api/validators";
-import { bus } from "@/main";
 
 interface Export {
   key: string;
@@ -70,7 +56,7 @@ interface Export {
 export default class ExportList extends Vue {
   @State("user") user: UserState;
 
-  private items: Array<Export> = [
+  items: Array<Export> = [
     {
       key: "charts",
       name: "Chart Data",
@@ -105,13 +91,12 @@ export default class ExportList extends Vue {
     }, */
   ];
 
-  private files = [];
+  
+  files = [];
 
-  private customKey = "";
+  customKey = "";
 
-  private matched = 0;
-
-  private ipList: string[] = [];
+  matched = 0;
 
   created() {
     this.processItems();
@@ -156,40 +141,6 @@ export default class ExportList extends Vue {
         });
       }
     });
-    getIpWhitelist(this.user._id).then(items => {
-      if (items instanceof Array) {
-        this.ipList = items;
-      }
-    })
-  }
-
-  get hasIpAddresses() {
-    return this.ipList.length > 0;
-  }
-
-  addIpAddress() {
-    this.ipList.push('0.0.0.0');
-  }
-
-  removeIpAddress(index = 0) {
-    if (index >= 0 && index <= this.ipList.length) {
-      this.ipList.splice(index, 1);
-    }
-  }
-
-  saveIpAddresses() {
-    const ipRgx = /^\d+\.\d+\.\d+\.\d+$/;
-    const ips = this.ipList.filter(ip => ipRgx.test(ip) && ip !== '0.0.0.0');
-    saveIpWhitelist(this.user._id, ips).then((ips: any) => {
-      if (ips instanceof Array) {
-        const message = "IP address overrides updated";
-        const duration = 4000;
-        const type = "success";
-        this.ipList = ips;
-        bus.$emit("toast", {message, duration, type });
-        
-      }
-    })
   }
 
   generate(item: Export) {

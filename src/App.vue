@@ -107,6 +107,7 @@ export default class App extends Vue {
     { to: "/settings", label: "Settings" },
     { to: "/charts", label: "Chart List" },
     { to: "/tech", label: "Files & Planetary Stations" },
+    { to: "/ip-whitelist", label: "IP Whitelist" },
   ];
 
   created() {

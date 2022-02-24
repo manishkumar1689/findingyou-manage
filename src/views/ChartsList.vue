@@ -2,7 +2,7 @@
   <ChartsListView />
 </template>
 
-<script>
+<script >
 // @ is an alias to /src
 import ChartsListView from "@/components/ChartsListView.vue";
 

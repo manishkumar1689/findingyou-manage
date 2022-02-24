@@ -48,6 +48,11 @@ const routes = [
     name: "Chart List",
     component: lazyLoad("ChartsList"),
   },
+  {
+    path: "/ip-whitelist",
+    name: "IP Whitelist",
+    component: lazyLoad("IpWhitelistView"),
+  },
 ];
 
 const router = new VueRouter({

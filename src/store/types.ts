@@ -2,11 +2,6 @@ import { Lexeme } from "@/api/models/Lexeme";
 import { ChartForm } from "@/api/models/ChartForm";
 import { AyanamshaItem } from "@/api/interfaces";
 
-export interface WindowState {
-  height: number;
-  width: number;
-}
-
 export interface MenuItem {
   to: string;
   title: string;
