@@ -358,7 +358,7 @@ export default class RolesForm extends Vue {
   get limitRows() {
     return this.limitValues.map((limit, li) => {
       const { key, value, name} = limit;
-      const perm = this.permissions.find(p => p.key === key);
+      //const perm = this.permissions.find(p => p.key === key);
       const text = notEmptyString(name)? name : toWords(key);
       const label = text.replace('%d', ['[',value,']'].join(''));
       return {

@@ -3,7 +3,7 @@
     <p v-if="hasCurrent" class="field row">
       <span class="text-label">{{currFileLabel}}</span>
       <span class="filename">{{currFileName}}</span>
-      <strong class="size">{{currFileSize|fileSize}}</strong>
+      <strong class="size">{{currFileSize | fileSize}}</strong>
       <time class="modified">{{currModified}}</time>
       <span class="info">{{currInfo}}</span>
     </p>

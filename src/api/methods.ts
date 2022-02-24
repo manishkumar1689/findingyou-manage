@@ -668,7 +668,7 @@ export const fetchPreferenceOptions = async (
   const surveyKey = notEmptyString(survey, 4) ? survey : "preference_options";
   const parts = ["user/preferences", surveyKey];
   if (refresh) {
-    parts.push("1");
+    parts.push("-", "1");
   }
   const path = parts.join("/");
   return await fetchDataObject(path);
