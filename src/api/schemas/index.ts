@@ -114,7 +114,7 @@ export const mapToVersion = (row = null) => {
       }
     }
     if (notEmptyString(text)) {
-      obj.text = text;
+      obj.text = text.replace(/\s+(Lorem)\b/, "\n$1");
     }
     if (active) {
       obj.active = !!active;
