@@ -41,7 +41,7 @@
               v-for="(version, vi) in props.row.values"
               :key="['version', props.row.key, vi].join('-')"
             >
-              <span class="text">{{ version.text }}</span>
+              <span class="text">{{ version.text | truncateVersion }}</span>
               <span class="lang">{{ version | langType }}</span>
               <em v-if="showTranslationInfo(props.row, vi)" class="translation-info">{{ translationInfo(props.row) }}</em>
             </li>
@@ -71,7 +71,7 @@ import {
   saveSnippet,
 } from "../api/methods";
 import {
-  smartSortNumPad,
+  smartSortNumPad, truncate,
 } from "../api/converters";
 import { notEmptyString } from "../api/validators";
 import { FilterSet } from "../api/composables/FilterSet";
@@ -90,6 +90,9 @@ import { bus } from "../main";
   },
   filters: {
     ...FilterSet,
+    truncateVersion(txt = '') {
+      return truncate(txt, 96).trim().replace(/\n/, '⏎ ')
+    }
   },
 })
 export default class SnippetList extends Vue {
