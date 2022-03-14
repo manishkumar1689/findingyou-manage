@@ -186,7 +186,7 @@ export default class SnippetList extends Vue {
   updateByRoute() {
     const { params } = this.$route;
     const { category, key } = params;
-    const matchedCat = notEmptyString(category, 2)
+    const matchedCat = notEmptyString(category, 2) || category === "-"
       ? category
       : this.categories.length > 0
       ? this.categories[0]
@@ -341,9 +341,10 @@ export default class SnippetList extends Vue {
           ? this.category + "__"
           : "";
       const startRgx = this.hasCategory ? "^" + prefix : "(\\w+_)*";
-      const searchStr = this.filter.trim().replace(/[^a-zéèàáåãäòóöõïüêîôùúñ0-9]+/gi, '.*?');
+      const searchStr = this.filter.trim().replace(/[^a-zéèàáåãäòóöõïüêîôøθðùúñßç0-9]+/gi, '.*?');
       const rgx = new RegExp(startRgx + searchStr, "i");
-      const nameRgx = new RegExp("\\b" + searchStr + ".{0,3}\\b", "i");
+      const maxExtraChars = this.hasCategory ? searchStr.length > 5 ? 3 : 2 : 0;
+      const nameRgx = new RegExp("\\b" + searchStr + ".{0,"+maxExtraChars+"}\\b", "i");
       return this.snippets.filter(
         (sn) =>
           rgx.test(sn.key) ||
