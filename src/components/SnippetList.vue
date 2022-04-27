@@ -342,7 +342,8 @@ export default class SnippetList extends Vue {
           : "";
       const startRgx = this.hasCategory ? "^" + prefix : "(\\w+_)*";
       const searchStr = this.filter.trim().replace(/[^a-zéèàáåãäòóöõïüêîôøθðùúñßç0-9]+/gi, '.*?');
-      const rgx = new RegExp(startRgx + searchStr, "i");
+      const searchBoundary = this.hasCategory && filterBySub? '(.*?_)?' : '';
+      const rgx = new RegExp(startRgx + searchBoundary + searchStr, "i");
       const maxExtraChars = this.hasCategory ? searchStr.length > 5 ? 3 : 2 : 0;
       const nameRgx = new RegExp("\\b" + searchStr + ".{0,"+maxExtraChars+"}\\b", "i");
       return this.snippets.filter(

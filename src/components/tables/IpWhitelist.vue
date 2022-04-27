@@ -4,22 +4,25 @@
     <form class="ip-list">
       <p>Add the current IP address you use for Internet Access to bypass dynamic security keys for direct API access. This should only be used for development and debugging.</p>
       <template v-if="hasIpAddresses">
-        <b-field v-for="(ip, ipi) in ipList" :key="['ip', ipi].join('-')" class="row horizontal">
-          <b-input
-            type="text"
-            v-model="ipList[ipi]"
-            :has-counter="false"
-            size="16"
-            pattern="[0-9][0-9]?[0-9]?\.[0-9][0-9]?[0-9]?\.[0-9][0-9]?[0-9]?\.[0-9][0-9]?[0-9]?"
-          />
-          <b-icon
-            class="remove"
-            icon="minus-circle"
-            @click.native="removeIpAddress(ipi)"
-            size="is-medium"
-            type="is-danger"
-          />
-        </b-field>
+        <div class="ip-addresses grid grid-4">
+          <b-field v-for="(ip, ipi) in ipList" :key="['ip', ipi].join('-')" class="row horizontal">
+            <b-input
+              type="text"
+              v-model="ipList[ipi]"
+              :has-counter="false"
+              size="16"
+              pattern="[0-9][0-9]?[0-9]?\.[0-9][0-9]?[0-9]?\.[0-9][0-9]?[0-9]?\.[0-9][0-9]?[0-9]?"
+              :class="inputClass(ipi)"
+            />
+            <b-icon
+              class="remove"
+              icon="minus-circle"
+              @click.native="removeIpAddress(ipi)"
+              size="is-medium"
+              type="is-danger"
+            />
+          </b-field>
+        </div>
       </template>
       <div class="actions row horizontal">
         <b-icon
@@ -84,15 +87,23 @@ export default class IpWhitelist extends Vue {
     this.ipList.push('0.0.0.0');
   }
 
+  inputClass(index = 0) {
+    const addr = index >=0 && index < this.ipList.length? this.ipList[index] : '';
+    return addr === '0.0.0.0'? 'new-address' : this.validIpAddress(addr)? 'valid' : 'invalid';
+  }
+
   removeIpAddress(index = 0) {
     if (index >= 0 && index <= this.ipList.length) {
       this.ipList.splice(index, 1);
     }
   }
 
+  validIpAddress(addr = '') {
+    return /^\d+\.\d+\.\d+\.\d+$/.test(addr) && addr !== '0.0.0.0';
+  }
+
   saveIpAddresses() {
-    const ipRgx = /^\d+\.\d+\.\d+\.\d+$/;
-    const ips = this.ipList.filter(ip => ipRgx.test(ip) && ip !== '0.0.0.0');
+    const ips = this.ipList.filter(this.validIpAddress);
     saveIpWhitelist(this.user._id, ips).then((ips: any) => {
       if (ips instanceof Array) {
         const message = "IP address overrides updated";

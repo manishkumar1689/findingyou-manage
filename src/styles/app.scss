@@ -565,6 +565,15 @@ dl.twin-column {
 
 .grid-4 {
   grid-template-columns: 1fr 1fr 1fr 1fr;
+  @media (max-width: $max-tablet-width) {
+    grid-template-columns: 1fr 1fr 1fr;
+  }
+  @media (max-width: $min-tablet-width) {
+    grid-template-columns: 1fr 1fr;
+  }
+  @media (max-width: $min-large-mobile-width) {
+    grid-template-columns: 1fr;
+  }
   column-gap: 2.5%;
   figure {
     position: relative;
@@ -2796,6 +2805,13 @@ body {
 }
 
 .ip-list {
+
+  margin-bottom: 2em;
+
+  .ip-addresses {
+    margin: 1em 0 0.5em 0;
+  }
+
   .horizontal {
     .icon {
       margin-left: 0.5em;
@@ -2817,6 +2833,12 @@ body {
       button {
         margin-left: 2em;
       }
+    }
+    .new-address input {
+      background-color: rgba($yellow-label, 0.25);
+    }
+    .invalid input {
+      background-color: rgba($red-label, 0.125);
     }
   }
 }
