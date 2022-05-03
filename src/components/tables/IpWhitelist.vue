@@ -24,7 +24,7 @@
           </b-field>
         </div>
       </template>
-      <div class="actions row horizontal">
+      <div class="actions row horizontal actions-bottom">
         <b-icon
           class="add-new"
           icon="plus-circle"
@@ -33,7 +33,10 @@
           type="is-success"
         />
         <b-button @click="saveIpAddresses" icon-left="content-save">Save IP address overrides</b-button>
+        <b-button v-if="showAddIp" @click="addCurrent" icon-left="plus">Add current IP address</b-button>
       </div>
+      <p class="info-row" v-if="hasIp"><em>Your IP address</em><strong>{{currIp}}</strong></p>
+      <p class="info-row" v-if="hasUserAgent"><em>User agent</em><strong>{{userAgent}}</strong></p>
     </form>
   </div>
 </template>
@@ -41,8 +44,9 @@
 import { Component, Vue } from "vue-property-decorator";
 import { State } from "vuex-class";
 import { UserState } from "../../store/types";
-import { getIpWhitelist, saveIpWhitelist } from "../../api/methods";
+import { getIpWhitelist, saveIpWhitelist, fetchIp } from "../../api/methods";
 import { bus } from "../../main";
+import { notEmptyString } from "@/api/validators";
 
 interface Export {
   key: string;
@@ -63,6 +67,10 @@ export default class IpWhitelist extends Vue {
 
   ipList: string[] = [];
 
+  currIp = "x.x.x.x";
+
+  userAgent = "";
+
   created() {
     setTimeout(this.sync, 500);
   }
@@ -76,7 +84,20 @@ export default class IpWhitelist extends Vue {
       if (items instanceof Array) {
         this.ipList = items;
       }
-    })
+    });
+    setTimeout(() => {
+      fetchIp().then(data => {
+        const {ip, userAgent, valid} = data;
+        if (valid) {
+            if (notEmptyString(ip)) {
+            this.currIp = '0.0.0.111';
+          }
+          if (notEmptyString(userAgent)) {
+            this.userAgent = userAgent;
+          }
+        }
+      })
+    }, 1500)
   }
 
   get hasIpAddresses() {
@@ -89,7 +110,11 @@ export default class IpWhitelist extends Vue {
 
   inputClass(index = 0) {
     const addr = index >=0 && index < this.ipList.length? this.ipList[index] : '';
-    return addr === '0.0.0.0'? 'new-address' : this.validIpAddress(addr)? 'valid' : 'invalid';
+    const cls = addr === '0.0.0.0'? ['new-address'] : this.validIpAddress(addr)? ['valid'] : ['invalid'];
+    if (addr === this.currIp) {
+      cls.push('current');
+    }
+    return cls;
   }
 
   removeIpAddress(index = 0) {
@@ -102,16 +127,42 @@ export default class IpWhitelist extends Vue {
     return /^\d+\.\d+\.\d+\.\d+$/.test(addr) && addr !== '0.0.0.0';
   }
 
+  get hasUserAgent() {
+    return notEmptyString(this.userAgent, 10);
+  }
+
+  get hasIp() {
+    return notEmptyString(this.currIp, 6) && /^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}/.test(this.currIp);
+  }
+
+  get showAddIp() {
+    return this.hasIp && !this.currentIpInList;
+  }
+
+  get currentIpInList() {
+    return this.ipList.includes(this.currIp);
+  }
+
+  addCurrent() {
+    if (this.hasIp) {
+      this.ipList.push(this.currIp);
+      this.saveIpAddresses();
+    }
+  }
+
   saveIpAddresses() {
     const ips = this.ipList.filter(this.validIpAddress);
     saveIpWhitelist(this.user._id, ips).then((ips: any) => {
       if (ips instanceof Array) {
+        this.ipList = ips;
         const message = "IP address overrides updated";
         const duration = 4000;
-        const type = "success";
-        this.ipList = ips;
-        bus.$emit("toast", { message, duration, type });
-
+        this.$buefy.toast.open({
+          duration,
+          message,
+          position: "is-bottom",
+          type:  "is-success",
+        });
       }
     })
   }

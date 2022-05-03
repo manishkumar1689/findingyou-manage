@@ -849,6 +849,11 @@ export const fetchLanguages = async (mode = "all", userId = "") => {
   return await fetchDataObject(path, userId);
 };
 
+export const fetchIp = async () => {
+  const path = ["user", "ip"].join("/");
+  return await fetchDataObject(path);
+};
+
 export const retrieveLangOpts = async (): Promise<LanguageItem[]> => {
   const langs = Vue.ls.get("languages");
   const mapLangOpts = (opt) => {

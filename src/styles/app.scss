@@ -2840,6 +2840,9 @@ body {
     .invalid input {
       background-color: rgba($red-label, 0.125);
     }
+    .current input {
+      background-color: rgba($green-label, 0.125);
+    }
   }
 }
 
@@ -2884,6 +2887,22 @@ body {
         font-size: 0.8em;
       }
     }
+  }
+  .info-row {
+    text-align: left;
+    em, strong, span {
+      display: inline-block;
+    }
+    span:first-child,
+    em:first-child {
+      margin-right: 0.25em;
+    }
+    em:first-child {
+      min-width: 8em;
+    }
+  }
+  .actions-bottom {
+    margin-bottom: 1.5em;
   }
   .quillWrapper {
     min-width: 50em;
