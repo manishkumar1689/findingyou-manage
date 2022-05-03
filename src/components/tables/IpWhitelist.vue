@@ -32,8 +32,11 @@
           size="is-large"
           type="is-success"
         />
-        <b-button @click="saveIpAddresses" icon-left="content-save">Save IP address overrides</b-button>
-        <b-button v-if="showAddIp" @click="addCurrent" icon-left="plus">Add current IP address</b-button>
+        <b-button @click="saveIpAddresses" icon-left="content-save"  type="is-success">Save IP address overrides</b-button>
+        <b-button v-if="showAddIp" @click="addCurrent" icon-left="plus" type="is-info">
+          <span class="text-label">Add current IP address</span>
+          <em class="small">{{currIp}}</em>
+        </b-button>
       </div>
       <p class="info-row" v-if="hasIp"><em>Your IP address</em><strong>{{currIp}}</strong></p>
       <p class="info-row" v-if="hasUserAgent"><em>User agent</em><strong>{{userAgent}}</strong></p>
@@ -90,7 +93,7 @@ export default class IpWhitelist extends Vue {
         const {ip, userAgent, valid} = data;
         if (valid) {
             if (notEmptyString(ip)) {
-            this.currIp = '0.0.0.111';
+            this.currIp = ip;
           }
           if (notEmptyString(userAgent)) {
             this.userAgent = userAgent;
