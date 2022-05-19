@@ -131,6 +131,7 @@ export default class SettingsPanes extends Vue {
     "member-flags",
     "rodden-scale",
     "paired-option-tags",
+    "devices",
     "languages",
     "advanced",
     "exports",
