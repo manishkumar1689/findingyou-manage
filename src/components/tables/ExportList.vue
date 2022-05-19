@@ -33,16 +33,28 @@
     <div class="actions other-actions">
       <router-link to="/ip-whitelist" :active="true">IP Whitelist</router-link>
     </div>
+    <section class="cache-keys-section sub-section">
+      <h4>Redis Cache Management</h4>
+      <b-field class="row horizontal" label="Cache key pattern">
+        <b-input type="text" v-model="cachePattern" />
+        <b-button v-if="hasKeys" @click="handleDeleteMatched">Delete all matching keys</b-button>
+      </b-field>
+      <p><strong>NB:</strong> <span class="text">Deleting large numbers of cached items may temporarily impact performance.</span></p>
+      <ol v-if="hasKeys" class="cache-keys-list">
+        <li v-for="(key, ki) in keys" :key="['cache-key', ki].join('-')" @click="handleDelete(key)">{{key}}</li>
+      </ol>
+    </section>
   </div>
 </template>
 <script lang="ts">
-import { Component, Vue } from "vue-property-decorator";
+import { Component, Vue, Watch } from "vue-property-decorator";
 import { State } from "vuex-class";
 import { UserState } from "../../store/types";
-import { listFiles, generateExport, downloadResource } from "../../api/methods";
+import { listFiles, generateExport, downloadResource, fetchCacheKeys, deleteCacheKeys } from "../../api/methods";
 import { FilterSet } from "../../api/composables/FilterSet";
 import { fileSize, longDate } from "@/api/converters";
 import { notEmptyString } from "@/api/validators";
+import { bus } from "@/main";
 
 interface Export {
   key: string;
@@ -101,6 +113,14 @@ export default class ExportList extends Vue {
 
   matched = 0;
 
+  cachePattern = '';
+
+  keys: string[] = [];
+
+  searching = false;
+
+  cacheKeyDeleteConfirmed = false;
+
   created() {
     this.processItems();
     setTimeout(this.sync, 500);
@@ -108,6 +128,10 @@ export default class ExportList extends Vue {
 
   get wrapperClasses() {
     return ["export-listing"];
+  }
+
+  get hasKeys() {
+    return this.keys.length > 0;
   }
 
   processItems() {
@@ -194,5 +218,73 @@ export default class ExportList extends Vue {
   assignRowClasses(index: number) {
     return [["index", index].join("-"), ["custom-setting", index].join("-")];
   }
+
+  get numKeys() {
+    return this.keys.length;
+  }
+
+  handleDeleteMatched() {
+    this.handleDelete(this.cachePattern, false)
+  }
+
+  handleDelete(key = '', exact = true, confirmed = false) {
+    const matchRel = key.includes('*')? 'matching' : 'beginning with';
+    const keyPattern = key.replace(/\*$/, '') + '*';
+    const messageWarning = confirmed? `${this.numKeys} keys will be permanently deleted. ` : ``;
+    const messageEnd = exact? `the cached item "${key}"` : `all cache keys ${matchRel} ${keyPattern} (${this.numKeys})`
+    const message = `${messageWarning}Are you sure you wish to delete ${messageEnd};`
+    const deleteLabel = confirmed? `Confirm deletion` : "Delete";
+    this.$buefy.dialog.confirm({
+      message,
+      cancelText: "Keep",
+      confirmText: deleteLabel,
+      type: "is-danger",
+      onConfirm: () => this.processKeyDeletion(key, exact),
+    });
+  }
+
+  processKeyDeletion(key, exact = false) {
+    this.cacheKeyDeleteConfirmed = true;
+    if (exact) {
+      this.deleteCache(key = '');
+    } else {
+      this.handleDelete(key, false, true);
+    }
+  }
+
+  deleteCache(key = '') {
+    if (this.cacheKeyDeleteConfirmed) {
+      deleteCacheKeys(key, this.user._id).then(result => {
+        if (result.valid) {
+          bus.$emit('toast', {
+            message: `The cache key "${key}" was successfully deleted`
+          });
+        }
+      });
+    }
+  }
+
+  @Watch('cachePattern')
+  changeCachePattern(newVal) {
+    if (newVal.length > 2) {
+      if (!this.searching) {
+        this.searching = true;
+        fetchCacheKeys(this.cachePattern, this.user._id).then(result => {
+          if (result.valid) {
+            this.keys = result.keys;
+          }
+          setTimeout(() => {
+            this.searching = false;
+          }, 250);
+        })
+      }
+    } else {
+      this.keys = [];
+    }
+    setTimeout(() => {
+      this.searching = false;
+    }, 3000);
+  }
+
 }
 </script>

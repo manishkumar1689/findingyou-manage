@@ -39,6 +39,9 @@
       <b-tab-item label="Paired Attributes">
         <TagOptionForm />
       </b-tab-item>
+      <b-tab-item label="Devices">
+        <device-versions-form />
+      </b-tab-item>
       <b-tab-item label="Languages">
         <LanguageForm />
       </b-tab-item>
@@ -75,6 +78,7 @@ import LookupSetForm from "./forms/LookupSetForm.vue";
 import MemberFlagForm from "./forms/MemberFlagForm.vue";
 import LanguageForm from "./forms/LanguageForm.vue";
 import TagOptionForm from "./forms/TagOptionForm.vue";
+import DeviceVersionsForm from "./forms/DeviceVersionsForm.vue";
 import SettingsList from "./tables/SettingsList.vue";
 import FacetedSurveyTest from "./tables/FacetedSurveyTest.vue";
 import ExportList from "./tables/ExportList.vue";
@@ -99,6 +103,7 @@ import { bus } from "../main";
     TagOptionForm,
     LanguageForm,
     SettingsList,
+    DeviceVersionsForm,
     ExportList,
     MemberFlagForm,
     FacetedSurveyTest

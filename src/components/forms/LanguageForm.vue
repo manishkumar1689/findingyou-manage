@@ -234,7 +234,9 @@ export default class LanguageForm extends Vue {
           "",
           "languages"
         ).then((data) => {
-          this.$ls.set("dictlangs", dictFiltered);
+          if (data) {
+            this.$ls.set("dictlangs", dictFiltered);
+          }
         });
       }, 1000);
     }

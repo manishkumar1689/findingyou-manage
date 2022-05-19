@@ -438,3 +438,19 @@ export interface KeySet {
   key: string;
   set: number;
 }
+
+
+export interface DeviceVersion {
+  key: string;
+  name: string;
+  version: string;
+  forceUpdate: boolean;
+  valid?: boolean;
+}
+
+export const defaultDeviceVersion = {
+  key: '',
+  name: '',
+  version: '0.0.1',
+  forceUpdate: false
+};

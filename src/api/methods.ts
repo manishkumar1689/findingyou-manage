@@ -9,6 +9,7 @@ import {
   Lexeme,
   SlugName,
   Snippet,
+  DeviceVersion,
 } from "./interfaces";
 import { ChartInput, PairedInput } from "./models/ChartForm";
 import { buildOptions, extractUserId } from "./build-headers";
@@ -98,15 +99,22 @@ const buildQueryString = (criteria = null, literal = false) => {
   return str;
 };
 
-export const getData = async (path: string) => {
-  let data = { valid: false };
+export const getData = async (path: string, mode = 'object') => {
+  let result: any = mode === 'array' ? [] : { valid: false };
   await fetchContent(path).then((response) => {
     if (response.data) {
-      data = response.data;
-      data.valid = true;
+      const { data } = response;
+      if (data instanceof Object) {
+        if (mode !== 'array') {
+          result = data;
+          result.valid = data instanceof Object;
+        } else if (data instanceof Array) {
+          result = data;
+        }
+      }
     }
   });
-  return data;
+  return result;
 };
 //bodies-in-houses/:loc/:dt/:system?
 export const fetchDataSet = async (
@@ -1477,4 +1485,39 @@ export const fetchRoddenValues = async () => {
     });
   }
   return rows;
+};
+
+export const deviceVersions = async (userId = '') => {
+  const uri = ['setting/device/versions', userId].join('/');
+  return await getData(uri, 'array');
+}
+
+export const saveDeviceVersions = async (userId = '', versions: DeviceVersion[] = []) => {
+  const uri = ['setting/device/save-versions', userId].join('/');
+  return await putData(uri, versions);
+}
+
+export const fetchCacheKeys = async (pattern = '', userId = '') => {
+  let result = { valid: false, keys: [], num: 0 };
+  if (pattern.length > 2 && userId.length > 12) {
+    const url = ['setting/redis-keys', userId, pattern].join('/');
+    const data = await fetchDataObject(url)
+    if (data instanceof Object && data.valid) {
+      result = data;
+    }
+  }
+  return result;
+};
+
+export const deleteCacheKeys = async (pattern = '', userId = '') => {
+  let result = { valid: false, keys: [], num: 0 };
+  if (pattern.length > 2 && userId.length > 12) {
+    const url = ['setting/clear-by-key', userId, pattern].join('/');
+    const response = await deleteData(url);
+    const { data } = response;
+    if (data instanceof Object && data.valid) {
+      result = data;
+    }
+  }
+  return result;
 };
