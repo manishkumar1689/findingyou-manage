@@ -140,7 +140,7 @@ export default class SettingsPanes extends Vue {
   activeTab = 0;
   private saving = false;
   promptOptions = [];
-  private showingToast = false;
+  showingToast = false;
 
   created() {
     this.loadData();
@@ -178,7 +178,7 @@ export default class SettingsPanes extends Vue {
         });
         setTimeout(() => {
           this.showingToast = false;
-        }, durationInt + 1000);
+        }, durationInt + 2000);
       }
     })
   }
@@ -372,6 +372,12 @@ export default class SettingsPanes extends Vue {
               }
               this.saving = false;
             }, 500);
+            if (key.includes('enforce_paid')) {
+              const message = value === true ? 'Paid membership logic enforced' : 'All members treated the same in the search';
+              bus.$emit('toast', {
+                message
+              })
+            }
           }
         }
       });

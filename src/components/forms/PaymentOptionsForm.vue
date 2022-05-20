@@ -1,5 +1,8 @@
 <template>
   <form class="edit-form pay-opts-form">
+    <b-field v-if="enforcePaidLogicChecked" label="Enforce paid logic" class="row horizontal">
+      <b-switch v-model="enforcePaidLogic" />
+    </b-field>
     <fieldset
       v-for="(payOpt, ri) in editedPayOpts"
       :key="[payOpt, ri].join('-')"
@@ -117,6 +120,7 @@ import {
 import { notEmptyString } from "../../api/validators";
 import currencyValues from "../../api/mappings/currencies";
 import { bus } from "../../main";
+import { checkEnforcePaidLogic } from "@/api/methods";
 
 @Component({
   components: {},
@@ -126,11 +130,11 @@ export default class PaymentOptionsForm extends Vue {
   @Prop({ default: () => [] }) readonly paymentOptions: Array<PaymentOption>;
   @Prop({ default: () => [] }) readonly roles: Array<Role>;
   @Prop({ default: () => [] }) readonly countries: Array<CountryOption>;
-  private editedPayOpts: Array<PaymentOption> = [];
+  editedPayOpts: Array<PaymentOption> = [];
 
-  private filteredCountries: Array<string> = [];
+  filteredCountries: Array<string> = [];
 
-  private emptyPaymentOption: PaymentOption =  {
+  emptyPaymentOption: PaymentOption =  {
       key: "",
       name: "",
       curr: "",
@@ -141,6 +145,12 @@ export default class PaymentOptionsForm extends Vue {
       duration: 3,
       maxRepeats: 0
   };
+
+  enforcePaidLogic = false;
+
+  enforcePaidLogicChecked = false;
+
+  saving = false;
 
   created() {
     this.sync();
@@ -154,8 +164,17 @@ export default class PaymentOptionsForm extends Vue {
   }
 
   sync() {
+    this.enforcePaidLogicChecked = false;
     if (this.roles instanceof Array && this.paymentOptions instanceof Array) {
       this.editedPayOpts = this.paymentOptions.map(this.mapPO);
+      checkEnforcePaidLogic().then(result => {
+        if (result.valid) {
+          this.enforcePaidLogic = result.enforce === true;
+          setTimeout(() => {
+            this.enforcePaidLogicChecked = true;
+          }, 500);
+        }
+      });
     }
   }
 
@@ -296,5 +315,17 @@ export default class PaymentOptionsForm extends Vue {
   get currencies(): Array<KeyName> {
     return currencyValues;
   }
+
+  @Watch('enforcePaidLogic')
+  changeEnforcePaidLogic(newVal) {
+    if ((newVal === true || newVal === false) && !this.saving && this.enforcePaidLogicChecked) {
+      this.saving = true;
+      bus.$emit("save-setting", { key: "members__enforce_paid_logic", value: newVal, type: 'boolean' });
+      setTimeout(() => {
+        this.saving = false;
+      }, 1500);
+    }
+  }
+
 }
 </script>

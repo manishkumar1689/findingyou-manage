@@ -1492,6 +1492,11 @@ export const deviceVersions = async (userId = '') => {
   return await getData(uri, 'array');
 }
 
+export const checkEnforcePaidLogic = async () => {
+  const uri = 'setting/enforce-paid-logic';
+  return await getData(uri);
+}
+
 export const saveDeviceVersions = async (userId = '', versions: DeviceVersion[] = []) => {
   const uri = ['setting/device/save-versions', userId].join('/');
   return await putData(uri, versions);
