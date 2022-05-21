@@ -156,7 +156,7 @@ export default class PaymentOptionsForm extends Vue {
     this.sync();
     setTimeout(this.sync, 500);
     bus.$on("setting-saved", (result) => {
-      const { key, data } = result;
+      const { key } = result;
       if (key === "payments") {
         this.sync();
       }
