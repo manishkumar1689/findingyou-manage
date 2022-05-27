@@ -207,11 +207,20 @@ export default class MainView extends Vue {
     height: 8em;
     background: transparent url(/img/drawings/fy-logo.svg) no-repeat top left;
     background-size: contain;
+     @media (min-width: $max-mobile-width) {
+      left: 1.25em;
+    }
+    @media (min-width: $min-medium-width) {
+      left: 1em;
+    }
     @media (min-width: $min-standard-width) {
       left: 0.75em;
     }
     @media (min-width: $min-mlarge-width) {
       left: 0.5em;
+    }
+    @media (min-width: $min-large-width) {
+      left: 0.25em;
     }
   }
   
