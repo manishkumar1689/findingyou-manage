@@ -201,12 +201,18 @@ export default class MainView extends Vue {
     position: absolute;
     top: 0.75em;
     pointer-events: none;
-    left: 0;
+    left: 1em;
     width: 20em;
     max-width: 50%;
     height: 8em;
     background: transparent url(/img/drawings/fy-logo.svg) no-repeat top left;
     background-size: contain;
+    @media (max-width: $min-standard-width) {
+      left: 0.75em;
+    }
+    @media (max-width: $min-mlarge-width) {
+      left: 0.5em;
+    }
   }
   
   #main.home h1 {
