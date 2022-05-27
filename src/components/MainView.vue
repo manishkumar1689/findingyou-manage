@@ -1,4 +1,6 @@
 <template>
+<fragment>
+  <figure class="fy-logo"></figure>
   <div class="main-view">
     <h1 class="main-title">Welcome</h1>
     <nav class="welcome-nav">
@@ -42,6 +44,7 @@
       </div>
     </form>
   </div>
+</fragment>
 </template>
 
 <script lang="ts">
@@ -169,8 +172,14 @@ export default class MainView extends Vue {
 }
 </script>
 <style lang="scss">
-
+@import "@/styles/variables.scss";
 #app {
+  .home {
+    justify-content: flex-start;
+    .main-view {
+      margin-top: 3em;
+    }
+  }
   .welcome-nav {
     margin: 0 auto;
     max-width: 80em;
@@ -186,6 +195,32 @@ export default class MainView extends Vue {
         font-weight: bold;
         margin: 0.5em;
       }
+    }
+  }
+  .fy-logo {
+    position: absolute;
+    top: 0.75em;
+    pointer-events: none;
+    left: 0;
+    width: 20em;
+    max-width: 50%;
+    height: 8em;
+    background: transparent url(/img/drawings/fy-logo.svg) no-repeat top left;
+    background-size: contain;
+  }
+  
+  #main.home h1 {
+    @media (max-width: $min-medium-width) {
+      font-size: 4vw;
+      text-align: right;
+      top: -1em;
+    }
+    @media (max-width: $max-mobile-width) {
+      font-size: 4.5vw;
+    }
+
+    @media (max-width: $max-narrow-mobile-width) {
+      font-size: 5vw;
     }
   }
 }
