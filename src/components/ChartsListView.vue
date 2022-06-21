@@ -253,11 +253,11 @@ export default class ChartsListView extends Vue {
   }
 
   get singleChartExpanded() {
-    return this.selectedChart instanceof Chart && this.selectedChart.hasId;
+    return this.selectedChart instanceof Chart && this.selectedChart.hasIdOrIsNew;
   }
 
   get pairedExpanded() {
-    return this.selectedPaired instanceof PairedChart && notEmptyString(this.selectedPaired._id, 12);
+    return this.selectedPaired instanceof PairedChart && notEmptyString(this.selectedPaired._id, 12) || this.newPairedMode;
   }
 
   get showPairedNameSearch() {
@@ -397,6 +397,7 @@ export default class ChartsListView extends Vue {
         if (pc instanceof Object) {
           this.selectedChart = new Chart();
           this.selectedPaired = new PairedChart(pc);
+          this.showEditOverlay = true;
         }
       }
     })
@@ -408,6 +409,7 @@ export default class ChartsListView extends Vue {
         const c2 = new Chart(null);
         this.selectedPaired = new PairedChart({c1: result.chart, c2, tags: []});
         this.newPairedMode = true;
+        this.showEditOverlay = true;
       }
     });
   }
@@ -416,6 +418,7 @@ export default class ChartsListView extends Vue {
     const nc = new Chart({_id: "_new"});
     this.selectedChart = nc;
     this.currentPairedItems = [];
+    this.showEditOverlay = true;
   }
 
   changePage(page = 0) {
@@ -507,9 +510,12 @@ export default class ChartsListView extends Vue {
   }
 
   close() {
-    /* this.selectedPaired = new PairedChart();
-    this.selectedChart = new Chart(); */
-    this.showEditOverlay = false;
+    this.selectedPaired = new PairedChart();
+    this.selectedChart = new Chart();
+    setTimeout(() => {
+      this.showEditOverlay = false;
+      this.newPairedMode = false;
+    }, 250);
   }
 
   @Watch('status')

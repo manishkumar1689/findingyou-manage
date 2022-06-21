@@ -445,6 +445,14 @@ export class Chart {
     return notEmptyString(this._id, 12);
   }
 
+  get isNew() {
+    return ["_new","new"].includes(this._id);
+  }
+
+  get hasIdOrIsNew() {
+    return this.hasId || this.isNew;
+  }
+
   get name() {
     let str = "";
     if (this.subject instanceof Object) {

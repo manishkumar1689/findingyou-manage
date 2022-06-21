@@ -1,11 +1,12 @@
 <template>
-  <fragment>
+  <div class="overlay-form-wrapper">
     <form class="relations edit-form collapsible" :class="wrapperClasses">
       <h3 class="form-title" @click="toggleCollapse">
         <template v-if="tooltip">
           <b-tooltip :label="pairInfo1" :multilined="true" @click.native="openSingle(1)">{{ label1 }}</b-tooltip>
-          {{labelSeparator}}
+          <span class="seperator">{{labelSeparator}}</span>
           <b-tooltip v-if="hasSecondChart" :label="pairInfo2" :multilined="true" @click.native="openSingle(2)">{{ label2 }}</b-tooltip>
+          <span v-else class="second">{{label2}}</span>
         </template>
         <span class="text" v-else>{{ label }}</span>
       </h3>
@@ -119,7 +120,7 @@
       </fieldset>
     </form>
     <slot v-if="initialised"></slot>
-  </fragment>
+  </div>
 </template>
 
 <script lang="ts">
@@ -173,8 +174,8 @@ export default class RelationshipForm extends Vue {
   filteredQualityTags: SlugName[] = [];
   filteredTraitTags: SlugName[] = [];
   selectedTraitTags: SlugName[] = [];
-  private qualityChanged = false;
-  private otherTagsValuesChanged = false;
+  qualityChanged = false;
+  otherTagsValuesChanged = false;
 
   created() {
     setTimeout(this.sync, 500);
@@ -197,7 +198,7 @@ export default class RelationshipForm extends Vue {
     if (this.paired instanceof PairedChart) {
       this.startDate = "";
       this.endDate = "";
-      const firstTypeOpt = this.paired.primaryRelationship;
+      //const firstTypeOpt = this.paired.primaryRelationship;
       this.types = this.paired.relationshipTags;
       const startYear = smartCastFloat(this.paired.startYear);
       const knownEndYear = smartCastFloat(this.paired.endYear);
@@ -359,7 +360,7 @@ export default class RelationshipForm extends Vue {
 
   get label2() {
     const parts = this.label.split('&')
-    return parts.length > 1? parts.pop().trim() : "[unknown]";
+    return parts.length > 1 && notEmptyString(parts[1], 2)? parts.pop().trim() : "[unknown]";
   }
 
   get labelSeparator() {
