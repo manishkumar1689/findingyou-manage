@@ -189,7 +189,7 @@ import {
   hasPayments,
   matchLastPayment,
   matchLastPaymentDate,
-  matchPrefence,
+  matchPreference,
   extractPayments,
 } from "../api/mappers";
 import { Chart } from "../api/models/Chart";
@@ -378,7 +378,7 @@ export default class UserEdit extends Vue {
   get submittedPreferenceOptions() {
     return this.preferenceOptions.map((opt, index) => {
       const itemKey = [opt.key, index].join('-');
-      const response = this.matchPrefenceDisplay(opt.key);
+      const response = this.matchPreferenceDisplay(opt.key);
       const hasResponse = response !== null;
       return {...opt, itemKey, response, hasResponse};
     }).filter(item => item.hasResponse);
@@ -425,7 +425,7 @@ export default class UserEdit extends Vue {
     return matchLastPaymentDate(user);
   }
 
-  matchPrefence(key: string) {
+  matchPreference(key: string) {
     let preference = null;
     const { preferences } = this.current;
     if (preferences instanceof Array) {
@@ -434,11 +434,11 @@ export default class UserEdit extends Vue {
     if (!preference) {
       preference = { key, value: null, type: "" };
     }
-    return matchPrefence(preference, this.preferenceOptions);
+    return matchPreference(preference, this.preferenceOptions);
   }
 
-  matchPrefenceDisplay(key: string) {
-    const pr = this.matchPrefence(key);
+  matchPreferenceDisplay(key: string) {
+    const pr = this.matchPreference(key);
     return pr instanceof Object ? pr.display : "";
   }
 

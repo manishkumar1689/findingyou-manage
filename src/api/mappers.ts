@@ -82,7 +82,7 @@ export const extractStringList = (preference: Preference, separator = ", ") => {
   return snakeToWords(str);
 };
 
-export const matchPrefence = (
+export const matchPreference = (
   preference: Preference,
   preferenceOptions: Array<PreferenceOption>
 ) => {

@@ -119,6 +119,9 @@ export default class MiscSettings extends Vue {
       const valueObj = JSON.parse(JSON.stringify(this.value));
       const refKey = this.isNew ? this.newKey : this.settingKey;
       if (notEmptyString(refKey, 5)) {
+        if (refKey.startsWith('panchanga_')) {
+          this.$ls.remove(refKey);
+        }
         saveSetting(refKey, this.user._id, valueObj, this.notes, "custom").then(
           (result) => {
             if (result instanceof Object) {
