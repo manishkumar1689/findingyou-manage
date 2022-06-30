@@ -111,7 +111,9 @@ export default class MiscSettings extends Vue {
   }
 
   onError(e) {
-    this.errorMsg = "Bad format";
+    if (e) {
+      this.errorMsg = "Bad format";
+    }
   }
 
   save() {
