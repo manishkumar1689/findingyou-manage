@@ -145,7 +145,7 @@ export default class MainView extends Vue {
       const classNames = [baseClass];
       const keys = Object.keys(mi);
       const reload = keys.includes('reload') ? mi.reload : false;
-      const key = ['home','nav']
+      const key = ['home','nav', mi.to.substring(1).split('/').join('_')].join('-');
       if (reload) {
         classNames.push("astro");
       }

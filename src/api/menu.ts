@@ -6,7 +6,7 @@ export const mainMenuItems = [
     label: "Compatibility Protocols",
     reload: true,
   },
-  { to: "/users", label: "Users" },
+  { to: "/users", label: "Members and Admins" },
   { to: "/dictionary", label: "Dictionary", icon: "book-alphabet" },
   { to: "/snippets", label: "Snippets" },
   { to: "/messages", label: "Messages" },

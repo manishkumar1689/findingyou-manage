@@ -505,6 +505,20 @@ form {
   button {
     margin-right: 0.5em;
   }
+  .field {
+    display: flex;
+    flex-flow: row nowrap;
+    align-items: center;
+    > .label {
+      display: inline-block;
+      margin: 0 0.5em 0 1.25em;
+      user-select: none;
+      font-weight:normal;
+    }
+    .switch {
+      margin-right: 1.25em;
+    }
+  }
 }
 
 .user-form {
@@ -1433,6 +1447,19 @@ main {
     .column > .field {
       > label:first-child {
         width: 9em;
+      }
+      &.user-roles {
+        position: relative;
+        padding-left: 10em;
+        flex-flow: column wrap;
+        > label.label:first-child {
+          position: absolute;
+          top: 0;
+          left: 0;
+        }
+        > .switch {
+          margin-bottom: 0.5em;
+        }
       }
     }
 

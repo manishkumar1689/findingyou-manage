@@ -1,7 +1,7 @@
 <template>
   <div class="main-view" :class="wrapperClasses">
     <h1 class="main-title">
-      <span class="text-label">Users</span>
+      <span class="text-label">{{title}}</span>
       <em v-if="showSubtotal" class="total rounded-box">{{subtotal}}</em>
       <em class="total rounded-box">{{total}}</em>
     </h1>
@@ -14,6 +14,24 @@
         @keydown.native="manageKeydown"
       />
       <b-button icon-left="magnify" @click="searchUsers"/>
+      <b-field label="Type">
+        <b-radio-button v-model="listMode"
+            native-value="members"
+            type="is-info is-light is-outlined">
+            <b-icon icon="account-multiple"></b-icon>
+            <span>Members</span>
+        </b-radio-button>
+
+        <b-radio-button v-model="listMode"
+            native-value="admin"
+            type="is-success is-light is-outlined">
+            <b-icon icon="account-supervisor-circle"></b-icon>
+            <span>Admin</span>
+        </b-radio-button>
+    </b-field>
+    <b-field label="Active only">
+        <b-switch v-model="activeOnly" />
+    </b-field>
       <b-button icon-right="plus" @click="showAddForm">Add new</b-button>
     </form>
     <UserEdit
@@ -103,6 +121,10 @@ export default class UsersListView extends Vue {
 
   roles: Array<Role> = [];
 
+  listMode = 'members';
+
+  activeOnly = true;
+
   created() {
     this.loadData();
     bus.$on("escape", this.dismiss);
@@ -111,6 +133,20 @@ export default class UsersListView extends Vue {
         this.loadData();
       }
     })
+    const { path } = this.$route;
+    const pathParts = path.substring(1).split('/');
+    if (pathParts.length > 1) {
+      switch (pathParts[1]) {
+        case 'members':
+        case 'member':
+          this.criteria.set('type', 'members');
+          break;
+        case 'admins':
+        case 'admin':
+          this.criteria.set('type', 'admin');
+          break;
+      }
+    }
     bus.$on("remove-media-item", ({user, index, mediaRef})  => {
       const item = this.users.find(u => u._id === user);
       if (item instanceof Object) {
@@ -131,7 +167,12 @@ export default class UsersListView extends Vue {
 
   async loadData() {
     this.criteria.set('totals', 1);
+    
     const filter = Object.fromEntries(this.criteria);
+    const hasUsearch = this.criteria.has('usearch') ? notEmptyString(filter.usearch) : false;
+    if (hasUsearch) {
+      filter.admin = 1;
+    }
     await listUsers(0, 100, filter).then((result) => {
       if (result.valid) {
         this.users = result.items.map((user) => {
@@ -187,6 +228,11 @@ export default class UsersListView extends Vue {
   showAddForm() {
     this.selectedUser = Object.assign({}, defaultUser);
     this.showForm = true;
+    const { path } = this.$route;
+    const newPath = ['/users','new'].join('/');
+    if (newPath !== path) {
+      this.$router.push(newPath);
+    }
   }
 
   dismiss() {
@@ -257,6 +303,28 @@ export default class UsersListView extends Vue {
     return cls;
   }
 
+  get title() {
+    const { path } = this.$route;
+    const pathParts = path.substring(1).split('/');
+    if (pathParts.length > 1) {
+      switch (pathParts[1]) {
+        case 'members':
+        case 'member':
+          return 'Members';
+        case 'admins':
+        case 'admin':
+          return 'Administrators';
+        case 'new':
+          return 'New User';
+        default:
+          if (/^[0-9a-f]{16.32}$/.test(pathParts[1])) {
+            return 'Edit User';
+          }
+      }
+    }
+    return 'Members and Admins';
+  }
+
   assignRowClasses(index: number) {
     return [["index", index].join("-"), ["user", index].join("-")];
   }
@@ -272,6 +340,9 @@ export default class UsersListView extends Vue {
 
   @Watch("selectedUser")
   changeSelectedUser(newVal) {
+    const { path } = this.$route;
+    const currParts = path.substring(1).split('/');
+    const currSub = currParts.length > 1 ? currParts[1] : '';
     const pathParts = ["/users"];
     if (newVal instanceof Object) {
       const { _id } = newVal;
@@ -280,10 +351,29 @@ export default class UsersListView extends Vue {
       }
     }
     const newPath = pathParts.join("/");
-    const { path } = this.$route;
-    if (newPath !== path) {
+    if (newPath !== path && currSub !== 'new') {
       this.$router.push(newPath);
     }
   }
+
+  @Watch("listMode")
+  changeListmode(newVal) {
+    const { path } = this.$route;
+    const newPath = ['/users', newVal].join('/');
+    if (newPath !== path) {
+      this.$router.push(newPath);
+      this.criteria.set('type', newVal);
+      this.loadData();
+    }
+  }
+
+  @Watch("activeOnly")
+  changeActiveOnly(newVal, prevVal) {
+    if (newVal !== prevVal) {
+      this.criteria.set('admin', newVal? 1 : 0);
+      this.loadData();
+    }
+  }
+
 }
 </script>

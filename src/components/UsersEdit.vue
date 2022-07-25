@@ -56,7 +56,7 @@
           >
         </b-select>
       </b-field>
-      <b-field label="Roles" class="wrap">
+      <b-field label="Roles" class="user-roles column">
         <b-switch v-for="role in roleOptions" :key="role.itemKey" size="is-small" v-model="roleState[role.key]">{{role.name}}</b-switch>  
       </b-field>
       <b-field label="Status" class="wrap">
@@ -100,10 +100,15 @@
         </template>
       </fieldset>
     </div>
+    <ul v-if="hasErrors" class="errors">
+      <li v-for="(msg, ei) in errorMsgs" :key="['error-msg', ei].join('-')">
+        {{msg}}
+      </li>
+    </ul>
     <div class="actions">
       <b-button @click="save">Save</b-button>
     </div>
-    <div class="info row horizontal twin">
+    <div v-if="isSaved" class="info row horizontal twin">
       <dl class="twin-column bold-labels">
         <dt v-if="hasChart">Location</dt>
         <dd v-if="hasChart">
@@ -144,10 +149,10 @@
         </template>
       </dl>
     </div>
-    <div class="status-log">
+    <div v-if="isSaved" class="status-log">
       <div v-for="status in statusLog" :key="status.key"></div>
     </div>
-    <div class="profiles">
+    <div v-if="isSaved" class="profiles">
       <ul class="twin-column left-aligned long-title">
         <li v-for="(po, pIndex) in profiles" :key="po.itemKey">
           <article >
@@ -214,26 +219,27 @@ export default class UserEdit extends Vue {
   >;
   @Prop({ default: () => [] }) readonly roleOpts: Array<Role>;
 
-  private fullName = "";
-  private nickName = "";
-  private identifier = "";
-  private mode = "";
-  private active = false;
-  private roles: string[] = [];
-  private test = false;
-  private status = [];
-  private geo: Geo = { lat: 0, lng: 0, alt: 0 };
-  private placenames = [];
-  private gender = "-";
-  private preferences = [];
-  private profiles = [];
-  private preview = "";
-  private chart = null;
+  fullName = "";
+  nickName = "";
+  identifier = "";
+  mode = "";
+  active = false;
+  roles: string[] = [];
+  test = false;
+  status = [];
+  geo: Geo = { lat: 0, lng: 0, alt: 0 };
+  placenames = [];
+  gender = "-";
+  preferences = [];
+  profiles = [];
+  preview = "";
+  chart = null;
 
-  private password = "";
-  private cpassword = "";
-  private mayEditPassword = false;
-  private roleState = Object.assign({}, defaultRoleStates)
+  password = "";
+  cpassword = "";
+  mayEditPassword = false;
+  roleState = Object.assign({}, defaultRoleStates)
+  errorMsgs: string[] = [];
 
   created() {
     if (this.current instanceof Object) {
@@ -244,12 +250,18 @@ export default class UserEdit extends Vue {
   async sync() {
     if (notEmptyString(this.current.fullName)) {
       this.fullName = this.current.fullName;
+    } else {
+      this.fullName = '';
     }
     if (notEmptyString(this.current.nickName)) {
       this.nickName = this.current.nickName;
+    } else {
+      this.nickName = '';
     }
     if (notEmptyString(this.current.identifier)) {
       this.identifier = this.current.identifier;
+    } else {
+      this.identifier = '';
     }
     if (notEmptyString(this.current.mode)) {
       this.mode = this.current.mode;
@@ -261,11 +273,17 @@ export default class UserEdit extends Vue {
       this.current.roles.forEach(rk => {
         this.roleState[rk] = true;
       });
+    } else {
+      Object.keys(this.roleState).forEach(rk => {
+        this.roleState[rk] = false;
+      });
     }
     this.active = this.current.active;
     this.test = this.current.test;
     if (this.current.gender) {
       this.gender = this.current.gender;
+    } else {
+      this.gender = '-';
     }
     if (this.current.status instanceof Array) {
       this.status = this.current.status.filter(st => st instanceof Object).map((st, si) => {
@@ -301,11 +319,13 @@ export default class UserEdit extends Vue {
   }
 
   fetchChart() {
-    fetchUserChart(this.current._id).then((result) => {
-      if (result.valid) {
-        this.chart = new Chart(result.chart);
-      }
-    });
+    if (this.isSaved) {
+      fetchUserChart(this.current._id).then((result) => {
+        if (result.valid) {
+          this.chart = new Chart(result.chart);
+        }
+      });
+    }
   }
 
   get statusLog() {
@@ -325,11 +345,19 @@ export default class UserEdit extends Vue {
   }
 
   get isNew() {
-    return emptyString(this.current._id, 10);
+    return emptyString(this.current._id, 12);
+  }
+
+  get isSaved() {
+    return !this.isNew;
   }
 
   get hasStatuses() {
     return this.status.length > 0;
+  }
+
+  get hasErrors() {
+    return this.errorMsgs.length > 0;
   }
 
   get editPassword() {
@@ -447,7 +475,9 @@ export default class UserEdit extends Vue {
   }
 
   save() {
+    this.errorMsgs = [];
     this.roles = Object.entries(this.roleState).filter(entry => entry[1]).map(entry => entry[0]);
+    const errorTypes: string[] = [];
     const edited: any = {
       identifier: this.identifier,
         nickName: this.nickName,
@@ -459,14 +489,17 @@ export default class UserEdit extends Vue {
         admin: this.user._id
     };
     let valid = notEmptyString(this.identifier, 5) && notEmptyString(this.nickName, 1) && notEmptyString(this.fullName, 2) && notEmptyString(this.mode, 1);
+    if (!valid) {
+      errorTypes.push('core');
+    }
     if (notEmptyString(this.password) && this.editPassword) {
       this.password = this.password.trim();
       this.cpassword = this.cpassword.trim();
       if (this.password.length > 7 && this.password === this.cpassword) {
         edited.password = this.password;
-        
       } else {
         valid = false;
+        errorTypes.push('password');
       }
     }
     if (valid) {
@@ -482,7 +515,22 @@ export default class UserEdit extends Vue {
       setTimeout(() => {
         bus.$emit("update-user-list", true);
       }, 1000)
+    } else {
+      this.setErrorMsgs(errorTypes)
     }
+  }
+
+  setErrorMsgs(errorTypes: string[] = []) {
+    this.errorMsgs = errorTypes.map(type => {
+      switch (type) {
+        case 'core':
+          return 'Please add a full name, nickName, email, login mode and at least one role';
+        case 'password':
+          return 'Please ensure the password has at least 7 characters without spaces and matches the confirmation field';
+        default:
+          return 'Please check errors';
+      }
+    })
   }
 
   handleDelete(index = 0, mediaItem: MediaItem) {
@@ -531,10 +579,54 @@ export default class UserEdit extends Vue {
     bus.$emit("escape", true);
   }
 
+  validate() {
+    const errorTypes: string[] = [];
+    let valid = notEmptyString(this.identifier, 5) && notEmptyString(this.nickName, 1) && notEmptyString(this.fullName, 2) && notEmptyString(this.mode, 1);
+    if (!valid) {
+      errorTypes.push('core');
+    }
+    if (notEmptyString(this.password) && this.editPassword) {
+      const passOk = this.password.length > 7 && this.password === this.cpassword;
+      if (!passOk) {
+        valid = false;
+        errorTypes.push('password');
+      }
+    }
+    if (!valid) {
+      this.setErrorMsgs(errorTypes);
+    } else {
+      this.errorMsgs = [];
+    }
+  }
+
   @Watch("current")
   changeCurrent(newVal) {
     if (newVal instanceof Object) {
       this.sync();
+    }
+  }
+
+  @Watch("password")
+  changePassword() {
+    if (this.editPassword) {
+      this.validate();
+    }
+  }
+
+  @Watch("cpassword")
+  changeCpassword() {
+    if (this.editPassword) {
+      this.validate();
+    }
+  }
+
+  @Watch("roleState", { deep: true })
+  changeRoleState(newVal) {
+    if (newVal instanceof Object) {
+      const hasAdminRole = Object.entries(newVal).filter(entry => ['superadmin', 'admin', 'editor'].includes(entry[0]) && entry[1]).length > 0;
+      if (hasAdminRole && this.isNew) {
+        this.mode = 'local';
+      }
     }
   }
 }
