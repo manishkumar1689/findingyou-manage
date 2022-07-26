@@ -44,6 +44,12 @@
       v-if="hasUsers"
       :data="users"
       :row-class="(row, index) => assignRowClasses(index)"
+       :paginated="true"
+        backend-pagination
+        :current-page="page"
+        :per-page="perPage"
+        :total="total"
+        @page-change="onPageChange"
       class="listing-table"
     >
       <template slot-scope="props">
@@ -125,6 +131,10 @@ export default class UsersListView extends Vue {
 
   activeOnly = true;
 
+  perPage = 100;
+
+  page = 1;
+
   created() {
     this.loadData();
     bus.$on("escape", this.dismiss);
@@ -173,7 +183,8 @@ export default class UsersListView extends Vue {
     if (hasUsearch) {
       filter.admin = 1;
     }
-    await listUsers(0, 100, filter).then((result) => {
+    const startIndex = (this.page - 1) * this.perPage;
+    await listUsers(startIndex, this.perPage, filter).then((result) => {
       if (result.valid) {
         this.users = result.items.map((user) => {
           const fullName = notEmptyString(user.fullName)? user.fullName : user.nickName;
@@ -336,6 +347,11 @@ export default class UsersListView extends Vue {
       this.criteria.delete('usearch');
     }
     this.loadData()
+  }
+
+  onPageChange(page = 0) {
+    this.page = page;
+    this.loadData();
   }
 
   @Watch("selectedUser")
