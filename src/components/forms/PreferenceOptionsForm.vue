@@ -379,6 +379,7 @@ export default class PreferenceOptionsForm extends Vue {
     { key: "string", name: "multiple choice (text)", showOptions: true, presetOptions: false },
     { key: "text", name: "User-entered plain text", showOptions: false, presetOptions: false },
     { key: "uri", name: "URI, internet resource", showOptions: false, presetOptions: false },
+    { key: "code", name: "Custom code", showOptions: false, presetOptions: false },
     { key: "integer", name: "integer", showOptions: false, presetOptions: false },
     { key: "scale", name: "scale (like/dislike, agree/disagree)", showOptions: false, presetOptions: false },
     {
