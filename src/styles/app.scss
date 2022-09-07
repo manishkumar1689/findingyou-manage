@@ -969,7 +969,7 @@ main {
 
   .main-view .listing-table,
   .main-view.show-form > .edit-form {
-    height: 0;
+    height: auto;
     overflow: visible;
     opacity: 1;
     pointer-events: all;
@@ -2887,6 +2887,15 @@ body {
 }
 
 #app {
+
+  .main-view > .actions.fixed {
+    position: fixed;
+    &.bottom {
+      bottom: 2em;
+      right: 25vw;
+    }
+  }
+
   ul.text-preview {
     padding-bottom: 2em;
     li {

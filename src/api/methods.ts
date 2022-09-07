@@ -10,6 +10,7 @@ import {
   SlugName,
   Snippet,
   DeviceVersion,
+  IdBool,
 } from "./interfaces";
 import { ChartInput, PairedInput } from "./models/ChartForm";
 import { buildOptions, extractUserId } from "./build-headers";
@@ -99,13 +100,13 @@ const buildQueryString = (criteria = null, literal = false) => {
   return str;
 };
 
-export const getData = async (path: string, mode = 'object') => {
-  let result: any = mode === 'array' ? [] : { valid: false };
+export const getData = async (path: string, mode = "object") => {
+  let result: any = mode === "array" ? [] : { valid: false };
   await fetchContent(path).then((response) => {
     if (response.data) {
       const { data } = response;
       if (data instanceof Object) {
-        if (mode !== 'array') {
+        if (mode !== "array") {
           result = data;
           result.valid = data instanceof Object;
         } else if (data instanceof Array) {
@@ -543,6 +544,15 @@ export const getNumPaired = async () => {
     }
   });
   return total;
+};
+
+export const saveUserTestStatus = async (userID, values: IdBool[] = []) => {
+  const uri = ["user/update-test-status", userID].join("/");
+  const valid = values.length > 0;
+  if (valid) {
+    await putData(uri, values);
+  }
+  return valid;
 };
 
 export const analysePaired = async (
@@ -1487,26 +1497,29 @@ export const fetchRoddenValues = async () => {
   return rows;
 };
 
-export const deviceVersions = async (userId = '') => {
-  const uri = ['setting/device/versions', userId].join('/');
-  return await getData(uri, 'array');
-}
+export const deviceVersions = async (userId = "") => {
+  const uri = ["setting/device/versions", userId].join("/");
+  return await getData(uri, "array");
+};
 
 export const checkEnforcePaidLogic = async () => {
-  const uri = 'setting/enforce-paid-logic';
+  const uri = "setting/enforce-paid-logic";
   return await getData(uri);
-}
+};
 
-export const saveDeviceVersions = async (userId = '', versions: DeviceVersion[] = []) => {
-  const uri = ['setting/device/save-versions', userId].join('/');
+export const saveDeviceVersions = async (
+  userId = "",
+  versions: DeviceVersion[] = []
+) => {
+  const uri = ["setting/device/save-versions", userId].join("/");
   return await putData(uri, versions);
-}
+};
 
-export const fetchCacheKeys = async (pattern = '', userId = '') => {
+export const fetchCacheKeys = async (pattern = "", userId = "") => {
   let result = { valid: false, keys: [], num: 0 };
   if (pattern.length > 2 && userId.length > 12) {
-    const url = ['setting/redis-keys', userId, pattern].join('/');
-    const data = await fetchDataObject(url)
+    const url = ["setting/redis-keys", userId, pattern].join("/");
+    const data = await fetchDataObject(url);
     if (data instanceof Object && data.valid) {
       result = data;
     }
@@ -1514,10 +1527,10 @@ export const fetchCacheKeys = async (pattern = '', userId = '') => {
   return result;
 };
 
-export const deleteCacheKeys = async (pattern = '', userId = '') => {
+export const deleteCacheKeys = async (pattern = "", userId = "") => {
   let result = { valid: false, keys: [], num: 0 };
   if (pattern.length > 2 && userId.length > 12) {
-    const url = ['setting/clear-by-key', userId, pattern].join('/');
+    const url = ["setting/clear-by-key", userId, pattern].join("/");
     const response = await deleteData(url);
     const { data } = response;
     if (data instanceof Object && data.valid) {

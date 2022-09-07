@@ -127,7 +127,6 @@ export interface KeyNumLabel extends KeyNumValue {
   label: string;
 }
 
-
 export interface Translation {
   lang: string;
   text: string;
@@ -433,12 +432,10 @@ export interface RangeMatchProtocol {
   score: any;
 }
 
-
 export interface KeySet {
   key: string;
   set: number;
 }
-
 
 export interface DeviceVersion {
   key: string;
@@ -449,8 +446,25 @@ export interface DeviceVersion {
 }
 
 export const defaultDeviceVersion = {
-  key: '',
-  name: '',
-  version: '0.0.1',
-  forceUpdate: false
+  key: "",
+  name: "",
+  version: "0.0.1",
+  forceUpdate: false,
 };
+
+export interface SimpleLocation {
+  name: string;
+  lat: number;
+  lng: number;
+  itemKey?: string;
+  value?: string;
+}
+
+export interface IdBool {
+  id: string;
+  value: boolean;
+}
+
+export interface StringBool {
+  [key: string]: boolean;
+}

@@ -1,9 +1,9 @@
 <template>
   <div class="main-view" :class="wrapperClasses">
     <h1 class="main-title">
-      <span class="text-label">{{title}}</span>
-      <em v-if="showSubtotal" class="total rounded-box">{{subtotal}}</em>
-      <em class="total rounded-box">{{total}}</em>
+      <span class="text-label">{{ title }}</span>
+      <em v-if="showSubtotal" class="total rounded-box">{{ subtotal }}</em>
+      <em class="total rounded-box">{{ total }}</em>
     </h1>
     <form class="search-form">
       <b-input
@@ -13,25 +13,29 @@
         class="search-string"
         @keydown.native="manageKeydown"
       />
-      <b-button icon-left="magnify" @click="searchUsers"/>
+      <b-button icon-left="magnify" @click="searchUsers" />
       <b-field label="Type">
-        <b-radio-button v-model="listMode"
-            native-value="members"
-            type="is-info is-light is-outlined">
-            <b-icon icon="account-multiple"></b-icon>
-            <span>Members</span>
+        <b-radio-button
+          v-model="listMode"
+          native-value="members"
+          type="is-info is-light is-outlined"
+        >
+          <b-icon icon="account-multiple"></b-icon>
+          <span>Members</span>
         </b-radio-button>
 
-        <b-radio-button v-model="listMode"
-            native-value="admin"
-            type="is-success is-light is-outlined">
-            <b-icon icon="account-supervisor-circle"></b-icon>
-            <span>Admin</span>
+        <b-radio-button
+          v-model="listMode"
+          native-value="admin"
+          type="is-success is-light is-outlined"
+        >
+          <b-icon icon="account-supervisor-circle"></b-icon>
+          <span>Admin</span>
         </b-radio-button>
-    </b-field>
-    <b-field label="Active only">
+      </b-field>
+      <b-field label="Active only">
         <b-switch v-model="activeOnly" />
-    </b-field>
+      </b-field>
       <b-button icon-right="plus" @click="showAddForm">Add new</b-button>
     </form>
     <UserEdit
@@ -44,12 +48,12 @@
       v-if="hasUsers"
       :data="users"
       :row-class="(row, index) => assignRowClasses(index)"
-       :paginated="true"
-        backend-pagination
-        :current-page="page"
-        :per-page="perPage"
-        :total="total"
-        @page-change="onPageChange"
+      :paginated="true"
+      backend-pagination
+      :current-page="page"
+      :per-page="perPage"
+      :total="total"
+      @page-change="onPageChange"
       class="listing-table"
     >
       <template slot-scope="props">
@@ -58,6 +62,13 @@
         }}</b-table-column>
         <b-table-column class="identifier" field="identifier" label="Email">
           {{ props.row.identifier }}
+        </b-table-column>
+        <b-table-column
+          class="placenames"
+          field="placenames"
+          label="Placenames"
+        >
+          {{ renderPlacenames(props.row.placenames) }}
         </b-table-column>
         <b-table-column class="roles" field="roles" label="Roles">
           {{ renderRoles(props.row.roles) }}
@@ -69,6 +80,9 @@
             >{{ matchLastPayment(props.row) | toCurrency }}</span
           >
         </b-table-column>
+        <b-table-column class="test" field="test" label="Test">
+          <b-checkbox v-model="testStatusMap[props.row._id]" />
+        </b-table-column>
         <b-table-column class="modified" field="modified" label="Last edited">
           {{ props.row.modifiedAt | longDate }}
         </b-table-column>
@@ -79,25 +93,40 @@
         </b-table-column>
       </template>
     </b-table>
+    <div v-if="!showForm" class="actions bottom fixed">
+      <b-button
+        @click="saveStatus()"
+        class="save"
+        type="is-success"
+        size="is-large"
+        >Save</b-button
+      >
+    </div>
   </div>
 </template>
 <script lang="ts">
 import { Component, Watch, Vue } from "vue-property-decorator";
 import { State } from "vuex-class";
-import { listUsers, fetchPreferenceOptions, fetchRoleOptions } from "../api/methods";
+import {
+  listUsers,
+  fetchPreferenceOptions,
+  fetchRoleOptions,
+  saveUserTestStatus,
+} from "../api/methods";
 import { capitalize, snakeToWords } from "../api/converters";
 import { emptyString, notEmptyString } from "../api/validators";
 import { FilterSet } from "../api/composables/FilterSet";
 import { UserState } from "../store/types";
-import { User, defaultUser } from "../api/interfaces/users";
+import { User, defaultUser, Placename } from "../api/interfaces/users";
 import UserEdit from "./UsersEdit.vue";
 import {
   hasPayments,
   matchLastPayment,
   matchLastPaymentDate,
 } from "../api/mappers";
+import { extractCorePlacenames } from "../api/helpers";
 import { bus } from "../main";
-import { PreferenceOption, Role } from "../api/interfaces";
+import { PreferenceOption, Role, StringBool } from "../api/interfaces";
 
 @Component({
   components: {
@@ -127,7 +156,7 @@ export default class UsersListView extends Vue {
 
   roles: Array<Role> = [];
 
-  listMode = 'members';
+  listMode = "members";
 
   activeOnly = true;
 
@@ -135,36 +164,43 @@ export default class UsersListView extends Vue {
 
   page = 1;
 
+  testStatusMap: StringBool = {};
+
   created() {
     this.loadData();
     bus.$on("escape", this.dismiss);
-    bus.$on("update-user-list", ok  => {
+    bus.$on("update-user-list", (ok) => {
       if (ok) {
         this.loadData();
       }
-    })
+    });
     const { path } = this.$route;
-    const pathParts = path.substring(1).split('/');
+    const pathParts = path.substring(1).split("/");
     if (pathParts.length > 1) {
       switch (pathParts[1]) {
-        case 'members':
-        case 'member':
-          this.criteria.set('type', 'members');
+        case "members":
+        case "member":
+          this.criteria.set("type", "members");
           break;
-        case 'admins':
-        case 'admin':
-          this.criteria.set('type', 'admin');
+        case "admins":
+        case "admin":
+          this.criteria.set("type", "admin");
           break;
       }
     }
-    bus.$on("remove-media-item", ({user, index, mediaRef})  => {
-      const item = this.users.find(u => u._id === user);
+    bus.$on("remove-media-item", ({ user, index, mediaRef }) => {
+      const item = this.users.find((u) => u._id === user);
       if (item instanceof Object) {
-        if (Object.keys(item).includes('profiles') && item.profiles.length > 0) {
+        if (
+          Object.keys(item).includes("profiles") &&
+          item.profiles.length > 0
+        ) {
           if (index >= 0 && index < item.profiles.length) {
             const pr = item.profiles[index];
-            if (pr instanceof Object && Object.keys(pr).includes('mediaRef')) {
-              const mediaIndex = item.profiles[index].mediaItems.findIndex(mi => mi.filename === mediaRef);
+            if (pr instanceof Object && Object.keys(pr).includes("mediaRef")) {
+              const mediaIndex = item.profiles[index].mediaItems.findIndex(
+                (mi) => mi.filename === mediaRef
+              );
               if (mediaRef >= 0) {
                 item.profiles[index].mediaItems.splice(mediaIndex, 1);
               }
@@ -172,14 +208,16 @@ export default class UsersListView extends Vue {
           }
         }
       }
-    })
+    });
   }
 
   async loadData() {
-    this.criteria.set('totals', 1);
-    
+    this.criteria.set("totals", 1);
+
     const filter = Object.fromEntries(this.criteria);
-    const hasUsearch = this.criteria.has('usearch') ? notEmptyString(filter.usearch) : false;
+    const hasUsearch = this.criteria.has("usearch")
+      ? notEmptyString(filter.usearch)
+      : false;
     if (hasUsearch) {
       filter.admin = 1;
     }
@@ -187,8 +225,14 @@ export default class UsersListView extends Vue {
     await listUsers(startIndex, this.perPage, filter).then((result) => {
       if (result.valid) {
         this.users = result.items.map((user) => {
-          const fullName = notEmptyString(user.fullName)? user.fullName : user.nickName;
-          return { ...user, fullName }
+          const fullName = notEmptyString(user.fullName)
+            ? user.fullName
+            : user.nickName;
+          return { ...user, fullName };
+        });
+        this.testStatusMap = {};
+        this.users.forEach((user) => {
+          this.testStatusMap[user._id] = user.test === true;
         });
         this.subtotal = result.total;
         if (result.grandTotal) {
@@ -215,7 +259,7 @@ export default class UsersListView extends Vue {
     if (parts.length > 2) {
       const userId = parts[2];
       if (notEmptyString(userId)) {
-        const user = this.users.find(u => u._id === userId);
+        const user = this.users.find((u) => u._id === userId);
         if (user instanceof Object) {
           this.edit(user);
         }
@@ -240,10 +284,14 @@ export default class UsersListView extends Vue {
     this.selectedUser = Object.assign({}, defaultUser);
     this.showForm = true;
     const { path } = this.$route;
-    const newPath = ['/users','new'].join('/');
+    const newPath = ["/users", "new"].join("/");
     if (newPath !== path) {
       this.$router.push(newPath);
     }
+  }
+
+  renderPlacenames(placenames: Placename[]) {
+    return extractCorePlacenames(placenames);
   }
 
   dismiss() {
@@ -252,9 +300,12 @@ export default class UsersListView extends Vue {
   }
 
   renderRoles(roles = []) {
-    return roles.filter(notEmptyString).map(role => {
-      return role === "active"? "Member" : capitalize(snakeToWords(role));
-    }).join(", ");
+    return roles
+      .filter(notEmptyString)
+      .map((role) => {
+        return role === "active" ? "Member" : capitalize(snakeToWords(role));
+      })
+      .join(", ");
   }
 
   hasSelected() {
@@ -306,6 +357,21 @@ export default class UsersListView extends Vue {
     }
   }
 
+  saveStatus() {
+    const values = Object.entries(this.testStatusMap)
+      .map(([id, value]) => {
+        return { id, value };
+      })
+      .filter(
+        (item) => notEmptyString(item.id, 6) && typeof item.value === "boolean"
+      );
+    saveUserTestStatus(this.user._id, values).then((result: any) => {
+      if (result) {
+        this.toast("Test statuses saved");
+      }
+    });
+  }
+
   get wrapperClasses() {
     const cls = [];
     if (this.showForm) {
@@ -316,24 +382,24 @@ export default class UsersListView extends Vue {
 
   get title() {
     const { path } = this.$route;
-    const pathParts = path.substring(1).split('/');
+    const pathParts = path.substring(1).split("/");
     if (pathParts.length > 1) {
       switch (pathParts[1]) {
-        case 'members':
-        case 'member':
-          return 'Members';
-        case 'admins':
-        case 'admin':
-          return 'Administrators';
-        case 'new':
-          return 'New User';
+        case "members":
+        case "member":
+          return "Members";
+        case "admins":
+        case "admin":
+          return "Administrators";
+        case "new":
+          return "New User";
         default:
           if (/^[0-9a-f]{16.32}$/.test(pathParts[1])) {
-            return 'Edit User';
+            return "Edit User";
           }
       }
     }
-    return 'Members and Admins';
+    return "Members and Admins";
   }
 
   assignRowClasses(index: number) {
@@ -342,11 +408,11 @@ export default class UsersListView extends Vue {
 
   searchUsers() {
     if (notEmptyString(this.searchString)) {
-      this.criteria.set('usearch', this.searchString);
+      this.criteria.set("usearch", this.searchString);
     } else {
-      this.criteria.delete('usearch');
+      this.criteria.delete("usearch");
     }
-    this.loadData()
+    this.loadData();
   }
 
   onPageChange(page = 0) {
@@ -354,11 +420,20 @@ export default class UsersListView extends Vue {
     this.loadData();
   }
 
+  toast(message = "") {
+    this.$buefy.toast.open({
+      duration: 3000,
+      message,
+      position: "is-bottom",
+      type: "is-success",
+    });
+  }
+
   @Watch("selectedUser")
   changeSelectedUser(newVal) {
     const { path } = this.$route;
-    const currParts = path.substring(1).split('/');
-    const currSub = currParts.length > 1 ? currParts[1] : '';
+    const currParts = path.substring(1).split("/");
+    const currSub = currParts.length > 1 ? currParts[1] : "";
     const pathParts = ["/users"];
     if (newVal instanceof Object) {
       const { _id } = newVal;
@@ -367,7 +442,7 @@ export default class UsersListView extends Vue {
       }
     }
     const newPath = pathParts.join("/");
-    if (newPath !== path && currSub !== 'new') {
+    if (newPath !== path && currSub !== "new") {
       this.$router.push(newPath);
     }
   }
@@ -375,10 +450,10 @@ export default class UsersListView extends Vue {
   @Watch("listMode")
   changeListmode(newVal) {
     const { path } = this.$route;
-    const newPath = ['/users', newVal].join('/');
+    const newPath = ["/users", newVal].join("/");
     if (newPath !== path) {
       this.$router.push(newPath);
-      this.criteria.set('type', newVal);
+      this.criteria.set("type", newVal);
       this.loadData();
     }
   }
@@ -386,10 +461,9 @@ export default class UsersListView extends Vue {
   @Watch("activeOnly")
   changeActiveOnly(newVal, prevVal) {
     if (newVal !== prevVal) {
-      this.criteria.set('admin', newVal? 1 : 0);
+      this.criteria.set("admin", newVal ? 1 : 0);
       this.loadData();
     }
   }
-
 }
 </script>
