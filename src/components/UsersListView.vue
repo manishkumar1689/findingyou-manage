@@ -101,6 +101,16 @@
         size="is-large"
         >Save</b-button
       >
+      <b-button @click="revert()" class="save" type="is-info" size="is-small"
+        >Revert</b-button
+      >
+      <b-icon
+        @native-click="selectToggle()"
+        class="selectt-toggle"
+        :icon="selectToggleIcon"
+        size="is-large"
+        :title="selectToggleMsg"
+      />
     </div>
   </div>
 </template>
@@ -230,14 +240,12 @@ export default class UsersListView extends Vue {
             : user.nickName;
           return { ...user, fullName };
         });
-        this.testStatusMap = {};
-        this.users.forEach((user) => {
-          this.testStatusMap[user._id] = user.test === true;
-        });
+
         this.subtotal = result.total;
         if (result.grandTotal) {
           this.total = result.grandTotal;
         }
+        this.buildUserStatusMap();
       }
       fetchPreferenceOptions().then((data) => {
         if (data.items instanceof Array) {
@@ -250,6 +258,13 @@ export default class UsersListView extends Vue {
           this.roles = data;
         }
       });
+    });
+  }
+
+  buildUserStatusMap() {
+    this.testStatusMap = {};
+    this.users.forEach((user) => {
+      this.testStatusMap[user._id] = user.test === true;
     });
   }
 
@@ -418,6 +433,26 @@ export default class UsersListView extends Vue {
   onPageChange(page = 0) {
     this.page = page;
     this.loadData();
+  }
+
+  revert() {
+    this.buildUserStatusMap();
+  }
+
+  get propSelected() {
+    const entries = Object.entries(this.testStatusMap);
+    const numEntries = entries.length;
+    return entries.filter((entry) => entry[1]).length / numEntries;
+  }
+
+  get selectToggleIcon() {
+    return this.propSelected <= 0.5
+      ? "checkbox-multiple-marked"
+      : "checkbox-multiple-blank";
+  }
+
+  get selectToggleMsg() {
+    return this.propSelected <= 0.5 ? "Select all" : "Select none";
   }
 
   toast(message = "") {
