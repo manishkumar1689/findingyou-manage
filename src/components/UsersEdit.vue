@@ -116,15 +116,20 @@
       </li>
     </ul>
     <div class="actions">
-      <b-button @click="save">Save</b-button>
+      <b-button @click="save" type="is-success" size="is-medium">Save</b-button>
     </div>
     <div v-if="isSaved" class="info row horizontal twin">
       <dl class="twin-column bold-labels">
-        <dt v-if="hasChart">Location</dt>
-        <dd v-if="hasChart">
-          <span class="lat">{{ geo.lat | toDMSLat }} </span>
-          <span class="lng">{{ geo.lng | toDMSLng }} </span>
-          <span class="name">{{ placename }} </span>
+        <dt>Location</dt>
+        <dd>
+          <template v-if="hasLocation">
+            <span class="lat">{{ geo.lat | toDMSLat }} </span>
+            <span class="lng">{{ geo.lng | toDMSLng }} </span>
+            <span class="name">{{ placename }} </span>
+          </template>
+          <template v-else>
+            <span class="name">[Unknown]</span>
+          </template>
           <b-select v-if="showCustomLocations" v-model="customLocation">
             <option
               v-for="item in customLocationOptions"
@@ -362,13 +367,28 @@ export default class UserEdit extends Vue {
     if (!this.hasChart) {
       this.fetchChart();
     }
-    fetchSetting("default_custom_locations").then((setting: any) => {
-      if (setting instanceof Object && setting.value instanceof Array) {
-        this.customLocations = setting.value.filter(
-          (item) => item instanceof Object
-        );
-      }
-    });
+    this.fetchLocations();
+  }
+
+  fetchLocations() {
+    const cKey = "default_custom_locations";
+    const locations = this.$ls.get(cKey);
+    const filterLocations = (item: any) =>
+      item instanceof Object &&
+      notEmptyString(item.name) &&
+      isNumeric(item.lat);
+    if (locations instanceof Array && locations.length > 0) {
+      this.customLocations = locations.filter(filterLocations);
+    } else {
+      fetchSetting(cKey).then((setting: any) => {
+        if (setting instanceof Object && setting.value instanceof Array) {
+          this.customLocations = setting.value.filter(filterLocations);
+          if (this.customLocations.length > 0) {
+            this.$ls.set(cKey, this.customLocations);
+          }
+        }
+      });
+    }
   }
 
   get customLocationOptions() {
@@ -397,6 +417,14 @@ export default class UserEdit extends Vue {
         }
       });
     }
+  }
+
+  get hasLocation() {
+    return (
+      this.current.geo instanceof Object &&
+      isNumeric(this.current.geo.lat) &&
+      isNumeric(this.current.geo.lng)
+    );
   }
 
   get statusLog() {
@@ -620,12 +648,30 @@ export default class UserEdit extends Vue {
     if (this.hasGeo) {
       const customLoc = JSON.parse(this.customLocation);
       const km10 = 360 / 4000;
-      const diffY = Math.random() * km10;
+      const randomMinus = () => (Math.random() >= 0.5 ? 1 : -1);
+      const diffY = Math.random() * km10 * randomMinus();
       const diffX =
-        Math.random() * km10 * Math.cos((Math.PI / 180) * customLoc.lng);
+        Math.random() *
+        km10 *
+        Math.cos((Math.PI / 180) * customLoc.lat) *
+        randomMinus();
+      let lat = customLoc.lat + diffY;
+      if (lat > 90) {
+        lat = 90;
+      }
+      if (lat < -90) {
+        lat = -90;
+      }
+      let lng = customLoc.lng + diffX;
+      if (lng > 180) {
+        lng = 180;
+      }
+      if (lng < -180) {
+        lng = -180;
+      }
       edited.geo = {
-        lat: customLoc.lat + diffX,
-        lng: customLoc.lng + diffY,
+        lat,
+        lng,
       };
       edited.placenames = this.extractPlaceNames(customLoc);
     }

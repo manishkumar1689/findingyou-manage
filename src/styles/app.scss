@@ -2890,9 +2890,20 @@ body {
 
   .main-view > .actions.fixed {
     position: fixed;
+    padding: 0.5em;
+    background-color: white;
+    border: solid 1px $light-grey;
+    border-radius: 0.25em;
     &.bottom {
       bottom: 2em;
       right: 25vw;
+    }
+    .select-toggle {
+      cursor: pointer;
+      color: $medium-grey;
+      &:hover {
+        color: $active-color;
+      }
     }
   }
 

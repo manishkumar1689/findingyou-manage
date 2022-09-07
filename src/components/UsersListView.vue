@@ -98,18 +98,27 @@
         @click="saveStatus()"
         class="save"
         type="is-success"
-        size="is-large"
+        size="is-medium"
         >Save</b-button
       >
-      <b-button @click="revert()" class="save" type="is-info" size="is-small"
+      <b-button @click="revert()" class="save" type="is-info" size="is-medium"
         >Revert</b-button
       >
       <b-icon
-        @native-click="selectToggle()"
-        class="selectt-toggle"
-        :icon="selectToggleIcon"
+        v-if="showSelectAll"
+        @click.native="selectAll()"
+        class="select-toggle"
+        icon="checkbox-multiple-marked"
         size="is-large"
-        :title="selectToggleMsg"
+        title="Select all"
+      />
+      <b-icon
+        v-if="showSelectNone"
+        @click.native="selectNone()"
+        class="select-toggle"
+        icon="checkbox-multiple-blank"
+        size="is-large"
+        title="Select none"
       />
     </div>
   </div>
@@ -435,6 +444,13 @@ export default class UsersListView extends Vue {
     this.loadData();
   }
 
+  selectToggle(newVal = true) {
+    this.testStatusMap = {};
+    for (const user of this.users) {
+      this.testStatusMap[user._id] = newVal;
+    }
+  }
+
   revert() {
     this.buildUserStatusMap();
   }
@@ -445,14 +461,20 @@ export default class UsersListView extends Vue {
     return entries.filter((entry) => entry[1]).length / numEntries;
   }
 
-  get selectToggleIcon() {
-    return this.propSelected <= 0.5
-      ? "checkbox-multiple-marked"
-      : "checkbox-multiple-blank";
+  get showSelectAll() {
+    return this.propSelected < 1;
   }
 
-  get selectToggleMsg() {
-    return this.propSelected <= 0.5 ? "Select all" : "Select none";
+  get showSelectNone() {
+    return this.propSelected > 0.05;
+  }
+
+  selectAll() {
+    return this.selectToggle(true);
+  }
+
+  selectNone() {
+    return this.selectToggle(false);
   }
 
   toast(message = "") {
