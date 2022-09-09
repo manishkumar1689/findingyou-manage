@@ -185,6 +185,8 @@ export default class UsersListView extends Vue {
 
   testStatusMap: StringBool = {};
 
+  evaluated = false;
+
   created() {
     this.loadData();
     bus.$on("escape", this.dismiss);
@@ -271,10 +273,14 @@ export default class UsersListView extends Vue {
   }
 
   buildUserStatusMap() {
+    this.evaluated = false;
     this.testStatusMap = {};
     this.users.forEach((user) => {
       this.testStatusMap[user._id] = user.test === true;
     });
+    setTimeout(() => {
+      this.evaluated = true;
+    }, 125);
   }
 
   openUserForm() {
@@ -389,9 +395,11 @@ export default class UsersListView extends Vue {
       .filter(
         (item) => notEmptyString(item.id, 6) && typeof item.value === "boolean"
       );
+    this.evaluated = false;
     saveUserTestStatus(this.user._id, values).then((result: any) => {
       if (result) {
         this.toast("Test statuses saved");
+        this.evaluated = true;
       }
     });
   }
@@ -455,18 +463,23 @@ export default class UsersListView extends Vue {
     this.buildUserStatusMap();
   }
 
-  get propSelected() {
-    const entries = Object.entries(this.testStatusMap);
+  calcPropSelected() {
+    const entries =
+      this.testStatusMap instanceof Object
+        ? Object.entries(this.testStatusMap)
+        : [];
     const numEntries = entries.length;
-    return entries.filter((entry) => entry[1]).length / numEntries;
+    return numEntries > 0
+      ? entries.filter((entry) => entry[1]).length / numEntries
+      : 0;
   }
 
   get showSelectAll() {
-    return this.propSelected < 1;
+    return this.evaluated && this.calcPropSelected() < 1;
   }
 
   get showSelectNone() {
-    return this.propSelected > 0.05;
+    return this.evaluated && this.calcPropSelected() > 0.05;
   }
 
   selectAll() {
