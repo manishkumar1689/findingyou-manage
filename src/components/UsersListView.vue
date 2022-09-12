@@ -131,6 +131,7 @@ import {
   fetchPreferenceOptions,
   fetchRoleOptions,
   saveUserTestStatus,
+  fetchUser,
 } from "../api/methods";
 import { capitalize, snakeToWords } from "../api/converters";
 import { emptyString, notEmptyString } from "../api/validators";
@@ -209,6 +210,7 @@ export default class UsersListView extends Vue {
           break;
       }
     }
+
     bus.$on("remove-media-item", ({ user, index, mediaRef }) => {
       const item = this.users.find((u) => u._id === user);
       if (item instanceof Object) {
@@ -272,6 +274,16 @@ export default class UsersListView extends Vue {
     });
   }
 
+  loadUser(userId = "") {
+    if (notEmptyString(userId, 12) && /^[a-f0-9]+$/i.test(userId)) {
+      fetchUser(userId).then((result) => {
+        if (result.valid && result.user instanceof Object) {
+          this.edit(result.user);
+        }
+      });
+    }
+  }
+
   buildUserStatusMap() {
     this.evaluated = false;
     this.testStatusMap = {};
@@ -292,6 +304,8 @@ export default class UsersListView extends Vue {
         const user = this.users.find((u) => u._id === userId);
         if (user instanceof Object) {
           this.edit(user);
+        } else {
+          this.loadUser(userId);
         }
       }
     }

@@ -1307,6 +1307,18 @@ export const listUsers = async (
   return output;
 };
 
+export const fetchUser = async (userId = "") => {
+  let output: any = { valid: false };
+  await fetchContent("user/item/" + userId).then((res: any) => {
+    const result = extractDataObj(res);
+    if (result instanceof Object) {
+      output = result;
+      output.valid = true;
+    }
+  });
+  return output;
+};
+
 export const listAdmins = async () => {
   return listUsers(0, 1000, { editor: 1, admin: 1 });
 };
