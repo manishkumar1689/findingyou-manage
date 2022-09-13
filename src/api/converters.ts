@@ -1067,12 +1067,7 @@ export const relativeAngle = (
 Check the seconds component of datetimes stored as Julian dates
 */
 export const correctTimeFromJul = (jd = 0, tzOffset = 0, datetime: Date) => {
-  const secs = datetime
-    .toISOString()
-    .split(".")
-    .shift()
-    .split(":")
-    .pop();
+  const secs = datetime.toISOString().split(".").shift().split(":").pop();
   let timeVal = julToHMS(jd, tzOffset);
   const iSecs = parseInt(secs);
   if (iSecs < 59) {
@@ -1136,11 +1131,7 @@ export const isoDateStringToSimple = (dtStr: string, timePrecision = "m") => {
   const parts = dtStr.split("T");
   const outParts = [];
   if (parts.length > 1) {
-    const date = parts
-      .shift()
-      .split("-")
-      .reverse()
-      .join("/");
+    const date = parts.shift().split("-").reverse().join("/");
     outParts.push(date);
     let end = 0;
     switch (timePrecision) {
@@ -1155,13 +1146,18 @@ export const isoDateStringToSimple = (dtStr: string, timePrecision = "m") => {
         break;
     }
     if (end > 0) {
-      const tp = parts
-        .pop()
-        .split(".")
-        .shift()
-        .split(":");
+      const tp = parts.pop().split(".").shift().split(":");
       outParts.push(tp.slice(0, end).join(":"));
     }
   }
   return outParts.join(" ");
+};
+
+export const renderRolesFromKeys = (roles = []) => {
+  return roles
+    .filter(notEmptyString)
+    .map((role) => {
+      return role === "active" ? "Member" : capitalize(snakeToWords(role));
+    })
+    .join(", ");
 };

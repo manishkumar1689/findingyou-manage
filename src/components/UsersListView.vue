@@ -133,7 +133,7 @@ import {
   saveUserTestStatus,
   fetchUser,
 } from "../api/methods";
-import { capitalize, snakeToWords } from "../api/converters";
+import { renderRolesFromKeys } from "../api/converters";
 import { emptyString, notEmptyString } from "../api/validators";
 import { FilterSet } from "../api/composables/FilterSet";
 import { UserState } from "../store/types";
@@ -344,12 +344,7 @@ export default class UsersListView extends Vue {
   }
 
   renderRoles(roles = []) {
-    return roles
-      .filter(notEmptyString)
-      .map((role) => {
-        return role === "active" ? "Member" : capitalize(snakeToWords(role));
-      })
-      .join(", ");
+    return renderRolesFromKeys(roles);
   }
 
   hasSelected() {

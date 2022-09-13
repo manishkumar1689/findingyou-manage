@@ -1467,6 +1467,44 @@ export const registerUser = async (params = null) => {
   return data;
 };
 
+export const getFeedback = async (page = 1, keyRef = "all", userId = "") => {
+  const perPage = 100;
+  const start = page > 0 ? (page - 1) * perPage : 0;
+  const url = ["feedback/list", start, perPage].join("/");
+  const key = keyRef.trim().toLowerCase();
+  const filter: Map<string, string> = new Map();
+  if (notEmptyString(key, 2) && key !== "all") {
+    filter.set("key", key);
+  }
+  if (notEmptyString(userId, 12)) {
+    filter.set("user", userId);
+  }
+  const qStr =
+    filter.size > 0
+      ? buildQueryString(Object.fromEntries(filter.entries()))
+      : "";
+  const result: any = {
+    valid: false,
+    num: 0,
+    total: 0,
+    start: 0,
+    perPage: 0,
+    items: [],
+  };
+  await fetchContent(url + qStr).then((res: any) => {
+    const data = extractDataObj(res);
+    if (data instanceof Object) {
+      result.valid = data.valid;
+      result.items = data.items;
+      result.num = data.num;
+      result.start = data.start;
+      result.perPage = data.perPage;
+      result.total = data.total;
+    }
+  });
+  return result;
+};
+
 export const getIpWhitelist = async (userID: string) => {
   const url = ["setting/ip-whitelist/list", userID].join("/");
   let ips = [];

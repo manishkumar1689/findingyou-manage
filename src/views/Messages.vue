@@ -1,14 +1,14 @@
 <template>
-  <MessageList />
+  <MessagePanes />
 </template>
 <script>
 // @ is an alias to /src
-import MessageList from "@/components/MessageList.vue";
+import MessagePanes from "@/components/MessagePanes.vue";
 
 export default {
   name: "Messages",
   components: {
-    MessageList,
+    MessagePanes,
   },
 };
 </script>
