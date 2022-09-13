@@ -24,10 +24,10 @@
     >
       <template slot-scope="props">
         <b-table-column class="name" field="fullName" label="Name">{{
-          props.row.fullName
+          props.row.bestName
         }}</b-table-column>
         <b-table-column class="email" field="email" label="Email">
-          {{ props.row.email }}
+          <a :href="mailTo(props.row.email)">{{ props.row.email }}</a>
         </b-table-column>
         <b-table-column class="key" field="key" label="Subject">
           {{ renderKey(props.row.key) }}
@@ -59,6 +59,7 @@ import { UserState } from "../store/types";
 import { FeedbackItem } from "../api/models/FeedbackItem";
 import { bus } from "../main";
 import { renderRolesFromKeys, snakeToWords } from "@/api/converters";
+import { notEmptyString } from "@/api/validators";
 
 @Component({
   components: {},
@@ -133,6 +134,14 @@ export default class FeedbackListView extends Vue {
 
   renderKey(key = "") {
     return snakeToWords(key);
+  }
+
+  mailTo(email = "") {
+    if (notEmptyString(email) && email.includes("@")) {
+      return ["mailto", email].join(":");
+    } else {
+      return "#";
+    }
   }
 
   dismiss() {

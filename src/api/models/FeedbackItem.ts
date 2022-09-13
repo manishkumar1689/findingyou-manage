@@ -65,4 +65,12 @@ export class FeedbackItem {
   get hasDeviceDetails() {
     return notEmptyString(this.deviceDetails, 2);
   }
+
+  get bestName(): string {
+    return notEmptyString(this.fullName, 2)
+      ? this.fullName
+      : notEmptyString(this.nickName)
+      ? this.nickName
+      : this.email.split("@").shift();
+  }
 }
