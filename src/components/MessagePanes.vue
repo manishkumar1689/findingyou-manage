@@ -35,5 +35,19 @@ export default class MessagePanes extends Vue {
       type: "is-success",
     });
   }
+
+  get wrapperClasses(): string[] {
+    const cls = ['message-panes'];
+    switch (this.activeTab) {
+      case 1:
+        cls.push('mail-templates');
+        break;
+      default:
+        cls.push('feedback-messages');
+        break;
+    }
+    return cls;
+  }
+
 }
 </script>

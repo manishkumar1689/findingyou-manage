@@ -62,6 +62,10 @@ export class FeedbackItem {
     }
   }
 
+  get hasMediaItems(): boolean {
+    return this.mediaItems instanceof Array && this.mediaItems.length > 0;
+  }
+
   get hasDeviceDetails() {
     return notEmptyString(this.deviceDetails, 2);
   }

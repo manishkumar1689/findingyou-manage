@@ -45,6 +45,13 @@
             {{ props.row.deviceDetails }}
           </p>
           <div class="body" v-html="props.row.text"></div>
+          <div v-if="props.row.hasMediaItems">
+            <figure v-for="item in props.row.mediaItems" :key="item._id">
+              <template v-if="isImage(item)">
+                <img :src="fileLink(item)" :alt="item.title" />
+              </template>
+            </figure>
+          </div>
         </article>
       </template>
     </b-table>
@@ -60,6 +67,8 @@ import { FeedbackItem } from "../api/models/FeedbackItem";
 import { bus } from "../main";
 import { renderRolesFromKeys, snakeToWords } from "@/api/converters";
 import { notEmptyString } from "@/api/validators";
+import { api } from "@/.config";
+import { MediaItem } from "@/api/interfaces/users";
 
 @Component({
   components: {},
@@ -134,6 +143,20 @@ export default class FeedbackListView extends Vue {
 
   renderKey(key = "") {
     return snakeToWords(key);
+  }
+
+  isImage(item: MediaItem) {
+    return item.mime.includes('image');
+  }
+
+  fileLink(item: MediaItem) {
+    return [
+      api.base.replace(/\/$/, ''),
+      "feedback",
+      "view-file",
+      item.filename,
+      this.user._id,
+    ].join("/");
   }
 
   mailTo(email = "") {
