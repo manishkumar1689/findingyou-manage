@@ -1489,15 +1489,19 @@ export const getFeedback = async (page = 1, keyRef = "all", userId = "") => {
     total: 0,
     start: 0,
     perPage: 0,
+    types: [],
     items: [],
   };
   await fetchContent(url + qStr).then((res: any) => {
     const data = extractDataObj(res);
-    if (data instanceof Object) {
+    if (data instanceof Object && data.valid) {
       result.valid = data.valid;
       result.items = data.items;
       result.num = data.num;
       result.start = data.start;
+      if (data.types instanceof Array) {
+        result.types = data.types;
+      }
       result.perPage = data.perPage;
       result.total = data.total;
     }

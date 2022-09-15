@@ -8,7 +8,16 @@
     <form class="filter-form">
       <b-field label="Subject type" class="row">
         <b-select v-model="filterKey">
-          <template v-if="hasTypeOptions"> </template>
+          <template v-if="hasTypeOptions">
+            <option
+              v-for="opt in typeOptions"
+              :key="opt.itemKey"
+              :value="opt.key"
+              :selected="filterKey === opt.key"
+            >
+              {{ opt.name }}
+            </option>
+          </template>
         </b-select>
       </b-field>
     </form>
@@ -36,7 +45,8 @@
           <a :href="mailTo(props.row.email)">{{ props.row.email }}</a>
         </b-table-column>
         <b-table-column class="key" field="key" label="Subject">
-          {{ renderKey(props.row.key) }}
+          <span class="text-label">{{ renderKey(props.row.key) }}</span>
+          <b-icon v-if="props.row.hasMediaItems" icon="image-outline"></b-icon>
         </b-table-column>
         <b-table-column class="roles" field="roles" label="Roles">
           {{ renderRoles(props.row.roles) }}
@@ -120,7 +130,7 @@ export default class FeedbackListView extends Vue {
         if (result.types instanceof Array) {
           this.typeOpts = result.types.map((tp, ti) => {
             const { key, title, num } = tp;
-            const itemKey = ['fb-type', key, ti].join('-');
+            const itemKey = ["fb-type", key, ti].join("-");
             return {
               key,
               name: `${title} (${num})`,
@@ -138,7 +148,7 @@ export default class FeedbackListView extends Vue {
   }
 
   get typeOptions() {
-    const emptyOpt = { key: '-', name: 'All', itemKey: 'fb-type-all' };
+    const emptyOpt = { key: "-", name: "All", itemKey: "fb-type-all" };
     return [emptyOpt, ...this.typeOpts];
   }
 
@@ -205,11 +215,9 @@ export default class FeedbackListView extends Vue {
     this.loadData();
   }
 
-
-  @Watch('filterKey')
+  @Watch("filterKey")
   changeFilterKey() {
     this.loadData();
   }
-
 }
 </script>
