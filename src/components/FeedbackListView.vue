@@ -5,7 +5,13 @@
       <em v-if="showSubtotal" class="total rounded-box">{{ subtotal }}</em>
       <em class="total rounded-box">{{ total }}</em>
     </h1>
-    <form class="filter-form"></form>
+    <form class="filter-form">
+      <b-field label="Subject type" class="row">
+        <b-select v-model="filterKey">
+          <template v-if="hasTypeOptions"> </template>
+        </b-select>
+      </b-field>
+    </form>
     <b-table
       v-if="hasItems"
       :data="items"
@@ -69,6 +75,7 @@ import { renderRolesFromKeys, snakeToWords } from "@/api/converters";
 import { notEmptyString } from "@/api/validators";
 import { api } from "@/.config";
 import { MediaItem } from "@/api/interfaces/users";
+import { KeyName } from "@/api/interfaces";
 
 @Component({
   components: {},
@@ -97,6 +104,8 @@ export default class FeedbackListView extends Vue {
 
   openId = "";
 
+  typeOpts: KeyName[] = [];
+
   created() {
     this.loadData();
     bus.$on("escape", this.dismiss);
@@ -108,9 +117,29 @@ export default class FeedbackListView extends Vue {
         this.items = result.items.map((item) => {
           return new FeedbackItem(item);
         });
+        if (result.types instanceof Array) {
+          this.typeOpts = result.types.map((tp, ti) => {
+            const { key, title, num } = tp;
+            const itemKey = ['fb-type', key, ti].join('-');
+            return {
+              key,
+              name: `${title} (${num})`,
+              itemKey,
+            };
+          });
+        }
         this.total = result.total;
       }
     });
+  }
+
+  get hasTypeOptions() {
+    return this.typeOpts.length > 0;
+  }
+
+  get typeOptions() {
+    const emptyOpt = { key: '-', name: 'All', itemKey: 'fb-type-all' };
+    return [emptyOpt, ...this.typeOpts];
   }
 
   get hasItems(): boolean {
@@ -146,12 +175,12 @@ export default class FeedbackListView extends Vue {
   }
 
   isImage(item: MediaItem) {
-    return item.mime.includes('image');
+    return item.mime.includes("image");
   }
 
   fileLink(item: MediaItem) {
     return [
-      api.base.replace(/\/$/, ''),
+      api.base.replace(/\/$/, ""),
       "feedback",
       "view-file",
       item.filename,
@@ -175,5 +204,12 @@ export default class FeedbackListView extends Vue {
     this.page = page;
     this.loadData();
   }
+
+
+  @Watch('filterKey')
+  changeFilterKey() {
+    this.loadData();
+  }
+
 }
 </script>
