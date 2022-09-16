@@ -6,6 +6,7 @@ export const mainMenuItems = [
     label: "Compatibility Protocols",
     reload: true,
   },
+  { to: "/astro/pp-table", label: "5 Pakṣi Table", reload: true },
   { to: "/users", label: "Members and Admins" },
   { to: "/dictionary", label: "Dictionary", icon: "book-alphabet" },
   { to: "/snippets", label: "Snippets" },
