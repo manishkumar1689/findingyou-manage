@@ -573,6 +573,27 @@ form {
       }
     }
   }
+  .field {
+    &.profile {
+      button, label {
+        margin-right: 0.5em;
+      }
+      img {
+        margin: 0 1em;
+        max-width: 320px;
+        max-height: 400px;
+        width: auto;
+        height: auto;
+      }
+      button {
+        max-height: 2.25rem;
+      }
+      em.new-file {
+        color: $green-label;
+        font-size: 0.8em;
+      }
+    }
+  }
 }
 
 dl.twin-column {
