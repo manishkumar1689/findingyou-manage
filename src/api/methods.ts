@@ -556,6 +556,41 @@ export const saveUserTestStatus = async (userID, values: IdBool[] = []) => {
   return valid;
 };
 
+export const saveUserCustomLocation = async (
+  userID,
+  ids: string[] = [],
+  loc: SimpleLocation
+) => {
+  const uri = ["user/update-custom-locations", userID].join("/");
+  const result = { ids, placenames: [], geo: null };
+  const valid =
+    ids.length > 0 &&
+    isNumeric(loc.lng) &&
+    isNumeric(loc.lat) &&
+    notEmptyString(loc.name);
+  if (valid) {
+    const { name, lat, lng } = loc;
+    const response = await putData(uri, { ids, name, lat, lng });
+    if (result instanceof Object) {
+      const { data } = response;
+      if (data instanceof Object) {
+        if (data.valid) {
+          if (
+            data.ids instanceof Array &&
+            data.ids.length > 0 &&
+            data.geo instanceof Object
+          ) {
+            result.ids = data.ids;
+            result.placenames = data.placenames;
+            result.geo = data.geo;
+          }
+        }
+      }
+    }
+  }
+  return result;
+};
+
 export const analysePaired = async (
   protocolId = "",
   start = 0,

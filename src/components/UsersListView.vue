@@ -116,9 +116,14 @@
         class="save"
         type="is-success"
         size="is-medium"
-        >Save</b-button
+        >{{ saveButtonLabel }}</b-button
       >
-      <b-button @click="revert()" class="save" type="is-info" size="is-medium"
+      <b-button
+        v-if="showRevert"
+        @click="revert()"
+        class="save"
+        type="is-info"
+        size="is-medium"
         >Revert</b-button
       >
       <b-icon
@@ -150,6 +155,7 @@ import {
   saveUserTestStatus,
   fetchUser,
   fetchCustomLocations,
+  saveUserCustomLocation,
 } from "../api/methods";
 import { renderRolesFromKeys, smartCastInt } from "../api/converters";
 import { emptyString, notEmptyString } from "../api/validators";
@@ -215,6 +221,8 @@ export default class UsersListView extends Vue {
   selectedRowIndices = [];
 
   customLocations: SimpleLocation[] = [];
+
+  customLocation = "--";
 
   created() {
     const { query } = this.$route;
@@ -429,21 +437,61 @@ export default class UsersListView extends Vue {
     }
   }
 
+  get customLocationEditMode() {
+    return (
+      notEmptyString(this.customLocation, 9) &&
+      this.customLocation.endsWith("}") &&
+      this.selectedRowIndices.length > 0
+    );
+  }
+
+  get saveButtonLabel() {
+    if (this.customLocationEditMode) {
+      return "Save custom location of selected rows";
+    } else {
+      return "Save test statuses";
+    }
+  }
+
   saveStatus() {
-    const values = Object.entries(this.testStatusMap)
-      .map(([id, value]) => {
-        return { id, value };
-      })
-      .filter(
-        (item) => notEmptyString(item.id, 6) && typeof item.value === "boolean"
-      );
-    this.evaluated = false;
-    saveUserTestStatus(this.user._id, values).then((result: any) => {
-      if (result) {
-        this.toast("Test statuses saved");
-        this.evaluated = true;
-      }
-    });
+    if (this.customLocationEditMode) {
+      const ids = this.selectedRowIndices
+        .map((index) => {
+          if (index < this.users.length) {
+            return this.users[index]._id;
+          } else {
+            return "";
+          }
+        })
+        .filter(notEmptyString);
+      const loc = JSON.parse(this.customLocation);
+      saveUserCustomLocation(this.user._id, ids, loc).then((result) => {
+        if (result.ids.length > 0 && result.geo instanceof Object) {
+          this.selectedRowIndices = [];
+          ids.forEach((id) => {
+            const item = this.users.find((user) => user._id === id);
+            item.geo = result.geo;
+            item.placenames = result.placenames;
+          });
+        }
+      });
+    } else {
+      const values = Object.entries(this.testStatusMap)
+        .map(([id, value]) => {
+          return { id, value };
+        })
+        .filter(
+          (item) =>
+            notEmptyString(item.id, 6) && typeof item.value === "boolean"
+        );
+      this.evaluated = false;
+      saveUserTestStatus(this.user._id, values).then((result: any) => {
+        if (result) {
+          this.toast("Test statuses saved");
+          this.evaluated = true;
+        }
+      });
+    }
   }
 
   fetchLocations() {
@@ -535,11 +583,23 @@ export default class UsersListView extends Vue {
   }
 
   get showSelectAll() {
-    return this.evaluated && this.calcPropSelected() < 1;
+    return (
+      this.evaluated &&
+      this.calcPropSelected() < 1 &&
+      !this.customLocationEditMode
+    );
+  }
+
+  get showRevert() {
+    return !this.customLocationEditMode;
   }
 
   get showSelectNone() {
-    return this.evaluated && this.calcPropSelected() > 0.05;
+    return (
+      this.evaluated &&
+      this.calcPropSelected() > 0.05 &&
+      !this.customLocationEditMode
+    );
   }
 
   selectAll() {
