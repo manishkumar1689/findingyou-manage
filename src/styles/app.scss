@@ -449,6 +449,14 @@ form {
   }
 
   .users-list-table {
+    .placenames span {
+      min-height: 1.25em;
+      display: block;
+      min-width: 6em;
+      width: 100%;
+      height: 100%;
+      cursor: pointer;
+    }
     tr.selected {
       .placenames {
         font-style: italic;

@@ -68,7 +68,7 @@
           field="placenames"
           label="Placenames"
         >
-          <span class="text-label" @click="selectRow(props.index)">{{
+          <span class="text-label" @click="selectRow(props.index)" title="Click to toggle selection">{{
             renderPlacenames(props.row.placenames)
           }}</span>
         </b-table-column>
