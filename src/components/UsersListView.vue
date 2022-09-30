@@ -54,7 +54,7 @@
       :per-page="perPage"
       :total="total"
       @page-change="onPageChange"
-      class="listing-table"
+      class="listing-table users-list-table"
     >
       <template slot-scope="props">
         <b-table-column class="name" field="fileName" label="Name">{{
@@ -68,10 +68,15 @@
           field="placenames"
           label="Placenames"
         >
-          {{ renderPlacenames(props.row.placenames) }}
+          <span class="text-label" @click="selectRow(props.index)">{{
+            renderPlacenames(props.row.placenames)
+          }}</span>
         </b-table-column>
         <b-table-column class="roles" field="roles" label="Roles">
           {{ renderRoles(props.row.roles) }}
+        </b-table-column>
+        <b-table-column class="gender" field="gender" label="Gender">
+          {{ props.row.gender }}
         </b-table-column>
         <b-table-column class="payments" field="payments" label="Payments">
           <span
@@ -93,7 +98,19 @@
         </b-table-column>
       </template>
     </b-table>
-    <div v-if="!showForm" class="actions bottom fixed">
+    <div v-if="!showForm" class="actions bottom fixed row">
+      <b-field label="Change location" class="row">
+        <b-select v-if="hasCustomLocations" v-model="customLocation">
+          <option
+            v-for="item in customLocationOptions"
+            :key="item.itemKey"
+            :value="item.value"
+          >
+            {{ item.name }}
+          </option>
+        </b-select>
+      </b-field>
+
       <b-button
         @click="saveStatus()"
         class="save"
@@ -132,8 +149,9 @@ import {
   fetchRoleOptions,
   saveUserTestStatus,
   fetchUser,
+  fetchCustomLocations,
 } from "../api/methods";
-import { renderRolesFromKeys } from "../api/converters";
+import { renderRolesFromKeys, smartCastInt } from "../api/converters";
 import { emptyString, notEmptyString } from "../api/validators";
 import { FilterSet } from "../api/composables/FilterSet";
 import { UserState } from "../store/types";
@@ -146,7 +164,13 @@ import {
 } from "../api/mappers";
 import { extractCorePlacenames } from "../api/helpers";
 import { bus } from "../main";
-import { PreferenceOption, Role, StringBool } from "../api/interfaces";
+import {
+  PreferenceOption,
+  Role,
+  SimpleLocation,
+  StringBool,
+} from "../api/interfaces";
+import { buildCustomLocOptions } from "@/api/mappings/custom-locations";
 
 @Component({
   components: {
@@ -188,7 +212,16 @@ export default class UsersListView extends Vue {
 
   evaluated = false;
 
+  selectedRowIndices = [];
+
+  customLocations: SimpleLocation[] = [];
+
   created() {
+    const { query } = this.$route;
+    const currPageint = query.page ? smartCastInt(query.page) : -1;
+    if (currPageint > 0) {
+      this.page = currPageint;
+    }
     this.loadData();
     bus.$on("escape", this.dismiss);
     bus.$on("update-user-list", (ok) => {
@@ -210,7 +243,7 @@ export default class UsersListView extends Vue {
           break;
       }
     }
-
+    this.fetchLocations();
     bus.$on("remove-media-item", ({ user, index, mediaRef }) => {
       const item = this.users.find((u) => u._id === user);
       if (item instanceof Object) {
@@ -413,6 +446,20 @@ export default class UsersListView extends Vue {
     });
   }
 
+  fetchLocations() {
+    fetchCustomLocations().then((locs: SimpleLocation[]) => {
+      this.customLocations = locs;
+    });
+  }
+
+  get customLocationOptions() {
+    return buildCustomLocOptions(this.customLocations);
+  }
+
+  get hasCustomLocations() {
+    return this.customLocations.length > 1;
+  }
+
   get wrapperClasses() {
     const cls = [];
     if (this.showForm) {
@@ -444,7 +491,11 @@ export default class UsersListView extends Vue {
   }
 
   assignRowClasses(index: number) {
-    return [["index", index].join("-"), ["user", index].join("-")];
+    const cls = [["index", index].join("-"), ["user", index].join("-")];
+    if (this.selectedRowIndices.includes(index)) {
+      cls.push("selected");
+    }
+    return cls;
   }
 
   searchUsers() {
@@ -508,6 +559,17 @@ export default class UsersListView extends Vue {
     });
   }
 
+  selectRow(index = -1) {
+    if (index >= 0) {
+      const selIndex = this.selectedRowIndices.indexOf(index);
+      if (selIndex < 0) {
+        this.selectedRowIndices.push(index);
+      } else {
+        this.selectedRowIndices.splice(selIndex, 1);
+      }
+    }
+  }
+
   @Watch("selectedUser")
   changeSelectedUser(newVal) {
     const { path } = this.$route;
@@ -542,6 +604,19 @@ export default class UsersListView extends Vue {
     if (newVal !== prevVal) {
       this.criteria.set("admin", newVal ? 1 : 0);
       this.loadData();
+    }
+  }
+
+  @Watch("page")
+  changePage(newVal) {
+    if (newVal) {
+      const { path, query } = this.$route;
+      const prevPageParam = query.page ? query.page : "-1";
+      const newPage = this.page.toString();
+      if (newPage !== prevPageParam) {
+        const params = { ...query, page: newPage };
+        this.$router.push({ path, query: params });
+      }
     }
   }
 }

@@ -280,10 +280,19 @@ form {
     }
   }
   table {
-    tr:hover {
-      td,
-      th {
-        background-color: rgba($bright-shade, 0.25);
+    tr {
+      &:hover {
+        td,
+        th {
+          background-color: rgba($bright-shade, 0.25);
+        }
+        &.selected td,
+        &.selected th {
+          background-color: rgba($bright-green, 0.6667);
+        }
+      }
+      &.selected td, &.selected th {
+        background-color: rgba($bright-green, 0.33333);
       }
     }
     td {
@@ -435,6 +444,15 @@ form {
       }
       .icon {
         cursor: pointer;
+      }
+    }
+  }
+
+  .users-list-table {
+    tr.selected {
+      .placenames {
+        font-style: italic;
+        color: $warning-color;
       }
     }
   }
@@ -2903,6 +2921,13 @@ body {
       color: $medium-grey;
       &:hover {
         color: $active-color;
+      }
+    }
+
+    .field {
+      > .label {
+        font-size: 0.8em;
+        font-weight: normal;
       }
     }
   }

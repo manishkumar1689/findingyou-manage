@@ -207,6 +207,7 @@ import { Component, Prop, Watch, Vue } from "vue-property-decorator";
 import { State } from "vuex-class";
 import {
   deleteFile,
+  fetchCustomLocations,
   fetchSetting,
   fetchUserChart,
   registerUser,
@@ -245,6 +246,7 @@ import defaultRoleKeys from "@/api/mappings/default-roles";
 import genderOptions from "@/api/mappings/gender-options";
 import { MediaItem } from "@/api/models/MediaItem";
 import { GeoLoc } from "@/api/models/GeoLoc";
+import { buildCustomLocOptions } from "@/api/mappings/custom-locations";
 
 const defaultRoleStates = Object.fromEntries(
   defaultRoleKeys.map((key) => [key, false])
@@ -371,42 +373,13 @@ export default class UserEdit extends Vue {
   }
 
   fetchLocations() {
-    const cKey = "default_custom_locations";
-    const locations = this.$ls.get(cKey);
-    const filterLocations = (item: any) =>
-      item instanceof Object &&
-      notEmptyString(item.name) &&
-      isNumeric(item.lat);
-    if (locations instanceof Array && locations.length > 0) {
-      this.customLocations = locations.filter(filterLocations);
-    } else {
-      fetchSetting(cKey).then((setting: any) => {
-        if (setting instanceof Object && setting.value instanceof Array) {
-          this.customLocations = setting.value.filter(filterLocations);
-          if (this.customLocations.length > 0) {
-            this.$ls.set(cKey, this.customLocations);
-          }
-        }
-      });
-    }
+    fetchCustomLocations().then((locs: SimpleLocation[]) => {
+      this.customLocations = locs;
+    });
   }
 
   get customLocationOptions() {
-    return [
-      {
-        lat: 0,
-        lng: 0,
-        name: "--",
-        itemKey: "custom-location-empty",
-        value: "--",
-      },
-      ...this.customLocations.map((item) => {
-        const { lat, lng, name } = item;
-        const itemKey = ["custom-location", lat, lng].join("-");
-        const value = JSON.stringify(item);
-        return { lat, lng, name, itemKey, value };
-      }),
-    ];
+    return buildCustomLocOptions(this.customLocations);
   }
 
   fetchChart() {

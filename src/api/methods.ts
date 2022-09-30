@@ -11,6 +11,7 @@ import {
   Snippet,
   DeviceVersion,
   IdBool,
+  SimpleLocation,
 } from "./interfaces";
 import { ChartInput, PairedInput } from "./models/ChartForm";
 import { buildOptions, extractUserId } from "./build-headers";
@@ -1567,6 +1568,28 @@ export const saveDeviceVersions = async (
 ) => {
   const uri = ["setting/device/save-versions", userId].join("/");
   return await putData(uri, versions);
+};
+
+export const fetchCustomLocations = async () => {
+  const cKey = "default_custom_locations";
+  const locations = Vue.ls.get(cKey);
+  let customLocations: SimpleLocation[] = [];
+  const filterLocations = (item: any) =>
+    item instanceof Object && notEmptyString(item.name) && isNumeric(item.lat);
+  if (locations instanceof Array && locations.length > 0) {
+    customLocations = locations.filter(filterLocations);
+  } else {
+    await fetchSetting(cKey).then((setting: any) => {
+      if (setting instanceof Object && setting.value instanceof Array) {
+        const customLocs = setting.value.filter(filterLocations);
+        if (customLocs instanceof Array && customLocs.length > 0) {
+          Vue.ls.set(cKey, customLocs);
+          customLocations = customLocs;
+        }
+      }
+    });
+  }
+  return customLocations;
 };
 
 export const fetchCacheKeys = async (pattern = "", userId = "") => {
