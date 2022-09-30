@@ -1287,6 +1287,34 @@ export const downloadResource = (
   return fetchContent(path);
 };
 
+export const profileUpload = async (
+  userId = "",
+  file = null,
+  mediaRef = "",
+  title = ""
+) => {
+  const mediaRefStr = notEmptyString(mediaRef, 3) ? mediaRef : "-";
+  const uri = [
+    "user",
+    "profile-upload",
+    userId,
+    "public",
+    mediaRefStr,
+    title,
+  ].join("/");
+  const formData = new FormData();
+  formData.set("file", file);
+  let result: any = { valid: false };
+  await postData(uri, formData).then((response) => {
+    const { data } = response;
+    if (data instanceof Object) {
+      result = data;
+      result.valid = true;
+    }
+  });
+  return result;
+};
+
 export const deleteSwissEpheFile = async (
   userId: string,
   fileName: string,

@@ -68,9 +68,12 @@
           field="placenames"
           label="Placenames"
         >
-          <span class="text-label" @click="selectRow(props.index)" title="Click to toggle selection">{{
-            renderPlacenames(props.row.placenames)
-          }}</span>
+          <span
+            class="text-label"
+            @click="selectRow(props.index)"
+            title="Click to toggle selection"
+            >{{ renderPlacenames(props.row.placenames) }}</span
+          >
         </b-table-column>
         <b-table-column class="roles" field="roles" label="Roles">
           {{ renderRoles(props.row.roles) }}
@@ -271,6 +274,14 @@ export default class UsersListView extends Vue {
             }
           }
         }
+      }
+    });
+    bus.$on("update-user-record", (id, edited) => {
+      const item = this.users.find((u) => u._id === id);
+      if (item instanceof Object && edited instanceof Object) {
+          Object.entries(edited).forEach(([k, v]) => {
+            item[k] = v;
+          });
       }
     });
   }

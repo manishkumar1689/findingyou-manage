@@ -1,4 +1,3 @@
-import { LngLat } from "../models/Chart";
 import { GeoLoc } from "../models/GeoLoc";
 
 export interface Geo {

@@ -67,6 +67,27 @@
             >{{ role.name }}</b-switch
           >
         </b-field>
+        <b-field label="Profile image" class="profile image column">
+          <b-upload name="file" v-model="file">
+            <a class="button is-primary">
+              <b-icon icon="upload"></b-icon>
+              <span>Choose file</span>
+            </a>
+          </b-upload>
+          <b-button
+            v-if="mayUpload"
+            size="is-medium"
+            left-icon="upload"
+            @click="upload"
+            >Upload</b-button
+          >
+          <em v-if="mayUpload" class="new-file">{{ file.name }}</em>
+          <img
+            v-if="hasProfileImage"
+            :src="profileImageThumb"
+            alt="Profile Image"
+          />
+        </b-field>
         <b-field label="Status" class="wrap">
           <b-switch size="is-small" v-model="active">Active</b-switch>
           <b-switch size="is-small" v-model="test">Test account</b-switch>
@@ -210,6 +231,7 @@ import {
   fetchCustomLocations,
   fetchSetting,
   fetchUserChart,
+  profileUpload,
   registerUser,
 } from "../api/methods";
 import {
@@ -285,6 +307,7 @@ export default class UserEdit extends Vue {
   errorMsgs: string[] = [];
   customLocation = "--";
   customLocations: SimpleLocation[] = [];
+  file = null;
 
   created() {
     if (this.current instanceof Object) {
@@ -418,6 +441,34 @@ export default class UserEdit extends Vue {
 
   get isNew() {
     return emptyString(this.current._id, 12);
+  }
+
+  get profileImage() {
+    const po = this.current.profiles;
+    if (po.length > 0) {
+      if (po[0].mediaItems.length > 0) {
+        if (po[0].mediaItems[0] instanceof Object) {
+          return new MediaItem(po[0].mediaItems[0]);
+        }
+      }
+    }
+    return new MediaItem();
+  }
+
+  get hasProfileImage() {
+    return notEmptyString(this.profileImage.filename, 7);
+  }
+
+  get profileImageThumb() {
+    return this.profileImage.filename.length > 5
+      ? this.profileImage.thumbnail
+      : "";
+  }
+
+  get profileImageFilename() {
+    return this.profileImage.filename.length > 5
+      ? this.profileImage.filename
+      : "";
   }
 
   get isSaved() {
@@ -766,6 +817,34 @@ export default class UserEdit extends Vue {
       this.setErrorMsgs(errorTypes);
     } else {
       this.errorMsgs = [];
+    }
+  }
+
+  get mayUpload() {
+    return this.file instanceof File && this.file.type.startsWith("image/");
+  }
+
+  upload() {
+    if (this.file instanceof File) {
+      profileUpload(
+        this.current._id,
+        this.file,
+        this.profileImageFilename,
+        this.current.nickName
+      ).then((result) => {
+        if (result instanceof Object && result.valid) {
+          console.log(Object.keys(result));
+          if (result.user instanceof Object) {
+            const { profiles } = result.user;
+            if (profiles instanceof Array) {
+              setTimeout(() => {
+                bus.$emit("update-user-record", this.current._id, { profiles });
+              }, 250);
+            }
+          }
+        }
+        this.file = null;
+      });
     }
   }
 
