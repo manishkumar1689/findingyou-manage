@@ -833,7 +833,6 @@ export default class UserEdit extends Vue {
         this.current.nickName
       ).then((result) => {
         if (result instanceof Object && result.valid) {
-          console.log(Object.keys(result));
           if (result.user instanceof Object) {
             const { profiles } = result.user;
             if (profiles instanceof Array) {
