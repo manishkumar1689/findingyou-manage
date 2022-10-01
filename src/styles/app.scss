@@ -580,8 +580,8 @@ form {
       }
       img {
         margin: 0 1em;
-        max-width: 320px;
-        max-height: 400px;
+        max-width: 240px;
+        max-height: 320px;
         width: auto;
         height: auto;
       }
@@ -639,6 +639,17 @@ dl.twin-column {
 
 .grid-4 {
   grid-template-columns: 1fr 1fr 1fr 1fr;
+ 
+  &.grid-responsive {
+    @media (min-width: $min-mlarge-width) {
+      grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
+    }
+  
+    @media (min-width: $min-large-width) {
+      grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr;
+    }
+  }
+
   @media (max-width: $max-tablet-width) {
     grid-template-columns: 1fr 1fr 1fr;
   }

@@ -13,6 +13,16 @@
         class="search-string"
         @keydown.native="manageKeydown"
       />
+      <b-select v-model="filterMode">
+        <option v-for="fm in filterModes" :key="fm.itemKey" :value="fm.key">
+          {{ fm.name }}
+        </option>
+      </b-select>
+      <b-select v-model="genderMode">
+        <option v-for="fm in genderModes" :key="fm.itemKey" :value="fm.key">
+          {{ fm.name }}
+        </option>
+      </b-select>
       <b-button icon-left="magnify" @click="searchUsers" />
       <b-field label="Type">
         <b-radio-button
@@ -174,6 +184,7 @@ import {
 import { extractCorePlacenames } from "../api/helpers";
 import { bus } from "../main";
 import {
+  KeyName,
   PreferenceOption,
   Role,
   SimpleLocation,
@@ -227,12 +238,21 @@ export default class UsersListView extends Vue {
 
   customLocation = "--";
 
+  filterMode = "usearch";
+
+  genderMode = "-";
+
   created() {
     const { query } = this.$route;
     const currPageint = query.page ? smartCastInt(query.page) : -1;
     if (currPageint > 0) {
       this.page = currPageint;
     }
+    Object.entries(query).forEach(([k,v]) => {
+      if (k !== 'page' && typeof v === 'string') {
+        this.criteria.set(k, v);
+      }
+    });
     this.loadData();
     bus.$on("escape", this.dismiss);
     bus.$on("update-user-list", (ok) => {
@@ -279,16 +299,20 @@ export default class UsersListView extends Vue {
     bus.$on("update-user-record", (id, edited) => {
       const item = this.users.find((u) => u._id === id);
       if (item instanceof Object && edited instanceof Object) {
-          Object.entries(edited).forEach(([k, v]) => {
-            item[k] = v;
-          });
+        Object.entries(edited).forEach(([k, v]) => {
+          item[k] = v;
+        });
       }
     });
   }
 
   async loadData() {
     this.criteria.set("totals", 1);
-
+    if (["m", "f"].includes(this.genderMode)) {
+      this.criteria.set("gender", this.genderMode);
+    } else {
+      this.criteria.delete("gender");
+    }
     const filter = Object.fromEntries(this.criteria);
     const hasUsearch = this.criteria.has("usearch")
       ? notEmptyString(filter.usearch)
@@ -371,6 +395,42 @@ export default class UsersListView extends Vue {
     return this.subtotal > 0 && this.subtotal !== this.total;
   }
 
+  get filterModes(): KeyName[] {
+    return [
+      {
+        key: "usearch",
+        name: "People",
+      },
+      {
+        key: "place",
+        name: "Places",
+      },
+    ].map((row, ri) => {
+      const itemKey = ["filter-mode", row.key, ri].join("-");
+      return { ...row, itemKey };
+    });
+  }
+
+  get genderModes() {
+    return [
+      {
+        key: "-",
+        name: "Any",
+      },
+      {
+        key: "f",
+        name: "females",
+      },
+      {
+        key: "m",
+        name: "males",
+      },
+    ].map((row, ri) => {
+      const itemKey = ["filter-mode", row.key, ri].join("-");
+      return { ...row, itemKey };
+    });
+  }
+
   edit(user: User) {
     this.selectedUser = user;
     this.showForm = true;
@@ -424,7 +484,8 @@ export default class UsersListView extends Vue {
     if (notEmptyString(this.searchString)) {
       this.searchUsers();
     } else {
-      this.criteria.set("usearch", "");
+      this.criteria.delete("usearch");
+      this.criteria.delete("place");
       this.loadData();
     }
   }
@@ -558,12 +619,19 @@ export default class UsersListView extends Vue {
   }
 
   searchUsers() {
+    this.page = 1;
     if (notEmptyString(this.searchString)) {
-      this.criteria.set("usearch", this.searchString);
+      const filterMode = this.filterMode === "place" ? "place" : "usearch";
+      const unsetFilterMode = filterMode === "place" ? "usearch" : "place";
+      this.criteria.set(filterMode, this.searchString);
+      this.criteria.delete(unsetFilterMode);
     } else {
       this.criteria.delete("usearch");
+      this.criteria.delete("place");
     }
     this.loadData();
+    const { path } = this.$route;
+    this.$router.push({ path, query: this.buildQueryObj() });
   }
 
   onPageChange(page = 0) {
@@ -619,6 +687,13 @@ export default class UsersListView extends Vue {
 
   selectNone() {
     return this.selectToggle(false);
+  }
+
+  buildQueryObj() {
+    const entries = [["page", this.page], ...this.criteria.entries()].filter(
+      (entry) => entry[1] !== "-" && entry[1] !== "" && entry[0] !== "totals"
+    );
+    return Object.fromEntries(entries);
   }
 
   toast(message = "") {
@@ -685,8 +760,7 @@ export default class UsersListView extends Vue {
       const prevPageParam = query.page ? query.page : "-1";
       const newPage = this.page.toString();
       if (newPage !== prevPageParam) {
-        const params = { ...query, page: newPage };
-        this.$router.push({ path, query: params });
+        this.$router.push({ path, query: this.buildQueryObj() });
       }
     }
   }

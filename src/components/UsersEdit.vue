@@ -204,7 +204,7 @@
           <article>
             {{ po.text }}
           </article>
-          <div class="media-items grid grid-4" v-if="po.hasMediaItems">
+          <div class="media-items grid grid-4 grid-responsive" v-if="po.hasMediaItems">
             <figure
               v-for="mi in po.mediaItems"
               :key="mi.itemKey"
