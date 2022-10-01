@@ -62,7 +62,7 @@
       backend-pagination
       :current-page="page"
       :per-page="perPage"
-      :total="total"
+      :total="subtotal"
       @page-change="onPageChange"
       class="listing-table users-list-table"
     >
@@ -248,9 +248,12 @@ export default class UsersListView extends Vue {
     if (currPageint > 0) {
       this.page = currPageint;
     }
-    Object.entries(query).forEach(([k,v]) => {
-      if (k !== 'page' && typeof v === 'string') {
+    Object.entries(query).forEach(([k, v]) => {
+      if (k !== "page" && typeof v === "string") {
         this.criteria.set(k, v);
+        if (k === "place" || k === "usearch") {
+          this.searchString = decodeURI(v);
+        }
       }
     });
     this.loadData();
@@ -630,8 +633,13 @@ export default class UsersListView extends Vue {
       this.criteria.delete("place");
     }
     this.loadData();
-    const { path } = this.$route;
-    this.$router.push({ path, query: this.buildQueryObj() });
+    const { path, query } = this.$route;
+    const currQstr = JSON.stringify(query);
+    const newQuery = this.buildQueryObj();
+    const newQueryStr = JSON.stringify(newQuery);
+    if (currQstr !== newQueryStr) {
+      this.$router.push({ path, query: newQuery });
+    }
   }
 
   onPageChange(page = 0) {
