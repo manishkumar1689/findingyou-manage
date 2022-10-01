@@ -251,8 +251,9 @@ export default class UsersListView extends Vue {
     Object.entries(query).forEach(([k, v]) => {
       if (k !== "page" && typeof v === "string") {
         this.criteria.set(k, v);
-        if (k === "place" || k === "usearch") {
+        if (["usearch", "place"].includes(k)) {
           this.searchString = decodeURI(v);
+          this.filterMode = k;
         }
       }
     });
