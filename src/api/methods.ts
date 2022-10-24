@@ -1383,6 +1383,65 @@ export const fetchUser = async (userId = "") => {
   return output;
 };
 
+/**
+ * Fetch users blocked affecting the referenced user.
+ */
+export const fetchUserBlocks = async (userId = "") => {
+  let output: any = { valid: false };
+  await fetchContent("user/blocks/" + userId).then((res: any) => {
+    const result = extractDataObj(res);
+    if (result instanceof Object) {
+      output = result;
+      output.valid = true;
+    }
+  });
+  return output;
+};
+
+/**
+ * Block user from interacting with another user only.
+ */
+export const blockSingleUserPair = async (
+  userId = "",
+  otherUserId = "",
+  direction = "-"
+) => {
+  let output: any = { valid: false };
+  const u1 = direction === "to" ? userId : otherUserId;
+  const u2 = direction === "to" ? otherUserId : userId;
+  const payload = { to: u1, from: u2 };
+  await postData("feedback/block", payload).then((res: any) => {
+    const result = extractDataObj(res);
+    if (result instanceof Object) {
+      output = result;
+      output.valid = true;
+    }
+  });
+  return output;
+};
+
+/**
+ * Fetch users blocked affecting the referenced user.
+ */
+export const unBlockUserPair = async (
+  userId = "",
+  otherUserId = "",
+  direction = "-"
+) => {
+  let output: any = { valid: false };
+  const u1 = direction === "to" ? userId : otherUserId;
+  const u2 = direction === "to" ? otherUserId : userId;
+  const uri = ["feedback/unblock", u1, u2].join("/");
+  await deleteData(uri).then((res: any) => {
+    const result = extractDataObj(res);
+    if (result instanceof Object) {
+      output = result;
+      output.valid = true;
+    }
+  });
+  return output;
+};
+
 export const listAdmins = async () => {
   return listUsers(0, 1000, { editor: 1, admin: 1 });
 };

@@ -725,6 +725,13 @@ export default class UsersListView extends Vue {
     }
   }
 
+  @Watch("$route.path")
+  changeRoutePath(newVal) {
+    if (notEmptyString(newVal, 16)) {
+      this.openUserForm();
+    }
+  }
+
   @Watch("selectedUser")
   changeSelectedUser(newVal) {
     const { path } = this.$route;

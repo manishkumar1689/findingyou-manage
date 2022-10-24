@@ -8,6 +8,8 @@ export class UserSchema {
   identifier = "";
   name = "";
   fullName = "";
+  gender = "-";
+  dob = new Date();
   roles: Array<string> = [];
   active = false;
   lastLogin = new Date();
@@ -23,6 +25,7 @@ export class UserSchema {
           case "lastLogin":
           case "createdAt":
           case "modifiedAt":
+          case "dob":
             if (typeof v === "string" && validDateString(v, true)) {
               this[k] = toDateTime(v);
             }
@@ -36,6 +39,12 @@ export class UserSchema {
             if (typeof v === "string") {
               this.name = v;
               this.fullName = v;
+            }
+            break;
+          case "gender":
+          case "nickName":
+            if (typeof v === "string") {
+              this[k] = v;
             }
             break;
           default:

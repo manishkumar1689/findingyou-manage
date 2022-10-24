@@ -198,6 +198,7 @@
     <div v-if="isSaved" class="status-log">
       <div v-for="status in statusLog" :key="status.key"></div>
     </div>
+    <user-block-list :current="current" />
     <div v-if="isSaved" class="profiles">
       <ul class="twin-column left-aligned long-title">
         <li v-for="(po, pIndex) in profiles" :key="po.itemKey">
@@ -229,7 +230,6 @@ import { State } from "vuex-class";
 import {
   deleteFile,
   fetchCustomLocations,
-  fetchSetting,
   fetchUserChart,
   profileUpload,
   registerUser,
@@ -269,12 +269,16 @@ import genderOptions from "@/api/mappings/gender-options";
 import { MediaItem } from "@/api/models/MediaItem";
 import { GeoLoc } from "@/api/models/GeoLoc";
 import { buildCustomLocOptions } from "@/api/mappings/custom-locations";
+import UserBlockList from "./tables/UserBlockList.vue";
 
 const defaultRoleStates = Object.fromEntries(
   defaultRoleKeys.map((key) => [key, false])
 );
 
 @Component({
+  components: {
+    UserBlockList,
+  },
   filters: FilterSet,
 })
 export default class UserEdit extends Vue {
