@@ -15,6 +15,7 @@ import {
   mediumDate,
   snakeToWords,
   capitalize,
+  mediumDateOnly,
 } from "../converters";
 import { toWords } from "../helpers";
 import { isNumeric, notEmptyString } from "../validators";
@@ -103,6 +104,9 @@ export const FilterSet = {
   },
   mediumDate(value: any) {
     return mediumDate(value);
+  },
+  mediumDateOnly(value: any) {
+    return mediumDateOnly(value);
   },
   toWords(value: any, cast = "lower") {
     let str = value;

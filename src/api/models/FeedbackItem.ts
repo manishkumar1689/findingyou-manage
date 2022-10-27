@@ -15,6 +15,8 @@ export class FeedbackItem {
   nickName = "";
   roles: string[] = [];
   mediaItems: MediaItem[] = [];
+  targetUser: { [key: string]: any } = { _id: "" };
+  hasTargetUser = false;
 
   constructor(inData: any = null) {
     if (inData instanceof Object) {
@@ -41,9 +43,14 @@ export class FeedbackItem {
           switch (key) {
             case "active":
             case "userActive":
+            case "hasTargetUser":
               this[key] = val;
               break;
           }
+        }
+
+        if (key === "targetUser" && val instanceof Object) {
+          this.targetUser = val;
         }
 
         if (val instanceof Array) {
@@ -76,5 +83,41 @@ export class FeedbackItem {
       : notEmptyString(this.nickName)
       ? this.nickName
       : this.email.split("@").shift();
+  }
+
+  hasTargetUserKey(key = "") {
+    return this.hasTargetUser
+      ? Object.keys(this.targetUser).includes(key)
+      : false;
+  }
+
+  get targetNickName() {
+    return this.hasTargetUser && this.hasTargetUserKey("nickName")
+      ? this.targetUser.nickName
+      : "";
+  }
+
+  get targetFullName() {
+    return this.hasTargetUser && this.hasTargetUserKey("fullName")
+      ? this.targetUser.fullName
+      : "";
+  }
+
+  get targetGender() {
+    return this.hasTargetUser && this.hasTargetUserKey("gender")
+      ? this.targetUser.gender
+      : "";
+  }
+
+  get targetEmail() {
+    return this.hasTargetUser && this.hasTargetUserKey("identifier")
+      ? this.targetUser.identifier
+      : "";
+  }
+
+  get targetInfo() {
+    return this.hasTargetUser
+      ? `${this.targetNickName} (${this.targetGender}): ${this.targetEmail}`
+      : "";
   }
 }

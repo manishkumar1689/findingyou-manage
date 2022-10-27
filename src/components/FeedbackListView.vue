@@ -51,22 +51,36 @@
         <b-table-column class="roles" field="roles" label="Roles">
           {{ renderRoles(props.row.roles) }}
         </b-table-column>
+
+        <b-table-column class="target" field="targetUser" label="Target user">
+          <router-link v-if="props.row.hasTargetUser" :to="targetLink(props.row.targetUser)">
+                <b-tooltip :label="props.row.targetInfo">{{props.row.fullName}}</b-tooltip>
+              </router-link>
+        </b-table-column>
         <b-table-column class="modified" field="modified" label="Edited">
           {{ props.row.modifiedAt | longDate }}
         </b-table-column>
       </template>
       <template #detail="props">
-        <article class="column vertical">
-          <p v-if="props.row.hasDeviceDetails" class="deviceDetails">
+        <article class="row horizontal details">
+          <div class="message column vertical">
+
+            <div class="body" v-html="props.row.text"></div>
+            <p v-if="props.row.hasDeviceDetails" class="deviceDetails">
             {{ props.row.deviceDetails }}
           </p>
-          <div class="body" v-html="props.row.text"></div>
-          <div v-if="props.row.hasMediaItems">
+          </div>
+          <div v-if="props.row.hasMediaItems" class="images column vertical">
             <figure v-for="item in props.row.mediaItems" :key="item._id">
               <template v-if="isImage(item)">
                 <img :src="fileLink(item)" :alt="item.title" />
               </template>
             </figure>
+          </div>
+          <div v-if="props.row.hasTargetUser" class="other-user column vertical">
+            <p><a :href="mailTo(props.row.targetEmail)">{{props.row.targetFullName}}</a></p>
+            <p><strong>Active</strong> <span>{{props.row.targetUser.active | yesNo}}</span></p>
+            <p><strong>Gender / DOB</strong> <span>{{props.row.targetGender}}</span> <span>{{props.row.targetUser.dob | mediumDateOnly }}</span></p>
           </div>
         </article>
       </template>
@@ -123,6 +137,7 @@ export default class FeedbackListView extends Vue {
 
   async loadData() {
     await getFeedback(this.page, this.filterKey).then((result: any) => {
+      console.log(result);
       if (result.valid) {
         this.items = result.items.map((item) => {
           return new FeedbackItem(item);
@@ -196,6 +211,15 @@ export default class FeedbackListView extends Vue {
       item.filename,
       this.user._id,
     ].join("/");
+  }
+
+  targetLink(user = null) {
+    const { path } = this.$route;
+    if (user instanceof Object) {
+      return ['/users', 'edit', user._id].join('/')
+    } else {
+      return path;
+    }
   }
 
   mailTo(email = "") {
