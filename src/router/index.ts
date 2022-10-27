@@ -29,7 +29,7 @@ const routes = [
     component: lazyLoad("Snippets"),
   },
   {
-    path: "/messages/:key?",
+    path: "/messages/:section?/:key?",
     name: "Messages",
     component: lazyLoad("Messages"),
   },

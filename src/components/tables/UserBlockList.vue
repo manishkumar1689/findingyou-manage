@@ -1,5 +1,5 @@
 <template>
-  <div v-if="hasItems" class="main-view" :class="wrapperClasses">
+  <div class="main-view" :class="wrapperClasses">
     <div class="blocked-by">
       <template v-if="hasToRows">
       <h3 class="sub-title">Has blocked: </h3>
@@ -52,6 +52,10 @@
         </b-table>
       </template>
     </div>
+    <div class="messages"><router-link :to="feedbackLink">
+      <b-icon icon="message-text-outline" />
+      <strong>{{this.numMessages}} freedback message(s)</strong>
+      </router-link></div>
   </div>
 </template>
 <script lang="ts">
@@ -59,7 +63,7 @@ import { Component, Vue, Prop, Watch } from "vue-property-decorator";
 import { State} from "vuex-class";
 import { UserState } from "../../store/types";
 import { fetchUserBlocks, unBlockUserPair } from "../../api/methods";
-import { bus } from "../../main";
+
 import { notEmptyString } from "@/api/validators";
 import { UserSchema } from "@/api/schemas";
 import { FilterSet } from "@/api/composables/FilterSet";
@@ -85,6 +89,8 @@ export default class UserBlockList extends Vue {
 
   items: UserBlockItem[] = [];
 
+  messages: any[] = [];
+
   created() {
     setTimeout(this.sync, 500);
   }
@@ -95,6 +101,10 @@ export default class UserBlockList extends Vue {
 
   get wrapperClasses() {
     return ["user-block-container", "grid", "grid-2"];
+  }
+
+  get feedbackLink() {
+    return ['/messages', 'list', ['user', this.current._id].join('-')].join('/');
   }
 
   get hasItems() {
@@ -116,6 +126,15 @@ export default class UserBlockList extends Vue {
   get isBlockedByUsers(): UserBlockItem[] {
     return this.hasItems ? this.items.filter(item => item.mode === 'from') : [];
   }
+
+  get numMessages(): number {
+    return this.messages.length;
+  }
+
+  get hasMessages(): boolean {
+    return this.numMessages > 0;
+  }
+
 
   buildInfo(other: UserBlockItem): string {
     const u = other.info;
@@ -167,12 +186,15 @@ export default class UserBlockList extends Vue {
 
   sync() {
     fetchUserBlocks(this.refUserId).then(data => {
-      const { items } = data;
+      const { items, messages } = data;
       if (items instanceof Array) {
         this.items = items.filter(item => item instanceof Object).map(item => {
           const info = new UserSchema(item.info);
           return { ...item, info }
         });
+      }
+      if (messages instanceof Array) {
+        this.messages = messages.filter(msg => msg instanceof Object);
       }
     });
   }

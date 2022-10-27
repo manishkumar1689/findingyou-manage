@@ -128,15 +128,18 @@ export default class FeedbackListView extends Vue {
 
   openId = "";
 
+  userId = "";
+
   typeOpts: KeyName[] = [];
 
   created() {
-    this.loadData();
+    this.initFromUrl();
+    setTimeout(this.loadData, 250);
     bus.$on("escape", this.dismiss);
   }
 
   async loadData() {
-    await getFeedback(this.page, this.filterKey).then((result: any) => {
+    await getFeedback(this.page, this.filterKey, this.userId).then((result: any) => {
       if (result.valid) {
         this.items = result.items.map((item) => {
           return new FeedbackItem(item);
@@ -155,6 +158,18 @@ export default class FeedbackListView extends Vue {
         this.total = result.total;
       }
     });
+  }
+
+  initFromUrl() {
+    const { path } = this.$route;
+    const parts = path.substring(1).split('/')
+    if (parts.length > 2 && notEmptyString(parts[2], 3)) {
+      if (/user-[a-f0-9]{12,30}/.test(parts[2])) {
+        this.userId = parts[2].split('-').pop();
+      } else {
+        this.filterKey = parts[2];
+      }
+    }
   }
 
   get hasTypeOptions() {
@@ -238,9 +253,32 @@ export default class FeedbackListView extends Vue {
     this.loadData();
   }
 
-  @Watch("filterKey")
-  changeFilterKey() {
+  @Watch("userId")
+  changeUserId(newVal) {
     this.loadData();
+    const parts = ['/messages', 'list'];
+    if (notEmptyString(newVal, 3)) {
+      parts.push(['user',newVal].join('-'));
+    }
+    const newPath = parts.join('/')
+    const { path } = this.$route;
+    if (path !== newPath) {
+      this.$router.push(newPath);
+    }
+  }
+
+  @Watch("filterKey")
+  changeFilterKey(newVal) {
+    this.loadData();
+    const parts = ['/messages', 'list'];
+    if (notEmptyString(newVal, 3)) {
+      parts.push(newVal);
+    }
+    const newPath = parts.join('/')
+    const { path } = this.$route;
+    if (path !== newPath) {
+      this.$router.push(newPath)
+    }
   }
 }
 </script>

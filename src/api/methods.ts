@@ -1388,7 +1388,8 @@ export const fetchUser = async (userId = "") => {
  */
 export const fetchUserBlocks = async (userId = "") => {
   let output: any = { valid: false };
-  await fetchContent("user/blocks/" + userId).then((res: any) => {
+  const uri = ["user", "blocks", userId, 1].join("/");
+  await fetchContent(uri).then((res: any) => {
     const result = extractDataObj(res);
     if (result instanceof Object) {
       output = result;
@@ -1599,7 +1600,7 @@ export const getFeedback = async (page = 1, keyRef = "all", userId = "") => {
   if (notEmptyString(key, 2) && key !== "all") {
     filter.set("key", key);
   }
-  if (notEmptyString(userId, 12)) {
+  if (notEmptyString(userId, 16)) {
     filter.set("user", userId);
   }
   const qStr =
