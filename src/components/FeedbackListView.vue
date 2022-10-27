@@ -137,7 +137,6 @@ export default class FeedbackListView extends Vue {
 
   async loadData() {
     await getFeedback(this.page, this.filterKey).then((result: any) => {
-      console.log(result);
       if (result.valid) {
         this.items = result.items.map((item) => {
           return new FeedbackItem(item);
