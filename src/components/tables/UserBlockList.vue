@@ -148,8 +148,9 @@ export default class UserBlockList extends Vue {
 
   handleUnBlock(row: UserBlockItem) {
     if (row instanceof Object) {
-    const uName = row.mode === 'to' ? this.current.fullName : row.info.fullName;
-    const otherUName = row.mode === 'from' ? this.current.fullName : row.info.fullName;
+    const matchName = (u: UserBlockItem) => notEmptyString(u.info.fullName) ? u.info.fullName : u.info.nickName;
+    const uName = row.mode === 'to' ? this.current.fullName : matchName(row);
+    const otherUName = row.mode === 'from' ? this.current.fullName : matchName(row);
     const genitive = /s$/i.test(uName)? "'" : "'s";
     this.$buefy.dialog.confirm({
       message: `Are you sure you wish to remove the ${uName}${genitive} block of ${otherUName}`,
