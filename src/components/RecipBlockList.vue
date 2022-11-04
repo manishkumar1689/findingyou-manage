@@ -202,7 +202,6 @@ export default class UserBlockList extends Vue {
   onPageChange(page = 0) {
     if (typeof page === 'number') {
       this.start = (page - 1) * this.perPage;
-    console.log(page, this.start)
       this.sync();
     }
   }
