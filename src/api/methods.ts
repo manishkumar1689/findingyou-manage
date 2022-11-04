@@ -1403,7 +1403,7 @@ export const fetchUserBlocks = async (userId = "") => {
  * Fetch users blocks in either direction
  */
 export const fetchBlockList = async (start = 0, search = "", perPage = 100) => {
-  const output = { items: [], valid: false };
+  const output = { items: [], valid: false, total: 0, grandTotal: 0, start: 0 };
   const qStr = notEmptyString(search) ? buildQueryString({ search }) : "";
   const uri = ["user", "block-list", start, perPage].join("/") + qStr;
 
@@ -1412,6 +1412,9 @@ export const fetchBlockList = async (start = 0, search = "", perPage = 100) => {
     if (result instanceof Object) {
       if (result.items instanceof Array) {
         output.items = result.items;
+        output.total = result.total;
+        output.grandTotal = result.grandTotal;
+        output.start = result.start;
         output.valid = true;
       }
     }

@@ -1,39 +1,54 @@
 <template>
   <div class="main-view" :class="wrapperClasses">
-      <h3 class="sub-title">Has blocked: </h3>
+      <h3 class="sub-title">Members blocked by other users</h3>
+      <b-field label="Search" class="horizontal row">
+        <b-input v-model="search" type="text" :has-counter="false" 
+        icon-right="magnify"
+        size="64"
+        class="search-string"
+        style="min-width: 24em; max-width: 80%"
+        @keydown.native="manageKeydown"/>
+      </b-field>
     <b-table
       :data="items"
+       :paginated="true"
+      backend-pagination
+      :current-page="page"
+      :per-page="perPage"
+      :total="subtotal"
+      @page-change="onPageChange"
     >
       <template slot-scope="props">
-        <b-table-column class="size" field="nickName" label="Nick Name">
-          <b-tooltip :label="buildInfo(props.row)" :multilined="true">{{props.row.info.fullName}}</b-tooltip>
+        <b-table-column class="size" field="to" label="Initiator">
+          <b-tooltip :label="props.row.fromEmail" :multilined="true">{{props.row.fromName}}</b-tooltip>
         </b-table-column>
-        <b-table-column class="created" field="mutual" label="Mutual">
-          <b-icon v-if="props.row.mutual" icon="arrow-left-right-bold-outline" />
+        <b-table-column class="edit" field="edit1" label="Edit">
+          <b-icon icon="pencil-outline" @click.native="editRelUser(props.row.user)" />
         </b-table-column>
-        <b-table-column class="created" field="createdAt" label="Date">{{
+        <b-table-column class="created" field="from" label="Target">
+          <b-tooltip :label="props.row.toEmail" :multilined="true">{{props.row.toName}}</b-tooltip>
+        </b-table-column>
+        <b-table-column class="edit" field="edit2" label="Edit 2">
+          <b-icon icon="pencil-outline" @click.native="editRelUser(props.row.targetUser)" />
+        </b-table-column>
+        <b-table-column class="created" field="createdAt" label="Date/time">{{
           props.row.createdAt | mediumDate
         }}</b-table-column>
-        <b-table-column class="edikt" field="unblock" label="Unblock">
+        <b-table-column class="edit" field="unblock" label="Unblock">
           <b-icon icon="lock-open-outline" @click.native="handleUnBlock(props.row)" />
-        </b-table-column>
-        <b-table-column class="edikt" field="edit" label="Edit">
-          <b-icon icon="pencil-outline" @click.native="editRelUser(props.row.user)" />
         </b-table-column>
       </template>
     </b-table>
+  </div>
 </template>
 <script lang="ts">
-import { Component, Vue, Prop, Watch } from "vue-property-decorator";
+import { Component, Vue, Watch } from "vue-property-decorator";
 import { State} from "vuex-class";
-import { UserState } from "../../store/types";
-import { fetchBlockList, unBlockUserPair } from "../../api/methods";
+import { UserState } from "../store/types";
+import { fetchBlockList, unBlockUserPair } from "../api/methods";
 
 import { notEmptyString } from "@/api/validators";
-import { UserSchema } from "@/api/schemas";
 import { FilterSet } from "@/api/composables/FilterSet";
-import { mediumDate } from "@/api/converters";
-import { defaultUser, User } from "@/api/interfaces/users";
 
 class BlockPair {
   user = "";
@@ -110,7 +125,6 @@ class BlockPair {
   filters: FilterSet,
 })
 export default class UserBlockList extends Vue {
-  @Prop({ default: () => defaultUser }) readonly current: User;
   @State("user") user: UserState;
 
   search = "";
@@ -121,13 +135,21 @@ export default class UserBlockList extends Vue {
 
   messages: any[] = [];
 
+  subtotal = 0;
+
+  total = 0;
+
+  perPage = 100;
+
   created() {
     setTimeout(this.sync, 500);
   }
 
-  get refUserId(): string {
-    return this.current._id;
+  mounted() {
+    setTimeout(this.sync, 200);
   }
+
+  syncing = false;
 
   get wrapperClasses() {
     return ["block-list"];
@@ -135,6 +157,10 @@ export default class UserBlockList extends Vue {
 
   get hasItems() {
     return this.items.length > 0;
+  }
+
+  get page() {
+    return Math.floor(this.start  / this.perPage) + 1;
   }
 
   handleUnBlock(row: BlockPair) {
@@ -164,15 +190,52 @@ export default class UserBlockList extends Vue {
     })
   }
 
-  sync() {
-    fetchBlockList(this.start, this.search).then(data => {
-      const { items } = data;
-      if (items instanceof Array) {
-        this.items = items.filter(item => item instanceof Object).map(item => {
-          return new BlockPair(item);
-        });
-      }
+  editRelUser(uid: string) {
+    const newPath = ['/users', 'edit', uid].join('/');
+    const { query } = this.$route;
+    this.$router.push({
+      path: newPath,
+      query 
     });
+  }
+
+  onPageChange(page = 0) {
+    if (typeof page === 'number') {
+      this.start = (page - 1) * this.perPage;
+    console.log(page, this.start)
+      this.sync();
+    }
+  }
+
+  manageKeydown(e: any = null) {
+    if (e instanceof Object && e.code) {
+      switch (e.code) {
+        case 'enter':
+        case 'Enter':
+          setTimeout(this.sync, 100);
+          break;
+      }
+    }
+  }
+
+  sync() {
+    if (!this.syncing) {
+      this.syncing = true;
+      fetchBlockList(this.start, this.search).then(data => {
+        const { items, start, total, grandTotal } = data;
+        if (items instanceof Array) {
+          this.items = items.filter(item => item instanceof Object).map(item => {
+            return new BlockPair(item);
+          });
+          this.subtotal = total;
+          this.total = grandTotal;
+          this.start = start;
+        }
+        setTimeout(() => {
+          this.syncing = false;
+        }, 250)
+      });
+    }
   }
 
 }

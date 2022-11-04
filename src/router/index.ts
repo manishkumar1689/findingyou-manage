@@ -44,9 +44,9 @@ const routes = [
     component: lazyLoad("Users"),
   },
   {
-    path: "/user-blocks?",
-    name: "User",
-    component: lazyLoad("RecipBlockList"),
+    path: "/user-blocks",
+    name: "UserBlocks",
+    component: lazyLoad("BlockListView"),
   },
   {
     path: "/charts/:filter?/:page?",

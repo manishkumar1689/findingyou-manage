@@ -95,6 +95,10 @@ export default class UserBlockList extends Vue {
     setTimeout(this.sync, 500);
   }
 
+  mounted() {
+    setTimeout(this.sync, 200);
+  }
+
   get refUserId(): string {
     return this.current._id;
   }
