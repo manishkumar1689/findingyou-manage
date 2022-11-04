@@ -1400,6 +1400,26 @@ export const fetchUserBlocks = async (userId = "") => {
 };
 
 /**
+ * Fetch users blocks in either direction
+ */
+export const fetchBlockList = async (start = 0, search = "", perPage = 100) => {
+  const output = { items: [], valid: false };
+  const qStr = notEmptyString(search) ? buildQueryString({ search }) : "";
+  const uri = ["user", "block-list", start, perPage].join("/") + qStr;
+
+  await fetchContent(uri).then((res: any) => {
+    const result = extractDataObj(res);
+    if (result instanceof Object) {
+      if (result.items instanceof Array) {
+        output.items = result.items;
+        output.valid = true;
+      }
+    }
+  });
+  return output;
+};
+
+/**
  * Block user from interacting with another user only.
  */
 export const blockSingleUserPair = async (
