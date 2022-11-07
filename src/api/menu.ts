@@ -8,7 +8,7 @@ export const mainMenuItems = [
   },
   { to: "/astro/pp-table", label: "5 Pakṣi Table", reload: true },
   { to: "/users", label: "Members and Admins" },
-  { to: "/user-blocks", label: "Blocked users" },
+  { to: "/user-blocks", label: "Blocked users", size: "small" },
   { to: "/dictionary", label: "Dictionary", icon: "book-alphabet" },
   { to: "/snippets", label: "Snippets" },
   { to: "/messages", label: "Messages" },

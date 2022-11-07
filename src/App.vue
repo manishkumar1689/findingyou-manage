@@ -264,8 +264,12 @@ export default class App extends Vue {
       const icon = keys.includes("icon") ? mi.icon : "";
       const hasIcon = icon.length > 1;
       const reload = keys.includes('reload') ? mi.reload : false;
+      const size = keys.includes('size') ? mi.size : "medium";
       if (section !== refName) {
         classNames.push(refName);
+      }
+      if (size !== 'medium' && size.length > 2) {
+        classNames.push(size);
       }
       if (active) {
         classNames.push("active");

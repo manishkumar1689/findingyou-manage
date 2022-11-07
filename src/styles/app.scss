@@ -2013,6 +2013,7 @@ table {
       li {
         padding: 0.5em;
         text-align: right;
+        line-height: 1.125;
         a {
           font-weight: bold;
           color: $link-color;
@@ -2046,6 +2047,9 @@ table {
         > li {
           font-size: 1.333333em;
         }
+      }
+      li.small a {
+        font-size: 0.8em;
       }
     }
   }

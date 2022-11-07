@@ -19,17 +19,17 @@
       @page-change="onPageChange"
     >
       <template slot-scope="props">
-        <b-table-column class="size" field="to" label="Initiator">
-          <b-tooltip :label="props.row.fromEmail" :multilined="true">{{props.row.fromName}}</b-tooltip>
+        <b-table-column class="size" field="from" label="Initiator">
+          <b-tooltip :label="props.row.fromEmail" :multilined="true">{{props.row.bestName('from')}} ({{props.row.fromInfo}})</b-tooltip>
         </b-table-column>
-        <b-table-column class="edit" field="edit1" label="Edit">
-          <b-icon icon="pencil-outline" @click.native="editRelUser(props.row.user)" />
+        <b-table-column class="edit" field="edit1" label="View / wdit">
+          <b-icon icon="eye-outline" @click.native="editRelUser(props.row.user)" />
         </b-table-column>
-        <b-table-column class="created" field="from" label="Target">
-          <b-tooltip :label="props.row.toEmail" :multilined="true">{{props.row.toName}}</b-tooltip>
+        <b-table-column class="created" field="to" label="Target">
+          <b-tooltip :label="props.row.toEmail" :multilined="true">{{props.row.bestName('to')}} ({{props.row.toInfo}})</b-tooltip>
         </b-table-column>
-        <b-table-column class="edit" field="edit2" label="Edit 2">
-          <b-icon icon="pencil-outline" @click.native="editRelUser(props.row.targetUser)" />
+        <b-table-column class="edit" field="edit2" label="Blocked by">
+          <b-button icon-left="pencil-outline" @click.native="editRelUser(props.row.targetUser)">{{props.row.targetTotal}}</b-button>
         </b-table-column>
         <b-table-column class="created" field="createdAt" label="Date/time">{{
           props.row.createdAt | mediumDate
@@ -68,6 +68,9 @@ class BlockPair {
   toEmail = "";
   toActive = false;
   toRoles: string[] = [];
+  targetTotal = 0;
+  toAge = -1;
+  fromAge = -1;
 
   constructor(inData: any = null) {
     if (inData instanceof Object) {
@@ -99,6 +102,14 @@ class BlockPair {
               this[key] = val;
               break;
           }
+        } else if (typeof val === "number") {
+          switch (key) {
+            case "targetTotal":
+            case "fromAge":
+            case "toAge":
+              this[key] = val;
+              break;
+          }
         } else if (val instanceof Array) {
           switch (key) {
             case "fromRoles":
@@ -115,6 +126,35 @@ class BlockPair {
     const fn = mode === 'to' ? this.fromName : this.toName;
     const nn = mode === 'to' ? this.fromNickName : this.toNickName;
     return notEmptyString(fn) ? fn : nn;
+  }
+
+  translateRoles(roles: string[], active: boolean) {
+    const words = active ? [] : ["blocked"];
+    const roleKeys = roles.map(key => {
+      switch (key) {
+        case 'active':
+          return 'member';
+        default:
+          return key;
+      }
+    }).filter(key => key !== 'blocked');
+    return [...words, ...roleKeys].join(', ');
+  }
+
+  getInfo(mode = 'to') {
+    const fields = mode === 'to' ? [this.toGender, this.toAge, this.translateRoles(this.toRoles, this.toActive)] : [this.fromGender, this.fromAge, this.translateRoles(this.fromRoles, this.fromActive)];
+    if (fields[1] < 0) {
+      fields.splice(1, 1);
+    }
+    return fields.join(' / ');
+  }
+
+  get fromInfo() {
+    return this.getInfo('from');
+  }
+
+  get toInfo() {
+    return this.getInfo('to');
   }
 
 }
