@@ -123,8 +123,8 @@ class BlockPair {
   }
 
   bestName(mode = 'from') {
-    const fn = mode === 'to' ? this.fromName : this.toName;
-    const nn = mode === 'to' ? this.fromNickName : this.toNickName;
+    const fn = mode === 'to' ? this.toName : this.fromName;
+    const nn = mode === 'to' ? this.toNickName: this.fromNickName;
     return notEmptyString(fn) ? fn : nn;
   }
 
