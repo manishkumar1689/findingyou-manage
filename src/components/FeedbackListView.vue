@@ -45,7 +45,7 @@
           <a :href="mailTo(props.row.email)">{{ props.row.email }}</a>
         </b-table-column>
         <b-table-column class="key" field="key" label="Subject">
-          <span class="text-label">{{ renderKey(props.row.key) }}</span>
+          <span class="text-label">{{ renderSubject(props.row) }}</span>
           <b-icon v-if="props.row.hasMediaItems" icon="image-outline"></b-icon>
         </b-table-column>
         <b-table-column class="roles" field="roles" label="Roles">
@@ -54,7 +54,7 @@
 
         <b-table-column class="target" field="targetUser" label="Target user">
           <router-link v-if="props.row.hasTargetUser" :to="targetLink(props.row.targetUser)">
-                <b-tooltip :label="props.row.targetInfo">{{props.row.fullName}}</b-tooltip>
+                <b-tooltip :label="props.row.targetInfo">{{props.row.targetFullName}}</b-tooltip>
               </router-link>
         </b-table-column>
         <b-table-column class="modified" field="modified" label="Edited">
@@ -64,7 +64,7 @@
       <template #detail="props">
         <article class="row horizontal details">
           <div class="message column vertical">
-
+            <p class="reason" v-if="hasReason" v-html="props.row.reason"></p>
             <div class="body" v-html="props.row.text"></div>
             <p v-if="props.row.hasDeviceDetails" class="deviceDetails">
             {{ props.row.deviceDetails }}
@@ -209,8 +209,12 @@ export default class FeedbackListView extends Vue {
     return renderRolesFromKeys(roles);
   }
 
-  renderKey(key = "") {
-    return snakeToWords(key);
+  renderSubject(item: FeedbackItem) {
+    const parts = [snakeToWords(item.key)];
+    if (notEmptyString(item.reason)) {
+      parts.push(item.reason);
+    }
+    return parts.join(": ");
   }
 
   isImage(item: MediaItem) {

@@ -13,6 +13,7 @@ export class FeedbackItem {
   email = "";
   fullName = "";
   nickName = "";
+  reason = "";
   roles: string[] = [];
   mediaItems: MediaItem[] = [];
   targetUser: { [key: string]: any } = { _id: "" };
@@ -31,6 +32,7 @@ export class FeedbackItem {
             case "nickName":
             case "userId":
             case "text":
+            case "reason":
               this[key] = val;
               break;
             case "modifiedAt":
@@ -89,6 +91,10 @@ export class FeedbackItem {
     return this.hasTargetUser
       ? Object.keys(this.targetUser).includes(key)
       : false;
+  }
+
+  get hasReason() {
+    return notEmptyString(this.reason, 1);
   }
 
   get targetNickName() {
