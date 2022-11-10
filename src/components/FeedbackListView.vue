@@ -64,7 +64,7 @@
       <template #detail="props">
         <article class="row horizontal details">
           <div class="message column vertical">
-            <p class="reason" v-if="hasReason" v-html="props.row.reason"></p>
+            <p class="reason" v-if="props.row.hasReason" v-html="props.row.reason"></p>
             <div class="body" v-html="props.row.text"></div>
             <p v-if="props.row.hasDeviceDetails" class="deviceDetails">
             {{ props.row.deviceDetails }}
