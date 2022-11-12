@@ -2074,8 +2074,13 @@ table {
           font-size: 1.333333em;
         }
       }
-      li.small a {
-        font-size: 0.8em;
+      li.small {
+        position: relative;
+        padding: 0.0625em 0.5em;
+        top: -0.375em;
+        a {
+          font-size: 0.8em;
+        }
       }
     }
   }
