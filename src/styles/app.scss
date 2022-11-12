@@ -1032,6 +1032,32 @@ main {
     pointer-events: none;
   }
 
+  .reports {
+    @media (min-width: 60em) {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      column-gap: 1em;
+    }
+    @media (min-width: 80em) {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+    }
+    li {
+      text-align: left;
+      margin-bottom: 0.25rem;
+      .twin-column {
+        max-width: 60em;
+        grid-template-columns: 4.5rem auto;
+        dt, dd {
+          line-height: 1.125rem;
+        }
+        dt {
+          font-size: 0.8em;
+        }
+      }
+    }
+  }
+
   .main-view .listing-table,
   .main-view.show-form > .edit-form {
     height: auto;
