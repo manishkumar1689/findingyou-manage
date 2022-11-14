@@ -12,6 +12,7 @@
         class="search-string"
         style="min-width: 24em; max-width: 80%"
         @keydown.native="manageKeydown"/>
+        <b-icon class="clear" icon="close-octagon-outline" @click.native="reset" />
       </b-field>
     </form>
     <b-table
@@ -138,11 +139,11 @@ export default class ReportedListView extends Vue {
   } */
 
   manageKeydown(e: any = null) {
-    e.preventDefault();
     if (e instanceof Object && e.code) {
       switch (e.code) {
         case 'enter':
         case 'Enter':
+          e.preventDefault();
           setTimeout(this.loadData, 100);
           break;
       }
@@ -217,18 +218,13 @@ export default class ReportedListView extends Vue {
     this.loadData();
   }
 
+  reset() {
+    this.search = '';
+    this.loadData();
+  }
 
   submit() {
     this.loadData();
-    /* const parts = ['/messages', 'list'];
-    if (notEmptyString(newVal, 3)) {
-      parts.push(newVal);
-    }
-    const newPath = parts.join('/')
-    const { path } = this.$route;
-    if (path !== newPath) {
-      this.$router.push(newPath)
-    } */
   }
 }
 </script>

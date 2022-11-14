@@ -1679,8 +1679,8 @@ export const getReportedUsers = async (page = 1, search = "") => {
   };
   await fetchContent(url + qStr).then((res: any) => {
     const data = extractDataObj(res);
-    if (data instanceof Object && data.valid) {
-      result.valid = data.valid;
+    if (data instanceof Object) {
+      result.valid = data.items instanceof Array;
       result.items = data.items;
       result.num = data.num;
       result.start = data.start;

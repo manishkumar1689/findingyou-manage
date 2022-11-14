@@ -120,6 +120,17 @@ html {
   }
 }
 
+form {
+  .clear {
+    margin-left: 0.5em;
+    color: $light-fg;
+    cursor: pointer;
+    :hover {
+      color: $light-blue;
+    }
+  }
+}
+
 .icon.edit,
 .icon.remove,
 .mdi-plus {
