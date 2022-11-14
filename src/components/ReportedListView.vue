@@ -49,25 +49,25 @@
         </b-table-column>
       </template>
       <template #detail="props">
-        <ol class="reports">
-          <li v-for="(report, ri) in props.row.reports" :key="['user-report', props.row.user, report.user, ri].join('-')">
-            <dl class="report twin-column">
-              <dt>Reporter</dt>
-              <dd>
-                <router-link :to="targetLink(report.user)" class="name info">{{report.shortInfo}}</router-link>
-                <a :href="mailTo(report.identifier)">{{ report.identifier }}</a>
-              </dd>
-              <dt>Reason</dt>
-              <dd>
-                <span class="subject">{{report.reason}}</span>
-                <time>{{report.modifiedAt | mediumDate}}</time>
-                <em v-if="report.hasContext">{{report.text}}</em>
-              </dd>
-              <dt v-if="report.hasText">Text</dt>
-              <dd v-if="report.hasText">{{report.text}}</dd>
-            </dl>
-          </li>
-        </ol>
+        <b-table :data="props.row.reports" class="sub-table">
+           <template slot-scope="subs">
+              <b-table-column class="info" field="info" label="Info">
+                  <router-link :to="targetLink(subs.row.user)" class="name info">{{subs.row.shortInfo}}</router-link>
+              </b-table-column>
+              <b-table-column class="email" field="identifier" label="Email">
+                  <a :href="mailTo(subs.row.identifier)" target="_blank">{{ subs.row.identifier }}</a>
+              </b-table-column>
+               <b-table-column class="reason" field="reason" label="Reason">
+                  {{ subs.row.reason }}
+              </b-table-column>
+              <b-table-column class="text" field="text" label="Message">
+                  {{ subs.row.text }}
+              </b-table-column>
+              <b-table-column class="time" field="time" label="Time">
+                  {{ subs.row.modifiedAt | mediumDate }}
+              </b-table-column>
+            </template>
+          </b-table>
       </template>
     </b-table>
   </div>
