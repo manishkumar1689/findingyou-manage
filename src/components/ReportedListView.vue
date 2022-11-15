@@ -220,6 +220,7 @@ export default class ReportedListView extends Vue {
 
   reset() {
     this.search = '';
+    this.page = 1;
     this.loadData();
   }
 
