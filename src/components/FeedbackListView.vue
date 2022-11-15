@@ -5,7 +5,16 @@
       <em v-if="showSubtotal" class="total rounded-box">{{ subtotal }}</em>
       <em class="total rounded-box">{{ total }}</em>
     </h1>
-    <form class="filter-form">
+    <form class="filter-form row horizontal">
+       <b-field label="Search by name" class="row">
+        <b-input v-model="search" type="text" :has-counter="false" 
+        icon-right="magnify"
+        size="64"
+        class="search-string"
+        style="min-width: 24em; max-width: 80%"
+        @keydown.native="manageKeydown"/>
+        <b-icon class="clear" icon="close-octagon-outline" @click.native="reset" />
+      </b-field>
       <b-field label="Subject type" class="row">
         <b-select v-model="filterKey">
           <template v-if="hasTypeOptions">
@@ -132,6 +141,8 @@ export default class FeedbackListView extends Vue {
 
   typeOpts: KeyName[] = [];
 
+  search = "";
+
   created() {
     this.initFromUrl();
     setTimeout(this.loadData, 250);
@@ -139,7 +150,7 @@ export default class FeedbackListView extends Vue {
   }
 
   async loadData() {
-    await getFeedback(this.page, this.filterKey, this.userId).then((result: any) => {
+    await getFeedback(this.page, this.filterKey, this.userId, this.search).then((result: any) => {
       if (result.valid) {
         this.items = result.items.map((item) => {
           return new FeedbackItem(item);
@@ -254,6 +265,24 @@ export default class FeedbackListView extends Vue {
 
   onPageChange(page = 0) {
     this.page = page;
+    this.loadData();
+  }
+
+  manageKeydown(e: any = null) {
+    if (e instanceof Object && e.code) {
+      switch (e.code) {
+        case 'enter':
+        case 'Enter':
+          e.preventDefault();
+          setTimeout(this.loadData, 100);
+          break;
+      }
+    }
+  }
+
+  reset() {
+    this.search = '';
+    this.page = 1;
     this.loadData();
   }
 

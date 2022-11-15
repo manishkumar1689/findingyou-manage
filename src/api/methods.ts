@@ -1614,7 +1614,12 @@ export const registerUser = async (params = null) => {
   return data;
 };
 
-export const getFeedback = async (page = 1, keyRef = "all", userId = "") => {
+export const getFeedback = async (
+  page = 1,
+  keyRef = "all",
+  userId = "",
+  search = ""
+) => {
   const perPage = 100;
   const start = page > 0 ? (page - 1) * perPage : 0;
   const url = ["feedback/list", start, perPage].join("/");
@@ -1625,6 +1630,9 @@ export const getFeedback = async (page = 1, keyRef = "all", userId = "") => {
   }
   if (notEmptyString(userId, 16)) {
     filter.set("user", userId);
+  }
+  if (notEmptyString(search)) {
+    filter.set("search", search);
   }
   const qStr =
     filter.size > 0
