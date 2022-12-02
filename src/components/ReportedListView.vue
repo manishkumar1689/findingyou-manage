@@ -4,15 +4,22 @@
       <span class="text-label">{{ title }}</span>
       <em class="total rounded-box">{{ total }}</em>
     </h1>
-    <form class="filter-form">
+    <form class="filter-form row">
       <b-field label="Search by name" class="row">
         <b-input v-model="search" type="text" :has-counter="false" 
         icon-right="magnify"
         size="64"
-        class="search-string"
-        style="min-width: 24em; max-width: 80%"
-        @keydown.native="manageKeydown"/>
+        class="search-string" style="min-width: 24em; max-width: 80%" @keydown.native="manageKeydown"/>
         <b-icon class="clear" icon="close-octagon-outline" @click.native="reset" />
+        <b-select v-model="reason">
+            <option v-for="(row, ri) in reasonOpts" :key="['reason-item', row.key, ri].join('-')" :value="row.key">{{row.name}}</option>
+          </b-select>
+        <b-button @click="loadData">Update</b-button>
+      </b-field>
+      <b-field label="Sort by" class="row horizontal">
+        <b-select v-model="sortKey">
+          <option v-for="(row, ri) in sortOpts" :key="['reason-item', row.key, ri].join('-')" :value="row.key">{{row.name}}</option>
+        </b-select>
       </b-field>
     </form>
     <b-table
@@ -45,8 +52,11 @@
         <b-table-column class="roles" field="roles" label="Roles">
           {{ renderRoles(props.row.roles) }}
         </b-table-column>
-        <b-table-column class="reports" field="reports" label="Reports">
-            <b-button @click="toggle(props.row)">{{props.row.numReports}}</b-button>
+        <b-table-column class="reports" field="reports" label="# Reports / Reporters">
+            <b-button @click="toggle(props.row)" :icon-right="expandIcon(props.row)">{{props.row.numSummary}}</b-button>
+        </b-table-column>
+        <b-table-column class="reasons" field="resons" label="# Reasons">
+            {{props.row.reasons}}
         </b-table-column>
       </template>
       <template #detail="props">
@@ -74,14 +84,15 @@
   </div>
 </template>
 <script lang="ts">
-import { Component, Vue } from "vue-property-decorator";
+import { Component, Vue, Watch } from "vue-property-decorator";
 import { State } from "vuex-class";
-import { getReportedUsers } from "../api/methods";
+import { fetchReportReasons, getReportedUsers } from "../api/methods";
 import { FilterSet } from "../api/composables/FilterSet";
 import { UserState } from "../store/types";
 import { ReportedUser } from "../api/models/ReportedUser";
 import { renderRolesFromKeys } from "@/api/converters";
 import { notEmptyString } from "@/api/validators";
+import { KeyName } from "@/api/interfaces";
 
 @Component({
   components: {},
@@ -110,13 +121,47 @@ export default class ReportedListView extends Vue {
 
   openIds = [];
 
+  reason = '-';
+
+  reasons: KeyName[] = [];
+
+  sortKey = 'modified';
+
+  sortOpts = [{
+    key: 'modified',
+    name: 'Latest'
+  }, {
+    key: 'num',
+    name: '# reports'
+  }, {
+    key: 'reporters',
+    name: '# reporters'
+  }];
+
   created() {
-    //this.initFromUrl();
+    this.loadOptions();
     setTimeout(this.loadData, 250);
   }
 
+  async loadOptions() {
+    await fetchReportReasons().then(rows => {
+      if (rows instanceof Array && rows.length > 0) {
+        this.reasons = rows.map(r => {
+          r.name = `${r.name} (${r.value})`;
+          return r;
+        });
+      }
+    })
+  }
+
+  get reasonOpts(): KeyName[] {
+    return [{ key: "-", name: `Any`, value: -1 }, ...this.reasons]
+  }
+
   async loadData() {
-    await getReportedUsers(this.page, this.search).then((result: any) => {
+    
+
+    await getReportedUsers(this.page, this.search, this.reason, this.sortKey).then((result: any) => {
       if (result.valid) {
         this.items = result.items.map((item) => {
           return new ReportedUser(item);
@@ -124,6 +169,10 @@ export default class ReportedListView extends Vue {
         this.total = result.total;
       }
     });
+  }
+
+  get filterByReason(): boolean {
+    return notEmptyString(this.reason, 3);
   }
 
 /*   initFromUrl() {
@@ -174,6 +223,11 @@ export default class ReportedListView extends Vue {
     } else {
       this.openIds.splice(openIndex, 1);
     }
+  }
+
+  expandIcon(row: ReportedUser): string {
+    const openIndex = this.openIds.indexOf(row.user);
+    return openIndex < 0 ? 'chevron-down' : 'chevron-up';
   }
 
   openDetailRow(row: ReportedUser) {
@@ -227,5 +281,22 @@ export default class ReportedListView extends Vue {
   submit() {
     this.loadData();
   }
+
+  @Watch('reason')
+  changeReason(newVal) {
+    this.page = 1;
+    if (newVal) {
+      this.loadData();
+    }
+  }
+
+  @Watch('sort')
+  changeSort(newVal) {
+    this.page = 1;
+    if (newVal) {
+      this.loadData();
+    }
+  }
+
 }
 </script>

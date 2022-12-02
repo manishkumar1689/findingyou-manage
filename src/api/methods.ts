@@ -12,6 +12,7 @@ import {
   DeviceVersion,
   IdBool,
   SimpleLocation,
+  KeyName,
 } from "./interfaces";
 import { ChartInput, PairedInput } from "./models/ChartForm";
 import { buildOptions, extractUserId } from "./build-headers";
@@ -1664,13 +1665,24 @@ export const getFeedback = async (
   return result;
 };
 
-export const getReportedUsers = async (page = 1, search = "") => {
+export const getReportedUsers = async (
+  page = 1,
+  search = "",
+  reason = "",
+  sort = ""
+) => {
   const perPage = 100;
   const start = page > 0 ? (page - 1) * perPage : 0;
   const url = ["feedback/reported", start, perPage].join("/");
   const filter: Map<string, string> = new Map();
   if (notEmptyString(search)) {
     filter.set("search", search.trim());
+  }
+  if (notEmptyString(reason, 3)) {
+    filter.set("reason", reason.trim());
+  }
+  if (notEmptyString(sort, 2)) {
+    filter.set("sort", sort.trim().toLowerCase());
   }
   const qStr =
     filter.size > 0
@@ -1779,6 +1791,28 @@ export const fetchCustomLocations = async () => {
     });
   }
   return customLocations;
+};
+
+export const fetchReportReasons = async (refresh = false) => {
+  let rows: KeyName[] = [];
+  const cKey = "report_reasons";
+  const storedData = refresh ? [] : Vue.ls.get(cKey);
+  if (storedData instanceof Array && storedData.length > 1) {
+    rows = storedData;
+  } else {
+    const url = "feedback/report-reasons";
+    const items = await fetchDataObject(url);
+    if (items.length > 0) {
+      rows = items
+        .filter((row) => row instanceof Object)
+        .map((row) => {
+          const { key, name, count } = row;
+          return { key, name, value: count };
+        });
+      Vue.ls.set(cKey, rows, 15 * 60 * 1000);
+    }
+  }
+  return rows;
 };
 
 export const fetchCacheKeys = async (pattern = "", userId = "") => {

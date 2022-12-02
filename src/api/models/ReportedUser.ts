@@ -109,23 +109,31 @@ export class UserReport extends BaseUser {
 export class ReportedUser extends BaseUser {
   targetUser = "";
   reports: UserReport[] = [];
+  numReporters = 0;
 
   constructor(inData: any = null) {
     super(inData);
     if (inData instanceof Object) {
-      const { reports, targetUser } = inData;
+      const { reports, targetUser, numReporters } = inData;
       if (notEmptyString(targetUser)) {
         this.targetUser = targetUser;
         this.user = targetUser;
       }
       if (reports instanceof Array) {
         this.reports = reports.map((item) => new UserReport(item));
+        if (typeof numReporters === "number") {
+          this.numReporters = numReporters;
+        }
       }
     }
   }
 
   get numReports() {
     return this.reports.length;
+  }
+
+  get numSummary(): string {
+    return `${this.numReports} - ${this.numReporters}`;
   }
 
   get latestReportDate() {
@@ -143,5 +151,11 @@ export class ReportedUser extends BaseUser {
     } else {
       return joinedDt;
     }
+  }
+
+  get reasons(): string {
+    const rs = this.reports.map((r) => r.reason).filter(notEmptyString);
+    const rsSet = new Set(rs);
+    return [...rsSet].join(", ");
   }
 }
