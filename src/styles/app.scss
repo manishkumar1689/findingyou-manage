@@ -129,6 +129,13 @@ form {
       color: $light-blue;
     }
   }
+  &.filter-form {
+    .field.horizontal {
+      > label {
+        margin-left: 1.5em;
+      }
+    }
+  }
 }
 
 .icon.edit,

@@ -290,8 +290,8 @@ export default class ReportedListView extends Vue {
     }
   }
 
-  @Watch('sort')
-  changeSort(newVal) {
+  @Watch('sortKey')
+  changeSortKey(newVal) {
     this.page = 1;
     if (newVal) {
       this.loadData();
