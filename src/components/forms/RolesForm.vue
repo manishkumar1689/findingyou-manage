@@ -327,26 +327,29 @@ export default class RolesForm extends Vue {
         message: `Saved ${numRoles} roles.`
       });
       if (this.limitValues.length > 0) {
-        const repeatIntervalKey = 'members__repeat_interval';
+        const extraKeys = ['members__repeat_interval', 'members__like_reset_hours'];
         setTimeout(() => {
           bus.$emit("save-setting", {
             key: "permission_limits",
             type: "lookup_set",
-            value: this.limitValues.filter(row => row.key !== repeatIntervalKey),
+            value: this.limitValues.filter(row => extraKeys.includes(row.key)),
           });
           this.$ls.set("permission-limits", this.limitValues);
-        }, 1000);
-        const repeatRow = this.limitValues.find(row => row.key === repeatIntervalKey);
-        if (repeatRow instanceof Object) {
-          setTimeout(() => {
-            bus.$emit("save-setting", {
-              key: repeatIntervalKey,
-              type: "integer",
-              value: repeatRow.value
-            });
-          }, 2000)
+        }, 875);
+        let msOffset = 1750;
+        for (const extraKey of extraKeys) {
+          const repeatRow = this.limitValues.find(row => row.key === extraKey);
+          if (repeatRow instanceof Object) {
+            setTimeout(() => {
+              bus.$emit("save-setting", {
+                key: extraKey,
+                type: "integer",
+                value: repeatRow.value
+              });
+            }, msOffset);
+            msOffset += 625;
+          }
         }
-        
       }
     }
   }
