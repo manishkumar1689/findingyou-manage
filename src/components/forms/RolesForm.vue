@@ -93,6 +93,7 @@
 
 <script lang="ts">
 //import { Action } from "vuex-class";
+import { smartCastFloat, smartCastInt } from "@/api/converters";
 import { toWords } from "@/api/helpers";
 import { notEmptyString } from "@/api/validators";
 import { Component, Prop, Vue } from "vue-property-decorator";
@@ -332,7 +333,10 @@ export default class RolesForm extends Vue {
           bus.$emit("save-setting", {
             key: "permission_limits",
             type: "lookup_set",
-            value: this.limitValues.filter(row => extraKeys.includes(row.key) === false),
+            value: this.limitValues.filter(row => extraKeys.includes(row.key) === false).map(row => {
+              const value = smartCastInt(row.value);
+              return { ...row, value }
+            }),
           });
           this.$ls.set("permission-limits", this.limitValues);
         }, 875);
@@ -344,7 +348,7 @@ export default class RolesForm extends Vue {
               bus.$emit("save-setting", {
                 key: extraKey,
                 type: "integer",
-                value: repeatRow.value
+                value: smartCastInt(repeatRow.value)
               });
             }, msOffset);
             msOffset += 625;
