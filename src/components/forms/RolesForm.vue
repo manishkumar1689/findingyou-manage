@@ -332,7 +332,7 @@ export default class RolesForm extends Vue {
           bus.$emit("save-setting", {
             key: "permission_limits",
             type: "lookup_set",
-            value: this.limitValues.filter(row => extraKeys.includes(row.key)),
+            value: this.limitValues.filter(row => extraKeys.includes(row.key) === false),
           });
           this.$ls.set("permission-limits", this.limitValues);
         }, 875);
