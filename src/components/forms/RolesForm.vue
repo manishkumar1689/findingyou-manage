@@ -340,7 +340,7 @@ export default class RolesForm extends Vue {
           });
           this.$ls.set("permission-limits", this.limitValues);
         }, 875);
-        let msOffset = 1750;
+        let msOffset = 200;
         for (const extraKey of extraKeys) {
           const repeatRow = this.limitValues.find(row => row.key === extraKey);
           if (repeatRow instanceof Object) {
@@ -351,7 +351,7 @@ export default class RolesForm extends Vue {
                 value: smartCastInt(repeatRow.value)
               });
             }, msOffset);
-            msOffset += 625;
+            msOffset += 1500;
           }
         }
       }

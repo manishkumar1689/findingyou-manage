@@ -371,7 +371,7 @@ export default class SettingsPanes extends Vue {
                 this._newSurveyKey = "";
               }
               this.saving = false;
-            }, 500);
+            }, 250);
             if (key.includes('enforce_paid')) {
               const message = value === true ? 'Paid membership logic enforced' : 'All members treated the same in the search';
               bus.$emit('toast', {
