@@ -588,6 +588,16 @@ form {
             height: 100%;
           }
         }
+        &.column {
+          position: relative;
+          padding-top: 1.5em;
+          padding-left: 0;
+          > label {
+            position: absolute;
+            top: 0;
+            left: 0.125em;
+          }
+        }
       }
     }
   }

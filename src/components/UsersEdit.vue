@@ -141,7 +141,7 @@
     </div>
     <div v-if="isSaved" class="info row horizontal twin">
       <dl class="twin-column bold-labels">
-        <dt>Location</dt>
+        <dt >Location</dt>
         <dd>
           <template v-if="hasLocation">
             <span class="lat">{{ geo.lat | toDMSLat }} </span>
@@ -161,21 +161,51 @@
             </option>
           </b-select>
         </dd>
-        <dt v-if="hasChart">Age / DOB</dt>
-        <dd v-if="hasChart">
-          <p class="age">
-            <span class="age item">
-              {{ age }}
-            </span>
-            <span class="dob item">
-              {{ dob }}
-            </span>
-          </p>
-          <p>
-            <span class="lat">{{ chart.geo.lat | toDMSLat }} </span>
-            <span class="lng">{{ chart.geo.lng | toDMSLng }} </span>
-          </p>
-          <p>{{ chart.corePlacenames }}</p>
+        <dt>Birth chart</dt>
+        <dd class="chart-input">
+            <div v-if="detailEditMode">
+              <b-field label="Date of birth (local time)" class="column vertical">
+                  <birth-date-picker
+                    v-model="dateVal"
+                    :maxYear="maxYear"
+                    :minYear="minYear"
+                    delimiter="/"
+                    :closeOnSet="false"
+                  />
+              </b-field>
+              <b-field label="Time of birth (local time)" class="column vertical">
+                  <b-input size="is-medium" v-model="timeVal" class="time" type="time" :step="1" 
+                    />
+                  <b-input size="is-medium" v-model="tzHrs" class="tz-offset" type="number" :step="0.25" title="decimal hours"
+                    />
+              </b-field>
+              
+              <b-field label="Location" class="column vertical">
+                <b-input v-model="birthGeo.lat" type="number" :step="0.001" class="coordinate" :min="-90" :max="90" />
+                <b-input v-model="birthGeo.lng" type="number" :step="0.001" class="coordinate" :min="-180" :max="180" />
+              </b-field>
+              <b-field label="Place of birth (custom locality)" class="column vertical">
+                <b-input v-model="pob" type="text" size="60" />
+              </b-field>
+            </div>
+            <div v-else>
+              <p class="age" v-if="hasChart">
+                <span class="age item">
+                  {{ age }}
+                </span>
+                <span class="dob item">
+                  {{ dob }}
+                </span>
+              </p>
+              <p v-if="hasChart">
+                <span class="lat">{{ chart.geo.lat | toDMSLat }} </span>
+                <span class="lng">{{ chart.geo.lng | toDMSLng }} </span>
+              </p>
+              <p v-if="hasChart">{{ chart.corePlacenames }}</p>
+            </div>
+            <div class="edit-actions">
+              <b-button @click="toggleEditMode">{{toggleEditLabel}}</b-button>
+            </div>
         </dd>
         <dt>Joined</dt>
         <dd>{{ current.createdAt | mediumDate }}</dd>
@@ -191,7 +221,43 @@
           <dt :key="po.itemKey">
             {{ po.prompt }}
           </dt>
-          <dd :key="[po.itemKey, 2].join('-')">{{ po.response }}</dd>
+          <dd :key="[po.itemKey, 2].join('-')">
+            <div v-if="!detailEditMode" class="value">{{ po.response }}</div>
+            <div v-if="detailEditMode" class="editable-value">
+              <template v-if="po.type == 'float'">
+                <b-input v-model="preferenceMap[po.key]" type="number" step="0.1" class="medium" />
+              </template>
+              <template v-if="po.type == 'range_number'">
+                <b-input v-model="preferenceMap[po.key][0]" type="number" :min="0" :max="150" size="4" :step="1" class="medium" />
+                <b-input v-model="preferenceMap[po.key][1]" type="number" :min="0" :max="150" size="4" :step="1" class="medium" />
+              </template>
+              <template v-if="po.type == 'scale'">
+                <b-input v-model="preferenceMap[po.key]" type="number" :min="-1" :max="2" size="2" :step="1" class="short" />
+              </template>
+              <template v-if="po.type == 'key_scale'">
+                <b-select v-model="preferenceMap[po.key]">
+                  <option v-for="(opt,oi) in po.options" :key="[opt.key,oi].join('-')" :value="opt.value">{{ opt.key }}</option>
+                </b-select>
+              </template>
+              <template v-if="po.type == 'text'">
+                <b-input v-model="preferenceMap[po.key]" type="text" size="64" class="medium" />
+              </template>
+              <template v-if="po.type == 'uri'">
+                <b-input v-model="preferenceMap[po.key]" type="url" size="64" class="long" />
+              </template>
+              <template v-if="po.type == 'string'">
+                <b-select v-model="preferenceMap[po.key]">
+                  <option v-for="(opt,oi) in po.options" :key="[opt.key,oi].join('-')" :value="opt.key">{{ opt.prompt }}</option>
+                </b-select>
+              </template>
+              <template v-if="po.type == 'array_string'">
+                  <b-checkbox-button v-for="(opt,oi) in po.options" v-model="preferenceMap[po.key]" :key="[po.key,opt,oi].join('-')" :native-value="opt">{{ opt | toWords }}</b-checkbox-button>
+              </template>
+              <template v-if="po.type == 'boolean'">
+                <b-switch v-model="preferenceMap[po.key]" />
+              </template>
+            </div>
+            </dd>
         </template>
       </dl>
     </div>
@@ -227,6 +293,7 @@
 <script lang="ts">
 import { Component, Prop, Watch, Vue } from "vue-property-decorator";
 import { State } from "vuex-class";
+import birthDatePicker from "vue-birth-datepicker";
 import {
   deleteFile,
   fetchCustomLocations,
@@ -250,13 +317,14 @@ import {
 } from "../api/validators";
 
 import { FilterSet } from "../api/composables/FilterSet";
-import { UserState } from "../store/types";
+import { SettingState, UserState } from "../store/types";
 import { User, defaultUser, Placename } from "../api/interfaces/users";
 import {
   hasPayments,
   matchLastPayment,
   matchLastPaymentDate,
   matchPreference,
+  toPreferenceDefault,
 } from "../api/mappers";
 import { extractCorePlacenames } from "../api/helpers";
 import { Chart } from "../api/models/Chart";
@@ -270,6 +338,7 @@ import { MediaItem } from "@/api/models/MediaItem";
 import { GeoLoc } from "@/api/models/GeoLoc";
 import { buildCustomLocOptions } from "@/api/mappings/custom-locations";
 import UserBlockList from "./tables/UserBlockList.vue";
+import { julToDateParts, julToUnixMillisecs } from "@/api/julian-date";
 
 const defaultRoleStates = Object.fromEntries(
   defaultRoleKeys.map((key) => [key, false])
@@ -278,6 +347,7 @@ const defaultRoleStates = Object.fromEntries(
 @Component({
   components: {
     UserBlockList,
+    birthDatePicker
   },
   filters: FilterSet,
 })
@@ -297,9 +367,11 @@ export default class UserEdit extends Vue {
   test = false;
   status = [];
   geo: Geo = { lat: 0, lng: 0, alt: 0 };
+  birthGeo: Geo = { lat: 0, lng: 0, alt: 0 };
   placenames = [];
   gender = "-";
-  preferences = [];
+  pob = "";
+  preferenceMap: any = {};
   profiles = [];
   preview = "";
   chart = null;
@@ -312,6 +384,19 @@ export default class UserEdit extends Vue {
   customLocation = "--";
   customLocations: SimpleLocation[] = [];
   file = null;
+
+
+  dateVal = 0;
+
+  timeVal = "12:00:00";
+
+  tzHrs = 0;
+
+  maxYear = 2030;
+
+  minYear = 1600;
+
+  detailEditMode = false;
 
   created() {
     if (this.current instanceof Object) {
@@ -388,7 +473,17 @@ export default class UserEdit extends Vue {
       });
     }
     if (this.current.preferences instanceof Array) {
-      this.preferences = this.current.preferences;
+      const pm: Map<string, any> = new Map();
+      this.current.preferences.forEach(pref => {
+        pm.set(pref.key, pref.value);
+      })
+      this.preferenceOptions.forEach(pref => {
+        if (pm.has(pref.key) === false) {
+          
+          pm.set(pref.key, toPreferenceDefault(pref));
+        }
+      })
+      this.preferenceMap = Object.fromEntries(pm);
     }
     if (this.current.geo instanceof Object) {
       this.geo = this.current.geo;
@@ -397,6 +492,9 @@ export default class UserEdit extends Vue {
       this.fetchChart();
     }
     this.fetchLocations();
+    setTimeout(() => {
+      console.log(this.preferenceMap, this.preferenceOptions)
+    }, 1000)
   }
 
   fetchLocations() {
@@ -409,11 +507,21 @@ export default class UserEdit extends Vue {
     return buildCustomLocOptions(this.customLocations);
   }
 
+  get toggleEditLabel() {
+    return this.detailEditMode ? 'Dismiss' : 'Edit details';
+  }
+
   fetchChart() {
     if (this.isSaved) {
       fetchUserChart(this.current._id).then((result) => {
         if (result.valid) {
           this.chart = new Chart(result.chart);
+          this.birthGeo = { ... this.chart.geo };
+          const jDate = julToDateParts(this.chart.jd, this.chart.tzOffset);
+          const jDateStr = jDate.timeString();
+          this.timeVal = jDateStr;
+          this.dateVal = julToUnixMillisecs(this.chart.jd, this.chart.tzOffset);
+          this.tzHrs = this.chart.tzOffset / 3600;
         }
       });
     }
@@ -826,6 +934,24 @@ export default class UserEdit extends Vue {
 
   get mayUpload() {
     return this.file instanceof File && this.file.type.startsWith("image/");
+  }
+
+  toggleEditMode() {
+    if (this.detailEditMode) {
+      this.detailEditMode = false;
+    } else {
+      if (!this.hasChart) {
+        this.setToCurrLocation();
+      }
+      this.detailEditMode = true;
+    }
+  }
+
+  setToCurrLocation() {
+    this.birthGeo = this.geo;
+    if (this.placenames.length > 0) {
+      this.pob = this.placenames[this.placenames.length - 1];
+    }
   }
 
   upload() {

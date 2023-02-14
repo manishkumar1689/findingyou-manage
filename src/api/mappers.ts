@@ -119,6 +119,33 @@ export const matchPreference = (
   return { ...source, ...preference, display };
 };
 
+export const toPreferenceDefault = (pref: PreferenceOption) => {
+  switch (pref.type) {
+    case "float":
+    case "scale":
+    case "integer":
+      return 0;
+    case "boolean":
+      return false;
+    case "text":
+    case "string":
+      return "";
+    case "array_key_scale":
+    case "array_string":
+    case "key_scale":
+      return [];
+    case "range_number":
+      switch (pref.key) {
+        case "age_range":
+          return [18, 40];
+        default:
+          return [0, 100];
+      }
+    default:
+      return null;
+  }
+};
+
 export const transformKeyNameOptions = (
   options: Array<KeyName>,
   firstLabel = "",
