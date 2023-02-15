@@ -79,6 +79,7 @@ export interface User {
   preferences?: Preference[];
   profiles: Profile[];
   preview?: string;
+  pob: string;
   token?: string;
   login?: Date;
   createdAt?: Date;
@@ -97,6 +98,7 @@ export const defaultUser: User = {
   status: [],
   geo: { lat: 0, lng: 0, alt: 0 },
   placenames: [],
+  pob: "",
   gender: "-",
   preferences: [],
   profiles: [],

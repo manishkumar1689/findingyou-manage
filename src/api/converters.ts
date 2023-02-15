@@ -1161,3 +1161,13 @@ export const renderRolesFromKeys = (roles = []) => {
     })
     .join(", ");
 };
+
+export const msToDatePart = (msVal = 0, hrsOffset = 0) => {
+  const dt = new Date(msVal);
+  const hours = Math.floor(hrsOffset);
+  const mins = (hrsOffset - hours) * 60;
+  dt.setHours(hours);
+  dt.setMinutes(mins);
+  dt.setSeconds(0);
+  return dt.toISOString().split("T").shift();
+};

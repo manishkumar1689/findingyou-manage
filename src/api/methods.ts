@@ -362,9 +362,15 @@ export const fetchCurrentByGeoDatetime = async (
   return await fetchDataSet("astrologic/current-chart", geo, datetime, "all");
 };
 
-export const saveUserChart = async (inputData: ChartInput) => {
+export const saveUserChart = async (
+  inputData: ChartInput,
+  memberMode = false
+) => {
   let result = { valid: false, message: "", chart: null };
-  await postData("astrologic/save-user-chart", inputData).then((response) => {
+  const chartMode = memberMode ? "member" : "user";
+  const method = ["save", chartMode, "chart"].join("-");
+  const uri = ["astrologic", method].join("/");
+  await postData(uri, inputData).then((response) => {
     if (response instanceof Object) {
       const { data } = response;
       if (data instanceof Object) {
@@ -378,6 +384,9 @@ export const saveUserChart = async (inputData: ChartInput) => {
   });
   return result;
 };
+
+export const saveMemberChart = (inputData: ChartInput) =>
+  saveUserChart(inputData, true);
 
 export const saveChartsBulk = async (items: ChartInput[]) => {
   let result = { valid: false, message: "", chart: null };

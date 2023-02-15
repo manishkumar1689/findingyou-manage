@@ -48,7 +48,7 @@
           </b-select>
         </b-field>
         <b-field label="Gender">
-          <b-select placeholder="Gener" v-model="gender">
+          <b-select placeholder="Gender" v-model="gender">
             <option
               v-for="opt in genderOpts"
               :value="opt.key"
@@ -221,7 +221,7 @@
           <dt :key="po.itemKey">
             {{ po.prompt }}
           </dt>
-          <dd :key="[po.itemKey, 2].join('-')">
+          <dd :key="[po.itemKey, 2].join('-')" :data-key="po.key" :data-value="preferenceMap[po.key]">
             <div v-if="!detailEditMode" class="value">{{ po.response }}</div>
             <div v-if="detailEditMode" class="editable-value">
               <template v-if="po.type == 'float'">
@@ -239,7 +239,7 @@
                   <option v-for="(opt,oi) in po.options" :key="[opt.key,oi].join('-')" :value="opt.value">{{ opt.key }}</option>
                 </b-select>
               </template>
-              <template v-if="po.type == 'text'">
+              <template v-if="useTextField(po.type)">
                 <b-input v-model="preferenceMap[po.key]" type="text" size="64" class="medium" />
               </template>
               <template v-if="po.type == 'uri'">
@@ -251,7 +251,7 @@
                 </b-select>
               </template>
               <template v-if="po.type == 'array_string'">
-                  <b-checkbox-button v-for="(opt,oi) in po.options" v-model="preferenceMap[po.key]" :key="[po.key,opt,oi].join('-')" :native-value="opt">{{ opt | toWords }}</b-checkbox-button>
+                  <b-checkbox-button v-for="(opt,oi) in po.options" v-model="preferenceMap[po.key]" :key="[po.key,opt,oi].join('-')" :native-value="opt.key">{{ opt.prompt }}</b-checkbox-button>
               </template>
               <template v-if="po.type == 'boolean'">
                 <b-switch v-model="preferenceMap[po.key]" />
@@ -300,6 +300,8 @@ import {
   fetchUserChart,
   profileUpload,
   registerUser,
+  saveMemberChart,
+  saveUserChart,
 } from "../api/methods";
 import {
   getAge,
@@ -308,6 +310,7 @@ import {
   snakeToWords,
   zeroPad,
   mediumDate,
+  msToDatePart,
 } from "../api/converters";
 import {
   emptyString,
@@ -317,9 +320,10 @@ import {
 } from "../api/validators";
 
 import { FilterSet } from "../api/composables/FilterSet";
-import { SettingState, UserState } from "../store/types";
+import { UserState } from "../store/types";
 import { User, defaultUser, Placename } from "../api/interfaces/users";
 import {
+  expandPrefOption,
   hasPayments,
   matchLastPayment,
   matchLastPaymentDate,
@@ -339,6 +343,7 @@ import { GeoLoc } from "@/api/models/GeoLoc";
 import { buildCustomLocOptions } from "@/api/mappings/custom-locations";
 import UserBlockList from "./tables/UserBlockList.vue";
 import { julToDateParts, julToUnixMillisecs } from "@/api/julian-date";
+import { ChartInput } from "@/api/models/ChartForm";
 
 const defaultRoleStates = Object.fromEntries(
   defaultRoleKeys.map((key) => [key, false])
@@ -426,6 +431,9 @@ export default class UserEdit extends Vue {
     if (notEmptyString(this.current.preview)) {
       this.preview = this.current.preview;
     }
+    if (notEmptyString(this.current.pob)) {
+      this.pob = this.current.pob;
+    }
     if (this.current.roles instanceof Array) {
       this.current.roles.forEach((rk) => {
         this.roleState[rk] = true;
@@ -474,12 +482,14 @@ export default class UserEdit extends Vue {
     }
     if (this.current.preferences instanceof Array) {
       const pm: Map<string, any> = new Map();
+      const optKeys = this.preferenceOptions.map(po => po.key);
       this.current.preferences.forEach(pref => {
-        pm.set(pref.key, pref.value);
+        if (optKeys.includes(pref.key)) {
+          pm.set(pref.key, pref.value);
+        }
       })
       this.preferenceOptions.forEach(pref => {
         if (pm.has(pref.key) === false) {
-          
           pm.set(pref.key, toPreferenceDefault(pref));
         }
       })
@@ -492,9 +502,6 @@ export default class UserEdit extends Vue {
       this.fetchChart();
     }
     this.fetchLocations();
-    setTimeout(() => {
-      console.log(this.preferenceMap, this.preferenceOptions)
-    }, 1000)
   }
 
   fetchLocations() {
@@ -516,7 +523,11 @@ export default class UserEdit extends Vue {
       fetchUserChart(this.current._id).then((result) => {
         if (result.valid) {
           this.chart = new Chart(result.chart);
-          this.birthGeo = { ... this.chart.geo };
+          this.birthGeo = { 
+            lat: Math.round(this.chart.geo.lat * 1000) / 1000,
+            lng: Math.round(this.chart.geo.lng * 1000) / 1000,
+            alt: this.chart.geo.alt
+           };
           const jDate = julToDateParts(this.chart.jd, this.chart.tzOffset);
           const jDateStr = jDate.timeString();
           this.timeVal = jDateStr;
@@ -696,9 +707,25 @@ export default class UserEdit extends Vue {
         const itemKey = [opt.key, index].join("-");
         const response = this.matchPreferenceDisplay(opt.key);
         const hasResponse = response !== null;
-        return { ...opt, itemKey, response, hasResponse };
+        const options = opt.options instanceof Array && opt.options.length > 0 ? opt.options.map(opKey => {
+          return {
+            key: opKey,
+            prompt: expandPrefOption(opt.key, opKey)
+          }
+        }) : [];
+        return { ...opt, options, itemKey, response, hasResponse };
       })
       .filter((item) => item.hasResponse);
+  }
+
+  useTextField(prefType = ''): boolean {
+    switch (prefType) {
+      case "text":
+      case "code":
+        return true;
+      default:
+        return false;
+    }
   }
 
   get hasLoggedIn() {
@@ -781,6 +808,49 @@ export default class UserEdit extends Vue {
       test: this.test,
       admin: this.user._id,
     };
+
+    if (this.detailEditMode) {
+      edited.preferences = [];
+      Object.entries(this.preferenceMap).forEach(([key, val]) => {
+        const item = this.preferenceOptions.find(po => po.key === key);
+        if (item instanceof Object) {
+          const { type } = item;
+          edited.preferences.push({
+            key,
+            type,
+            value: val
+          })
+        }
+      })
+      if (this.birthGeo) {
+        const datetime = msToDatePart(this.dateVal, this.tzHrs) + 'T' + this.timeVal;
+        const tzOffset = this.tzHrs * 3600;
+        const inData = {
+          name: this.current.nickName,
+          gender: this.current.gender,
+          user: this.current._id,
+          lat: this.birthGeo.lat,
+          lng: this.birthGeo.lng,
+          alt: this.birthGeo.alt,
+          isDefaultBirthChart: true,
+          datetime, 
+          tzOffset,
+          roddenValue: 1000,
+          type: "person",
+          eventType: "birth",
+          _id: this.hasChart ? this.chart._id : '',
+          pob: this.pob
+        } as ChartInput;
+        edited.pob = this.pob;
+        edited.dob = datetime;
+        saveUserChart(inData).then(response => {
+          const { chart } = response;
+          if (chart instanceof Object) {
+            this.chart = chart;
+          }
+        });
+      }
+    }
     if (this.hasGeo) {
       const customLoc = JSON.parse(this.customLocation);
       const km10 = 360 / 4000;

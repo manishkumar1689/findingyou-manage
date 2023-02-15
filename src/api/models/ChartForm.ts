@@ -22,6 +22,7 @@ export interface ChartInput {
   parent?: string;
   dateDisplay?: string;
   label?: string;
+  pob?: string;
   jd?: number;
   _id?: string;
 }

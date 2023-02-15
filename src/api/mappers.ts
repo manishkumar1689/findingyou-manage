@@ -6,6 +6,7 @@ import { User, Preference } from "./interfaces/users";
 import { capitalize, snakeToWords, truncate } from "./converters";
 import { DictionaryState } from "@/store/types";
 import { notEmptyString } from "./validators";
+import { toWords } from "./helpers";
 
 export const mapGraha = (row: any) => new Graha(row);
 
@@ -74,10 +75,56 @@ export const extractKeyValueList = (preference: Preference) => {
   return snakeToWords(str);
 };
 
+export const expandOrientationKey = (key = "") => {
+  const firstLetter = notEmptyString(key)
+    ? key.substring(0, 1).toLowerCase()
+    : "-";
+  switch (firstLetter) {
+    case "s":
+      return "Straight";
+    case "g":
+      return "Gay";
+    case "b":
+      return "Bisexual";
+    case "o":
+      return "Other";
+    default:
+      return "unknown";
+  }
+};
+
+export const expandGenderKey = (key = "") => {
+  const firstLetter = notEmptyString(key)
+    ? key.substring(0, 1).toLowerCase()
+    : "-";
+  switch (firstLetter) {
+    case "m":
+      return "Male";
+    case "f":
+      return "Female";
+    default:
+      return "N/A";
+  }
+};
+
+export const expandPrefOption = (prefKey = "", optKey = "") => {
+  switch (prefKey) {
+    case "orientation":
+      return expandOrientationKey(optKey);
+    case "genders":
+    case "gender":
+      return expandGenderKey(optKey);
+    default:
+      return toWords(optKey);
+  }
+};
+
 export const extractStringList = (preference: Preference, separator = ", ") => {
   let str = "";
   if (preference.value instanceof Array) {
-    str = preference.value.join(separator);
+    str = preference.value
+      .map((val) => expandPrefOption(preference.key, val))
+      .join(separator);
   }
   return snakeToWords(str);
 };
@@ -106,6 +153,9 @@ export const matchPreference = (
       case "key_scale":
         display = extractOptionKey(option, preference);
         break;
+      case "string":
+        display = expandPrefOption(preference.key, preference.value);
+        break;
       default:
         display =
           display instanceof Array
@@ -129,6 +179,7 @@ export const toPreferenceDefault = (pref: PreferenceOption) => {
       return false;
     case "text":
     case "string":
+    case "code":
       return "";
     case "array_key_scale":
     case "array_string":
