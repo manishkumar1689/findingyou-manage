@@ -704,7 +704,6 @@ export default class UserEdit extends Vue {
   }
 
   get submittedPreferenceOptions() {
-    console.log(this.preferenceOptions)
     return this.preferenceOptions
       .map((opt, index) => {
         const itemKey = [opt.key, index].join("-");
