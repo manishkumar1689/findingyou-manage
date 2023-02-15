@@ -659,6 +659,17 @@ dl.twin-column {
       font-style: italic;
     }
   }
+
+  dd {
+    .medium {
+      max-width: 6em;
+    }
+    .control {
+      .checkbox {
+        max-width: 10em;
+      }
+    }
+  }
 }
 
 .grid {

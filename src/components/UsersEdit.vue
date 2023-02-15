@@ -223,9 +223,12 @@
           </dt>
           <dd :key="[po.itemKey, 2].join('-')" :data-key="po.key" :data-value="preferenceMap[po.key]">
             <div v-if="!detailEditMode" class="value">{{ po.response }}</div>
-            <div v-if="detailEditMode" class="editable-value">
+            <div v-if="detailEditMode" class="editable-value" :class="po.rowClasses">
               <template v-if="po.type == 'float'">
                 <b-input v-model="preferenceMap[po.key]" type="number" step="0.1" class="medium" />
+              </template>
+              <template v-if="po.type == 'integer'">
+                <b-input v-model="preferenceMap[po.key]" type="number" step="1" class="medium" />
               </template>
               <template v-if="po.type == 'range_number'">
                 <b-input v-model="preferenceMap[po.key][0]" type="number" :min="0" :max="150" size="4" :step="1" class="medium" />
@@ -300,7 +303,6 @@ import {
   fetchUserChart,
   profileUpload,
   registerUser,
-  saveMemberChart,
   saveUserChart,
 } from "../api/methods";
 import {
@@ -702,6 +704,7 @@ export default class UserEdit extends Vue {
   }
 
   get submittedPreferenceOptions() {
+    console.log(this.preferenceOptions)
     return this.preferenceOptions
       .map((opt, index) => {
         const itemKey = [opt.key, index].join("-");
@@ -713,7 +716,16 @@ export default class UserEdit extends Vue {
             prompt: expandPrefOption(opt.key, opKey)
           }
         }) : [];
-        return { ...opt, options, itemKey, response, hasResponse };
+        const rowClasses = [];
+        switch (opt.type) {
+          case 'array_string':
+            rowClasses.push('column');
+            break;
+          default:
+            rowClasses.push('row');
+            break;
+        }
+        return { ...opt, options, itemKey, response, hasResponse, rowClasses };
       })
       .filter((item) => item.hasResponse);
   }
