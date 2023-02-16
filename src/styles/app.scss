@@ -44,6 +44,10 @@ html {
     }
   }
 
+  .icon .mdi-map {
+    cursor: pointer;
+  }
+
   .sidebar .event-type {
     select {
       border-color: #dbdbdb;

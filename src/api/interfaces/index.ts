@@ -241,6 +241,14 @@ export interface CountryOption {
   num: number;
 }
 
+export interface SuggestedPlace {
+  lat: number;
+  lng: number;
+  name: string;
+  land: string;
+  itemKey?: string;
+}
+
 export interface AyanamshaItem {
   num: number;
   key: string;

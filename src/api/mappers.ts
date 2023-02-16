@@ -1,11 +1,11 @@
 import { Graha } from "./models/Graha";
 import refValues from "./mappings/ref-values";
 import grahaValues from "./mappings/graha-values";
-import { KeyName, PreferenceOption } from "./interfaces";
+import { KeyName, PreferenceOption, SuggestedPlace } from "./interfaces";
 import { User, Preference } from "./interfaces/users";
 import { capitalize, snakeToWords, truncate } from "./converters";
 import { DictionaryState } from "@/store/types";
-import { notEmptyString } from "./validators";
+import { isNumeric, notEmptyString } from "./validators";
 import { toWords } from "./helpers";
 
 export const mapGraha = (row: any) => new Graha(row);
@@ -256,4 +256,31 @@ export const genderOptions = (dictionary: DictionaryState) => {
       name,
     };
   });
+};
+
+export const mapToSuggestedPlace = (item: any = null): SuggestedPlace => {
+  const defVal = {
+    lat: 0,
+    lng: 0,
+    name: "",
+    land: "",
+  };
+  if (item instanceof Object) {
+    const { lat, lng, country, region, name } = item;
+    if (isNumeric(lat)) {
+      defVal.lat = lat;
+      defVal.lng = lng;
+    }
+    if (notEmptyString(name)) {
+      defVal.name = name;
+    }
+    const hasCountry = notEmptyString(country);
+    const hasRegion = notEmptyString(region);
+    if (hasCountry && /\d+/.test(country) && hasRegion) {
+      defVal.land = region;
+    } else if (hasCountry) {
+      defVal.land = country;
+    }
+  }
+  return defVal;
 };

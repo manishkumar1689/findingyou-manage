@@ -187,7 +187,13 @@
                 </b-field>
                 <b-field label="Place of birth (custom locality)" class="column vertical">
                   <b-input v-model="pob" type="text" size="60" />
+                  <b-icon icon="map" size="is-medium" type="is-success" @click.native="matchPlacenames"/>
                 </b-field>
+                <ul v-if="hasSuggestions" class="suggestions">
+                  <li v-for="sug in suggestions" :key="sug.itemKey" @click="selectSuggestion(sug)">
+                    <span>{{sug.name}}</span> (<em>{{sug.land}}</em>)
+                  </li>
+                </ul>
               </div>
               <div v-else>
                 <p class="age" v-if="hasChart">
@@ -311,6 +317,7 @@ import {
   profileUpload,
   registerUser,
   saveUserChart,
+  fetchPlacenames
 } from "../api/methods";
 import {
   getAge,
@@ -320,6 +327,7 @@ import {
   zeroPad,
   mediumDate,
   msToDatePart,
+  sanitize,
 } from "../api/converters";
 import {
   emptyString,
@@ -334,6 +342,7 @@ import { User, defaultUser, Placename } from "../api/interfaces/users";
 import {
   expandPrefOption,
   hasPayments,
+  mapToSuggestedPlace,
   matchLastPayment,
   matchLastPaymentDate,
   matchPreference,
@@ -341,7 +350,7 @@ import {
 } from "../api/mappers";
 import { extractCorePlacenames } from "../api/helpers";
 import { Chart } from "../api/models/Chart";
-import { PreferenceOption, Role, SimpleLocation } from "../api/interfaces";
+import { PreferenceOption, Role, SimpleLocation, SuggestedPlace } from "../api/interfaces";
 import { Geo } from "../api/interfaces/users";
 import { updateUser } from "../api/methods";
 import { bus } from "../main";
@@ -411,6 +420,8 @@ export default class UserEdit extends Vue {
   minYear = 1600;
 
   detailEditMode = false;
+
+  suggestions: SuggestedPlace[] = [];
 
   created() {
     if (this.current instanceof Object) {
@@ -531,19 +542,27 @@ export default class UserEdit extends Vue {
     if (this.isSaved) {
       fetchUserChart(this.current._id).then((result) => {
         if (result.valid) {
-          this.chart = new Chart(result.chart);
-          this.birthGeo = { 
-            lat: Math.round(this.chart.geo.lat * 1000) / 1000,
-            lng: Math.round(this.chart.geo.lng * 1000) / 1000,
-            alt: this.chart.geo.alt
-           };
-          const jDate = julToDateParts(this.chart.jd, this.chart.tzOffset);
-          const jDateStr = jDate.timeString();
-          this.timeVal = jDateStr;
-          this.dateVal = julToUnixMillisecs(this.chart.jd, this.chart.tzOffset);
-          this.tzHrs = this.chart.tzOffset / 3600;
+          this.assignChart(result.chart)
         }
       });
+    }
+  }
+
+  assignChart(chartData: any = null) {
+    this.chart = new Chart(chartData);
+    this.birthGeo = { 
+      lat: Math.round(this.chart.geo.lat * 1000) / 1000,
+      lng: Math.round(this.chart.geo.lng * 1000) / 1000,
+      alt: this.chart.geo.alt
+      };
+    const jDate = julToDateParts(this.chart.jd, this.chart.tzOffset);
+    const jDateStr = jDate.timeString();
+    this.timeVal = jDateStr;
+    this.dateVal = julToUnixMillisecs(this.chart.jd, this.chart.tzOffset);
+    this.tzHrs = this.chart.tzOffset / 3600;
+    const currPob = this.pob;
+    if (notEmptyString(currPob) && this.chart.placenames.length > 1) {
+      this.pob = [currPob.split(',').shift(), this.chart.placenames[0].name].join(', ');
     }
   }
 
@@ -759,13 +778,17 @@ export default class UserEdit extends Vue {
     }
   }
 
-  textSize(prefType = ''): number {
+  textSizeInt(prefType = ''): number {
     switch (prefType) {
       case 'text':
         return 255;
       default:
         return 32;
     }
+  }
+
+  textSize(prefType = ''): string {
+    return this.textSizeInt(prefType).toString();
   }
 
   textSizeClass(prefType = ''): string {
@@ -874,6 +897,7 @@ export default class UserEdit extends Vue {
       if (this.birthGeo) {
         const datetime = msToDatePart(this.dateVal, this.tzHrs) + 'T' + this.timeVal;
         const tzOffset = this.tzHrs * 3600;
+        const pob = notEmptyString(this.pob) ? this.pob.split(",").shift() : '';
         const inData = {
           name: this.current.nickName,
           gender: this.current.gender,
@@ -888,14 +912,14 @@ export default class UserEdit extends Vue {
           type: "person",
           eventType: "birth",
           _id: this.hasChart ? this.chart._id : '',
-          pob: this.pob
+          pob,
         } as ChartInput;
-        edited.pob = this.pob;
+        edited.pob = pob;
         edited.dob = datetime;
         saveUserChart(inData).then(response => {
           const { chart } = response;
           if (chart instanceof Object) {
-            this.chart = chart;
+            this.assignChart(chart);
           }
         });
       }
@@ -1096,6 +1120,42 @@ export default class UserEdit extends Vue {
     }
   }
 
+  matchPlacenames() {
+    this.suggestions = [];
+    fetchPlacenames(this.pob).then(data => {
+      if (data instanceof Object) {
+        const { items } = data;
+        if (items instanceof Array) {
+          const places: SuggestedPlace[] = [];
+          const keys: string[] = [];
+          items.forEach((item, index) => {
+            const sug = mapToSuggestedPlace(item);
+            const itemKey = ['spl', item.lat, item.lng, index].join('-');
+            const nk = [sanitize(item.name), sanitize(item.land)].join('--');
+            if (keys.indexOf(nk) < 0) {
+              places.push({...sug, itemKey});
+              keys.push(nk);
+            }
+          });
+          this.suggestions = places;
+        }
+      }
+    })
+  }
+
+  selectSuggestion(sug: SuggestedPlace) {
+    this.birthGeo.lat = sug.lat;
+    this.birthGeo.lng = sug.lng;
+    this.pob = [sug.name, sug.land].join(", ");
+    setTimeout(() => {
+      this.suggestions = [];
+    }, 500);
+  }
+
+  get hasSuggestions() {
+    return this.suggestions.length > 0;
+  }
+
   @Watch("current")
   changeCurrent(newVal) {
     if (newVal instanceof Object) {
@@ -1132,3 +1192,31 @@ export default class UserEdit extends Vue {
   }
 }
 </script>
+<style lang="scss">
+@import "@/styles/variables.scss";
+ul.suggestions {
+  li {
+    cursor: pointer;
+    &:hover {
+      background-color: rgba($highlight-color, 0.25);
+    }
+  }
+}
+
+.chart-input {
+  .field {
+    .icon {
+      margin-left: 0.75em;
+      i {
+        position: relative;
+        top: -0.625em;
+        transition: transform 0.333s ease-in-out;
+        &:hover {
+          transform: skew(-3deg);
+        }
+      }
+    }
+  }
+}
+
+</style>
