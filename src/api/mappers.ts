@@ -107,6 +107,22 @@ export const expandGenderKey = (key = "") => {
   }
 };
 
+export const expandChartModeKey = (key = ""): string => {
+  const max = notEmptyString(key) ? key.length : 1;
+  const maxLen = max > 3 ? 3 : max;
+  const firstLetters = notEmptyString(key)
+    ? key.substring(0, maxLen).toLowerCase()
+    : "-";
+  switch (firstLetters) {
+    case "sid":
+      return "Sidereal";
+    case "tro":
+      return "Tropical";
+    default:
+      return "-";
+  }
+};
+
 export const expandPrefOption = (prefKey = "", optKey = "") => {
   switch (prefKey) {
     case "orientation":
@@ -114,6 +130,8 @@ export const expandPrefOption = (prefKey = "", optKey = "") => {
     case "genders":
     case "gender":
       return expandGenderKey(optKey);
+    case "birth_chart_sign":
+      return expandChartModeKey(optKey);
     default:
       return toWords(optKey);
   }

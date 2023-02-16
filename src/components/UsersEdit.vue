@@ -137,85 +137,92 @@
       </li>
     </ul>
     <div class="actions">
-      <b-button @click="save" type="is-success" size="is-medium">Save</b-button>
+      <b-button @click="save" type="is-success" size="is-medium">{{topSaveLabel}}</b-button>
     </div>
     <div v-if="isSaved" class="info row horizontal twin">
-      <dl class="twin-column bold-labels">
-        <dt >Location</dt>
-        <dd>
-          <template v-if="hasLocation">
-            <span class="lat">{{ geo.lat | toDMSLat }} </span>
-            <span class="lng">{{ geo.lng | toDMSLng }} </span>
-            <span class="name">{{ placename }} </span>
-          </template>
-          <template v-else>
-            <span class="name">[Unknown]</span>
-          </template>
-          <b-select v-if="showCustomLocations" v-model="customLocation">
-            <option
-              v-for="item in customLocationOptions"
-              :key="item.itemKey"
-              :value="item.value"
-            >
-              {{ item.name }}
-            </option>
-          </b-select>
-        </dd>
-        <dt>Birth chart</dt>
-        <dd class="chart-input">
-            <div v-if="detailEditMode">
-              <b-field label="Date of birth (local time)" class="column vertical">
-                  <birth-date-picker
-                    v-model="dateVal"
-                    :maxYear="maxYear"
-                    :minYear="minYear"
-                    delimiter="/"
-                    :closeOnSet="false"
-                  />
-              </b-field>
-              <b-field label="Time of birth (local time)" class="column vertical">
-                  <b-input size="is-medium" v-model="timeVal" class="time" type="time" :step="1" 
+      <div class="primary-column column vertical">
+        <dl class="twin-column bold-labels">
+          <dt >Location</dt>
+          <dd>
+            <template v-if="hasLocation">
+              <span class="lat">{{ geo.lat | toDMSLat }} </span>
+              <span class="lng">{{ geo.lng | toDMSLng }} </span>
+              <span class="name">{{ placename }} </span>
+            </template>
+            <template v-else>
+              <span class="name">[Unknown]</span>
+            </template>
+            <b-select v-if="showCustomLocations" v-model="customLocation">
+              <option
+                v-for="item in customLocationOptions"
+                :key="item.itemKey"
+                :value="item.value"
+              >
+                {{ item.name }}
+              </option>
+            </b-select>
+          </dd>
+          <dt>Birth chart</dt>
+          <dd class="chart-input">
+              <div v-if="detailEditMode">
+                <b-field label="Date of birth (local time)" class="column vertical">
+                    <birth-date-picker
+                      v-model="dateVal"
+                      :maxYear="maxYear"
+                      :minYear="minYear"
+                      delimiter="/"
+                      :closeOnSet="false"
                     />
-                  <b-input size="is-medium" v-model="tzHrs" class="tz-offset" type="number" :step="0.25" title="decimal hours"
-                    />
-              </b-field>
-              
-              <b-field label="Location" class="column vertical">
-                <b-input v-model="birthGeo.lat" type="number" :step="0.001" class="coordinate" :min="-90" :max="90" />
-                <b-input v-model="birthGeo.lng" type="number" :step="0.001" class="coordinate" :min="-180" :max="180" />
-              </b-field>
-              <b-field label="Place of birth (custom locality)" class="column vertical">
-                <b-input v-model="pob" type="text" size="60" />
-              </b-field>
-            </div>
-            <div v-else>
-              <p class="age" v-if="hasChart">
-                <span class="age item">
-                  {{ age }}
-                </span>
-                <span class="dob item">
-                  {{ dob }}
-                </span>
-              </p>
-              <p v-if="hasChart">
-                <span class="lat">{{ chart.geo.lat | toDMSLat }} </span>
-                <span class="lng">{{ chart.geo.lng | toDMSLng }} </span>
-              </p>
-              <p v-if="hasChart">{{ chart.corePlacenames }}</p>
-            </div>
-            <div class="edit-actions">
-              <b-button @click="toggleEditMode">{{toggleEditLabel}}</b-button>
-            </div>
-        </dd>
-        <dt>Joined</dt>
-        <dd>{{ current.createdAt | mediumDate }}</dd>
-        <dt>Edited user data</dt>
-        <dd>{{ current.modifiedAt | mediumDate }}</dd>
-        <dt>Last logged in</dt>
-        <dd v-if="hasLoggedIn" class="login">
-          {{ current.login | mediumDate }}
-        </dd>
-      </dl>
+                </b-field>
+                <b-field label="Time of birth (local time)" class="column vertical">
+                    <b-input size="is-medium" v-model="timeVal" class="time" type="time" :step="1" 
+                      />
+                    <b-input size="is-medium" v-model="tzHrs" class="tz-offset" type="number" :step="0.25" title="decimal hours"
+                      />
+                </b-field>
+                
+                <b-field label="Location" class="column vertical">
+                  <b-input v-model="birthGeo.lat" type="number" :step="0.001" class="coordinate" :min="-90" :max="90" />
+                  <b-input v-model="birthGeo.lng" type="number" :step="0.001" class="coordinate" :min="-180" :max="180" />
+                </b-field>
+                <b-field label="Place of birth (custom locality)" class="column vertical">
+                  <b-input v-model="pob" type="text" size="60" />
+                </b-field>
+              </div>
+              <div v-else>
+                <p class="age" v-if="hasChart">
+                  <span class="age item">
+                    {{ age }}
+                  </span>
+                  <span class="dob item">
+                    {{ dob }}
+                  </span>
+                </p>
+                <p v-if="hasChart">
+                  <span class="lat">{{ chart.geo.lat | toDMSLat }} </span>
+                  <span class="lng">{{ chart.geo.lng | toDMSLng }} </span>
+                </p>
+                <p v-if="hasChart">{{ chart.corePlacenames }}</p>
+              </div>
+          </dd>
+        </dl>
+
+        <div class="edit-actions">
+          <b-button @click="toggleEditMode" :type="detailToggleDisplayMode" size="is-medium">{{toggleEditLabel}}</b-button>
+          <b-button v-if="detailEditMode" @click="save" type="is-success" size="is-medium">{{bottomSaveLabel}}</b-button>
+        </div>
+        
+        <dl class="twin-column bold-labels compact">
+          <dt>Joined</dt>
+          <dd>{{ current.createdAt | mediumDate }}</dd>
+          <dt>Edited user data</dt>
+          <dd>{{ current.modifiedAt | mediumDate }}</dd>
+          <dt v-if="hasLoggedIn">Last logged in</dt>
+          <dd v-if="hasLoggedIn" class="login">
+            {{ current.login | mediumDate }}
+          </dd>
+        </dl>
+      </div>
       <dl class="twin-column left-aligned long-title preferences">
         <template v-for="po in submittedPreferenceOptions">
           <dt :key="po.itemKey">
@@ -243,10 +250,10 @@
                 </b-select>
               </template>
               <template v-if="useTextField(po.type)">
-                <b-input v-model="preferenceMap[po.key]" type="text" size="64" class="medium" />
+                <b-input v-model="preferenceMap[po.key]" type="text" :size="textSize(po.type)" :class="textSizeClass(po.type)" />
               </template>
               <template v-if="po.type == 'uri'">
-                <b-input v-model="preferenceMap[po.key]" type="url" size="64" class="long" />
+                <b-input v-model="preferenceMap[po.key]" type="url" size="128" class="long" />
               </template>
               <template v-if="po.type == 'string'">
                 <b-select v-model="preferenceMap[po.key]">
@@ -650,6 +657,19 @@ export default class UserEdit extends Vue {
     }
   }
 
+  get topSaveLabel() {
+    return this.detailEditMode ? 'Save' : 'Save core fields';
+  }
+
+  get bottomSaveLabel() {
+    return this.detailEditMode ? 'Save user and chart details' : '';
+  }
+
+   get detailToggleDisplayMode() {
+    return this.detailEditMode ? 'is-info' : 'is-warning';
+  }
+
+
   extractPlaceNames(customLoc: SimpleLocation) {
     const placenames: Placename[] = [];
     if (this.hasGeo) {
@@ -736,6 +756,24 @@ export default class UserEdit extends Vue {
         return true;
       default:
         return false;
+    }
+  }
+
+  textSize(prefType = ''): number {
+    switch (prefType) {
+      case 'text':
+        return 255;
+      default:
+        return 32;
+    }
+  }
+
+  textSizeClass(prefType = ''): string {
+    switch (prefType) {
+      case 'text':
+        return 'long';
+      default:
+        return 'medium';
     }
   }
 
