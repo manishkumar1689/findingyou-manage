@@ -1092,7 +1092,7 @@ export default class UserEdit extends Vue {
 
   setToCurrLocation() {
     this.birthGeo = this.geo;
-    if (this.placenames.length > 0) {
+    if (this.placenames.length > 0 && emptyString(this.pob)) {
       this.pob = this.placenames[this.placenames.length - 1];
     }
   }
