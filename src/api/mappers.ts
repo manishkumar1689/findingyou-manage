@@ -115,8 +115,10 @@ export const expandChartModeKey = (key = ""): string => {
     : "-";
   switch (firstLetters) {
     case "sid":
+    case "s":
       return "Sidereal";
     case "tro":
+    case "t":
       return "Tropical";
     default:
       return "-";
