@@ -107,17 +107,47 @@ export const expandGenderKey = (key = "") => {
   }
 };
 
+export const expandChartType = (key = "") => {
+  const sk = notEmptyString(key) ? key.toLowerCase().substring(0, 2) : "";
+  switch (sk) {
+    case "ws":
+      return "Symbol";
+    case "hi":
+      return "Devnagri";
+    case "gu":
+      return "Gujarati";
+    case "pa":
+      return "Punjabi";
+    case "bn":
+      return "Bengali";
+    case "ta":
+      return "Tamil";
+    case "ml":
+      return "Malyalam";
+    case "kn":
+      return "Kannada";
+    case "te":
+      return "Telugu";
+    case "bo":
+      return "Tibetian";
+    case "zh":
+      return "Chinese";
+    case "en":
+      return "English";
+    case "ia":
+      return "IAST";
+    default:
+      return "-";
+  }
+};
+
 export const expandChartModeKey = (key = ""): string => {
-  const max = notEmptyString(key) ? key.length : 1;
-  const maxLen = max > 3 ? 3 : max;
-  const firstLetters = notEmptyString(key)
-    ? key.substring(0, maxLen).toLowerCase()
+  const firstLetter = notEmptyString(key)
+    ? key.substring(0, 1).toLowerCase()
     : "-";
-  switch (firstLetters) {
-    case "sid":
+  switch (firstLetter) {
     case "s":
       return "Sidereal";
-    case "tro":
     case "t":
       return "Tropical";
     default:
@@ -134,6 +164,8 @@ export const expandPrefOption = (prefKey = "", optKey = "") => {
       return expandGenderKey(optKey);
     case "birth_chart_sign":
       return expandChartModeKey(optKey);
+    case "birth_chart_symbol":
+      return expandChartType(optKey);
     default:
       return toWords(optKey);
   }
