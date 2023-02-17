@@ -107,7 +107,7 @@ export const expandGenderKey = (key = "") => {
   }
 };
 
-export const expandChartType = (key = "") => {
+export const expandChartSymbol = (key = "") => {
   const sk = notEmptyString(key) ? key.toLowerCase().substring(0, 2) : "";
   switch (sk) {
     case "ws":
@@ -141,6 +141,22 @@ export const expandChartType = (key = "") => {
   }
 };
 
+export const expandChartType = (key = "") => {
+  const sk = notEmptyString(key) ? key.toLowerCase().substring(0, 2) : "";
+  switch (sk) {
+    case "w":
+      return "Western";
+    case "ni":
+      return "North Indian";
+    case "si":
+      return "South Indian";
+    case "ei":
+      return "East Indian";
+    default:
+      return "-";
+  }
+};
+
 export const expandChartModeKey = (key = ""): string => {
   const firstLetter = notEmptyString(key)
     ? key.substring(0, 1).toLowerCase()
@@ -164,8 +180,10 @@ export const expandPrefOption = (prefKey = "", optKey = "") => {
       return expandGenderKey(optKey);
     case "birth_chart_sign":
       return expandChartModeKey(optKey);
-    case "birth_chart_symbol":
+    case "birth_chart_type":
       return expandChartType(optKey);
+    case "birth_chart_symbol":
+      return expandChartSymbol(optKey);
     default:
       return toWords(optKey);
   }
