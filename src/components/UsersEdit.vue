@@ -58,7 +58,7 @@
             </option>
           </b-select>
         </b-field>
-        <b-field label="Roles" class="user-roles column">
+        <b-field label="Roles" class="user-roles row switch-column">
           <b-switch
             v-for="role in roleOptions"
             :key="role.itemKey"

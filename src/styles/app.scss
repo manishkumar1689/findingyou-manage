@@ -596,10 +596,16 @@ form {
           position: relative;
           padding-top: 1.5em;
           padding-left: 0;
-          > label {
+          > label.label:first-child {
             position: absolute;
             top: 0;
             left: 0.125em;
+          }
+        }
+        &.row.switch-column {
+          padding-top: 0.25em;
+          > label.switch {
+            margin-bottom: 1em;
           }
         }
       }
