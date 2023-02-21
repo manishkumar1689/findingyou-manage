@@ -468,6 +468,17 @@ export interface SimpleLocation {
   value?: string;
 }
 
+export interface LikeRow {
+  identifier: string;
+  mode: string;
+  name: string;
+  id: string;
+  gender?: string;
+  age?: number;
+  date?: string;
+  isMutual?: boolean;
+}
+
 export interface IdBool {
   id: string;
   value: boolean;

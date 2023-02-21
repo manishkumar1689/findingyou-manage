@@ -304,6 +304,60 @@
         </li>
       </ul>
     </div>
+    <div class="column swipe-users">
+      <b-field class="row" label="Search other users">
+         <b-autocomplete
+            :data="suggestedNames"
+            field="name"
+            class="user-name"
+            v-model="otherUser.name"
+            :loading="isFetching"
+            @typing="matchUserNames"
+            @select="selectOtherUser"
+          >
+            <template slot-scope="props">
+              <div class="row">
+                {{props.option.name}}
+              </div>
+            </template>
+          </b-autocomplete>
+          <template v-if="hasOtherUser">
+            <b-button @click="rateUser(-1)" type="is-warning">Pass</b-button>
+            <b-button @click="rateUser(1)" type="is-info">Like</b-button>
+            <b-button @click="rateUser(2)" type="is-success">Star</b-button>
+            <b-button @click="deselectUser">Clear</b-button>
+          </template>
+      </b-field>
+      <b-field label="Likeability" class="row fetch-likes">
+          <b-button @click="fetchLikes">Get ratings</b-button>
+      </b-field>
+      <b-table
+            v-if="hasLikeability"
+            :data="likes"
+          >
+            <template slot-scope="props">
+              <b-table-column class="size" field="name" label="Name">
+                {{props.row.name}}
+              </b-table-column>
+              <b-table-column class="age" field="age" label="Age">
+                {{props.row.age}}
+              </b-table-column>
+              <b-table-column class="gender" field="gender" label="Gender">
+                {{props.row.gender}}
+              </b-table-column>
+              <b-table-column class="edit" field="mode" label="Mode">
+                {{props.row.mode}}
+              </b-table-column>
+              <b-table-column class="created" field="value" label="Rating">
+                <b-icon :icon="matchLikeIcon(props.row.value)" :title="props.row.value" />
+                <b-icon v-if="props.row.isMutual" icon="account-multiple" />
+              </b-table-column>
+              <b-table-column class="date" field="date" label="Date">
+                {{props.row.date | mediumDate}}
+              </b-table-column>
+            </template>
+          </b-table>
+    </div>
   </form>
 </template>
 <script lang="ts">
@@ -317,7 +371,10 @@ import {
   profileUpload,
   registerUser,
   saveUserChart,
-  fetchPlacenames
+  fetchPlacenames,
+  quickMatchUser,
+  swipeUser,
+  getLikeabilityByUser
 } from "../api/methods";
 import {
   getAge,
@@ -328,6 +385,7 @@ import {
   mediumDate,
   msToDatePart,
   sanitize,
+  smartCastInt,
 } from "../api/converters";
 import {
   emptyString,
@@ -350,7 +408,7 @@ import {
 } from "../api/mappers";
 import { extractCorePlacenames } from "../api/helpers";
 import { Chart } from "../api/models/Chart";
-import { PreferenceOption, Role, SimpleLocation, SuggestedPlace } from "../api/interfaces";
+import { KeyName, LikeRow, PreferenceOption, Role, SimpleLocation, SuggestedPlace } from "../api/interfaces";
 import { Geo } from "../api/interfaces/users";
 import { updateUser } from "../api/methods";
 import { bus } from "../main";
@@ -422,6 +480,11 @@ export default class UserEdit extends Vue {
   detailEditMode = false;
 
   suggestions: SuggestedPlace[] = [];
+  
+  suggestedNames: KeyName[] = [];
+  otherUser: KeyName = { key: '', name: '' };
+  isFetching = false;
+  likes: LikeRow[] = [];
 
   created() {
     if (this.current instanceof Object) {
@@ -1152,8 +1215,88 @@ export default class UserEdit extends Vue {
     }, 500);
   }
 
+  rateUser(num = 0) {
+    if (num !== 0 && this.hasOtherUser) {
+      swipeUser(this.current._id, this.otherUser.key, num).then(r => {
+        if (r) {
+          const action = num > 1 ? "starred" : num > 0?  "liked" : "passed on";
+          this.toast(`${this.otherUser.name} has been ${action}`)
+          setTimeout(() => {
+            this.fetchLikes();
+          }, 2000)
+        }
+      });
+    }
+  }
+
   get hasSuggestions() {
     return this.suggestions.length > 0;
+  }
+
+  selectOtherUser(user: KeyName) {
+    if (user instanceof Object && notEmptyString(user.key)) {
+      this.otherUser = user;
+    }
+  }
+
+  deselectUser() {
+    this.otherUser = {
+      key: '',
+      name: ''
+    }
+    this.suggestedNames = [];
+  }
+
+  get hasOtherUser() {
+    return notEmptyString(this.otherUser.key, 20);
+  }
+
+  get hasLikeability() {
+    return this.likes.length > 0;
+  }
+
+  matchUserNames(search = '') {
+    if (!this.isFetching && search.length > 2) {
+      this.isFetching = true;
+      quickMatchUser(search).then(users => {
+        if (users instanceof Array) {
+          this.suggestedNames = users;
+        }
+        this.isFetching =false;
+      })
+    } else {
+      this.suggestedNames = [];
+    }
+  }
+
+  matchLikeIcon(value = 0) {
+    const intVal = smartCastInt(value);
+    const refInt = intVal < -3 ? -3 :  intVal > 2 ? 2 : intVal;
+    switch (refInt) {
+      case 2:
+        return 'star';
+      case 1:
+        return 'thumb-up';
+      case -1:
+      case -2:
+      case -3:
+        return 'thumb-down';
+      default:
+        return 'circle-outline';
+    }
+  }
+
+  fetchLikes() {
+    getLikeabilityByUser(this.current._id).then(items => {
+      if (items instanceof Array) {
+        this.likes = items.filter(row => row instanceof Object).map(row => {
+          const { id, mode, identifier, value, name, age, date, isMutual } = row;
+          return { id, mode, identifier, value, name, age, date, isMutual: isMutual === true };
+        });
+      } else {
+        this.likes = [];
+      }
+    })
   }
 
   @Watch("current")
@@ -1217,6 +1360,10 @@ ul.suggestions {
       }
     }
   }
+}
+
+.user-name {
+  min-width: 20em;
 }
 
 </style>

@@ -1674,6 +1674,59 @@ export const getFeedback = async (
   return result;
 };
 
+export const quickMatchUser = async (
+  search,
+  gender = "-"
+): Promise<KeyName[]> => {
+  const parts = ["user", "quick-match", search];
+
+  if (["m", "f"].includes(gender)) {
+    parts.push(gender);
+  }
+  const uri = parts.join("/");
+  const items = await getData(uri, "array");
+  if (items instanceof Array) {
+    return items.map((row) => {
+      const { key, value } = row;
+      return { key, name: value };
+    });
+  } else {
+    return [];
+  }
+};
+
+export const swipeUser = async (
+  from: string,
+  to: string,
+  num = 0
+): Promise<boolean> => {
+  if (
+    notEmptyString(from, 20) &&
+    notEmptyString(to, 20) &&
+    [-1, 1, 2].includes(num)
+  ) {
+    const payload = {
+      from,
+      to,
+      value: num,
+    };
+    postData("feedback/swipe", payload);
+    return true;
+  } else {
+    return false;
+  }
+};
+
+export const getLikeabilityByUser = async (userId: string): Promise<any[]> => {
+  if (notEmptyString(userId, 20)) {
+    const uri = ["user", "likeability", userId].join("/");
+    const items = await getData(uri, "array");
+    return items instanceof Array ? items : [];
+  } else {
+    return [];
+  }
+};
+
 export const getReportedUsers = async (
   page = 1,
   search = "",
