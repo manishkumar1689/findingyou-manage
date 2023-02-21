@@ -1303,6 +1303,8 @@ export default class UserEdit extends Vue {
   changeCurrent(newVal) {
     if (newVal instanceof Object) {
       this.sync();
+      this.deselectUser();
+      this.likes = [];
     }
   }
 
