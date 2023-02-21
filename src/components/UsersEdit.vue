@@ -1290,8 +1290,8 @@ export default class UserEdit extends Vue {
     getLikeabilityByUser(this.current._id).then(items => {
       if (items instanceof Array) {
         this.likes = items.filter(row => row instanceof Object).map(row => {
-          const { id, mode, identifier, value, name, age, date, isMutual } = row;
-          return { id, mode, identifier, value, name, age, date, isMutual: isMutual === true };
+          const { id, mode, identifier, value, name, age, gender, date, isMutual } = row;
+          return { id, mode, identifier, value, name, age, gender, date, isMutual: isMutual === true };
         });
       } else {
         this.likes = [];
