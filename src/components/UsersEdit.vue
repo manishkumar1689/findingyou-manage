@@ -1364,6 +1364,18 @@ ul.suggestions {
 
 .user-name {
   min-width: 20em;
+  @media (min-width: 70em) {
+    min-width: 25em;
+  }
+  @media (min-width: 80em) {
+    min-width: 30em;
+  }
+  @media (min-width: 85em) {
+    min-width: 33em;
+  }
+  @media (min-width: 90em) {
+    min-width: 36em;
+  }
 }
 
 </style>
