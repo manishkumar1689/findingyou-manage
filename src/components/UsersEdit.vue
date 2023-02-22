@@ -321,8 +321,9 @@
               </div>
             </template>
           </b-autocomplete>
+          <b-checkbox v-if="showGenderButton" v-model="genderOnly" type="is-info">{{genderOnlyLabel}}</b-checkbox>
           <template v-if="hasOtherUser">
-            <b-button @click="rateUser(-1)" type="is-warning">Pass</b-button>
+            <!-- <b-button @click="rateUser(-1)" type="is-warning">Pass</b-button> -->
             <b-button @click="rateUser(1)" type="is-info">Like</b-button>
             <b-button @click="rateUser(2)" type="is-success">Star</b-button>
             <b-button @click="deselectUser">Clear</b-button>
@@ -485,6 +486,7 @@ export default class UserEdit extends Vue {
   otherUser: KeyName = { key: '', name: '' };
   isFetching = false;
   likes: LikeRow[] = [];
+  genderOnly = false;
 
   created() {
     if (this.current instanceof Object) {
@@ -749,6 +751,29 @@ export default class UserEdit extends Vue {
 
    get detailToggleDisplayMode() {
     return this.detailEditMode ? 'is-info' : 'is-warning';
+  }
+
+  get showGenderButton() {
+    if (this.preferenceMap.genders instanceof Array) {
+      return this.preferenceMap.genders.length === 1;
+    } else {
+      return false;
+    }
+  }
+
+  get genderOnlyLabel() {
+    if (this.showGenderButton) {
+      switch (this.preferredGenderOpt) {
+        case 'f':
+          return 'Women only';
+        case 'm':
+          return 'Men only';
+        default:
+          return '-';
+      }
+    } else {
+      return '-';
+    }
   }
 
 
@@ -1255,10 +1280,19 @@ export default class UserEdit extends Vue {
     return this.likes.length > 0;
   }
 
+  get preferredGenderOpt() {
+    if (this.preferenceMap.genders instanceof Array && this.preferenceMap.genders.length > 0) {
+      return this.preferenceMap.genders[0];
+    } else {
+      return '';
+    }
+  }
+
   matchUserNames(search = '') {
     if (!this.isFetching && search.length > 2) {
       this.isFetching = true;
-      quickMatchUser(search).then(users => {
+      const genderKey = (this.showGenderButton && this.genderOnly)?  this.preferredGenderOpt : '';
+      quickMatchUser(search, genderKey).then(users => {
         if (users instanceof Array) {
           this.suggestedNames = users;
         }
