@@ -203,9 +203,7 @@ export default class UsersListView extends Vue {
   result: any = null;
 
   users: Array<User> = [];
-
   total = 0;
-
   subtotal = 0;
 
   criteria = new Map<string, string | number | boolean>();
@@ -213,7 +211,6 @@ export default class UsersListView extends Vue {
   searchString = "";
 
   selectedUser = null;
-
   showForm = false;
 
   preferenceOptions: Array<PreferenceOption> = [];
@@ -221,6 +218,8 @@ export default class UsersListView extends Vue {
   roles: Array<Role> = [];
 
   listMode = "members";
+
+  initialised = false;
 
   activeOnly = true;
 
@@ -262,6 +261,11 @@ export default class UsersListView extends Vue {
     bus.$on("update-user-list", (ok) => {
       if (ok) {
         this.loadData();
+      }
+    });
+    bus.$on("load-user", (userId) => {
+      if (notEmptyString(userId, 12)) {
+        this.loadUser(userId);
       }
     });
     const { path } = this.$route;
@@ -340,6 +344,19 @@ export default class UsersListView extends Vue {
         }
         this.buildUserStatusMap();
       }
+      if (!this.initialised) {
+        this.loadOptions();
+        setTimeout(() => {
+          this.initialised = true;
+        }, 1000);
+      } else {
+        this.dismiss();
+      }
+    });
+  }
+
+  loadOptions() {
+
       fetchPreferenceOptions().then((data) => {
         if (data.items instanceof Array) {
           this.preferenceOptions = data.items;
@@ -351,7 +368,7 @@ export default class UsersListView extends Vue {
           this.roles = data;
         }
       });
-    });
+
   }
 
   loadUser(userId = "") {
@@ -633,6 +650,7 @@ export default class UsersListView extends Vue {
       this.criteria.delete("usearch");
       this.criteria.delete("place");
     }
+    
     this.loadData();
     const { path, query } = this.$route;
     const currQstr = JSON.stringify(query);

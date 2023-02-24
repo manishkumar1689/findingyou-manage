@@ -280,7 +280,6 @@
     <div v-if="isSaved" class="status-log">
       <div v-for="status in statusLog" :key="status.key"></div>
     </div>
-    <user-block-list :current="current" />
     <div v-if="isSaved" class="profiles">
       <ul class="twin-column left-aligned long-title">
         <li v-for="(po, pIndex) in profiles" :key="po.itemKey">
@@ -356,9 +355,15 @@
               <b-table-column class="date" field="date" label="Date">
                 {{props.row.date | mediumDate}}
               </b-table-column>
+              <b-table-column class="edit" field="edit" label="Edit / Rate">
+                <!-- <b-icon icon="thumb-up" size="is-small" :title="ratingTypeLabel(props.row, 1)" @click.native="rateUserByContext(props.row, 1)" />
+                <b-icon icon="star" size="is-small" :title="ratingTypeLabel(props.row, 1)" @click.native="rateUserByContext(props.row, 2)" /> -->
+                <b-icon icon="account-edit" class="edit-button" type="is-info" title="Edit user" @click.native="editOtherUser(props.row.id)" />
+              </b-table-column>
             </template>
           </b-table>
     </div>
+    <user-block-list :current="current" />
   </form>
 </template>
 <script lang="ts">
@@ -1242,16 +1247,56 @@ export default class UserEdit extends Vue {
 
   rateUser(num = 0) {
     if (num !== 0 && this.hasOtherUser) {
-      swipeUser(this.current._id, this.otherUser.key, num).then(r => {
+      this.rateUserById(this.otherUser.key, num, this.current._id);
+    }
+  }
+
+  rateUserByContext(row: LikeRow, num = 0) {
+    if (row instanceof Object) {
+      const targetId = row.mode === 'to' ? row.id : this.current._id;
+      const sourceId = row.mode === 'to' ? this.current._id : row.id;
+      this.rateUserById(targetId, num, sourceId);
+    }
+  }
+
+  rateUserById(refId = '', num = 0, sourceId = '') {
+    console.log(refId, num)
+    if (num !== 0 && notEmptyString(refId, 12)) {
+      swipeUser(sourceId, refId, num).then(r => {
         if (r) {
           const action = num > 1 ? "starred" : num > 0?  "liked" : "passed on";
-          this.toast(`${this.otherUser.name} has been ${action}`)
+          const userRef = refId === this.current._id ? 'The current user' : 'The other user';
+          this.toast(`${userRef} has been ${action}`)
           setTimeout(() => {
             this.fetchLikes();
           }, 2000)
         }
       });
     }
+  }
+
+  ratingNumTOWord(num = 1) {
+    switch (num) {
+      case 1:
+        return 'Like';
+      case 2:
+        return 'Start';
+      case -1:
+      case -2:
+      case -3:
+        return 'Unlike';
+      default:
+        return '';
+    }
+  }
+
+  ratingTypeLabel(row: LikeRow, num = 1) {
+    const word = this.ratingNumTOWord(num);
+    return row.mode === 'to' ? `${word} ${row.name}` : `Let ${row.name} ${word.toLowerCase()} ${this.current.nickName}`;
+  }
+
+  editOtherUser(userId = '') {
+    bus.$emit('load-user', userId);
   }
 
   get hasSuggestions() {
@@ -1324,8 +1369,8 @@ export default class UserEdit extends Vue {
     getLikeabilityByUser(this.current._id).then(items => {
       if (items instanceof Array) {
         this.likes = items.filter(row => row instanceof Object).map(row => {
-          const { id, mode, identifier, value, name, age, gender, date, isMutual } = row;
-          return { id, mode, identifier, value, name, age, gender, date, isMutual: isMutual === true };
+          const { otherId, mode, identifier, value, name, age, gender, date, isMutual } = row;
+          return { id:otherId, mode, identifier, value, name, age, gender, date, isMutual: isMutual === true };
         });
       } else {
         this.likes = [];
@@ -1339,6 +1384,7 @@ export default class UserEdit extends Vue {
       this.sync();
       this.deselectUser();
       this.likes = [];
+      this.detailEditMode = false;
     }
   }
 
@@ -1395,6 +1441,18 @@ ul.suggestions {
         }
       }
     }
+  }
+}
+
+td.edit {
+  .icon {
+    opacity: 0.5;
+    &:hover {
+      opacity: 1;
+    }
+  }
+  .edit-button {
+    padding-left: 0.75em;
   }
 }
 
