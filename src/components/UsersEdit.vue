@@ -1260,7 +1260,6 @@ export default class UserEdit extends Vue {
   }
 
   rateUserById(refId = '', num = 0, sourceId = '') {
-    console.log(refId, num)
     if (num !== 0 && notEmptyString(refId, 12)) {
       swipeUser(sourceId, refId, num).then(r => {
         if (r) {
