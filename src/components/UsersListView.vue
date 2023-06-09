@@ -281,7 +281,6 @@ export default class UsersListView extends Vue {
     const pathParts = path.substring(1).split("/");
     if (pathParts.length > 1) {
       let newMode = "";
-      console.log(pathParts[1])
       switch (pathParts[1]) {
         case "members":
         case "member":
