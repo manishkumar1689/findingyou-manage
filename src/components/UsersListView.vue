@@ -833,6 +833,7 @@ export default class UsersListView extends Vue {
     const newPath = ["/users", newVal].join("/");
     if (newPath !== path && this.initialised) {
       this.$router.push(newPath);
+      this.page = 1;
       this.criteria.set("type", newVal);
       this.users = [];
       this.loadData();
@@ -842,6 +843,7 @@ export default class UsersListView extends Vue {
   @Watch("activeOnly")
   changeActiveOnly(newVal, prevVal) {
     if (newVal !== prevVal) {
+      this.page = 1;
       this.criteria.set("admin", newVal ? 1 : 0);
       this.loadData();
     }
