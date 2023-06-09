@@ -535,6 +535,9 @@ export default class UserEdit extends Vue {
     }
     this.active = this.current.active;
     this.test = this.current.test;
+    this.password = '';
+    this.cpassword = '';
+    this.mayEditPassword = false;
     if (this.current.gender) {
       this.gender = this.current.gender;
     } else {
