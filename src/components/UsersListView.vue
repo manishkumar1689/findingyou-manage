@@ -105,7 +105,7 @@
             >{{ matchLastPayment(props.row) | toCurrency }}</span
           >
         </b-table-column>
-        <b-table-column v-if="showRegion" class="payments" field="payments" label="Payments">
+        <b-table-column v-if="showRegion" class="demo" field="demo" label="Demo Info">
           {{demoInfo(props.row)}}
         </b-table-column>
         <b-table-column class="test" field="test" label="Test">
@@ -280,18 +280,24 @@ export default class UsersListView extends Vue {
     const { path } = this.$route;
     const pathParts = path.substring(1).split("/");
     if (pathParts.length > 1) {
+      let newMode = "";
+      console.log(pathParts[1])
       switch (pathParts[1]) {
         case "members":
         case "member":
-          this.criteria.set("type", "members");
+          newMode = "members";
           break;
         case "admins":
         case "admin":
-          this.criteria.set("type", "admin");
+          newMode = "admin";
           break;
         case "demo":
-          this.criteria.set("type", "demo");
+          newMode = "demo"
           break;
+      }
+      if (notEmptyString(newMode)) {
+        this.criteria.set("type", newMode);
+        this.listMode = newMode;
       }
     }
     setTimeout(this.loadData, 250);
@@ -826,7 +832,7 @@ export default class UsersListView extends Vue {
   changeListmode(newVal) {
     const { path } = this.$route;
     const newPath = ["/users", newVal].join("/");
-    if (newPath !== path) {
+    if (newPath !== path && this.initialised) {
       this.$router.push(newPath);
       this.criteria.set("type", newVal);
       this.users = [];
