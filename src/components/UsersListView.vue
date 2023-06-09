@@ -33,7 +33,14 @@
           <b-icon icon="account-multiple"></b-icon>
           <span>Members</span>
         </b-radio-button>
-
+        <b-radio-button
+          v-model="listMode"
+          native-value="demo"
+          type="is-info is-light is-outlined"
+        >
+          <b-icon icon="face"></b-icon>
+          <span>Demo</span>
+        </b-radio-button>
         <b-radio-button
           v-model="listMode"
           native-value="admin"
@@ -82,7 +89,7 @@
             class="text-label"
             @click="selectRow(props.index)"
             title="Click to toggle selection"
-            >{{ renderPlacenames(props.row.placenames) }}</span
+            >{{ renderPlacenames(props.row) }}</span
           >
         </b-table-column>
         <b-table-column class="roles" field="roles" label="Roles">
@@ -91,12 +98,15 @@
         <b-table-column class="gender" field="gender" label="Gender">
           {{ props.row.gender }}
         </b-table-column>
-        <b-table-column class="payments" field="payments" label="Payments">
+        <b-table-column v-if="showPayments" class="payments" field="payments" label="Payments">
           <span
             v-if="hasPayments(props.row)"
             :title="matchLastPaymentDate(props.row) | mediumDate"
             >{{ matchLastPayment(props.row) | toCurrency }}</span
           >
+        </b-table-column>
+        <b-table-column v-if="showRegion" class="payments" field="payments" label="Payments">
+          {{demoInfo(props.row)}}
         </b-table-column>
         <b-table-column class="test" field="test" label="Test">
           <b-checkbox v-model="testStatusMap[props.row._id]" />
@@ -174,14 +184,14 @@ import { renderRolesFromKeys, smartCastInt } from "../api/converters";
 import { emptyString, notEmptyString } from "../api/validators";
 import { FilterSet } from "../api/composables/FilterSet";
 import { UserState } from "../store/types";
-import { User, defaultUser, Placename } from "../api/interfaces/users";
+import { User, defaultUser, Preference } from "../api/interfaces/users";
 import UserEdit from "./UsersEdit.vue";
 import {
   hasPayments,
   matchLastPayment,
   matchLastPaymentDate,
 } from "../api/mappers";
-import { extractCorePlacenames } from "../api/helpers";
+import { extractCorePlacenames, toWords } from "../api/helpers";
 import { bus } from "../main";
 import {
   KeyName,
@@ -256,7 +266,6 @@ export default class UsersListView extends Vue {
         }
       }
     });
-    this.loadData();
     bus.$on("escape", this.dismiss);
     bus.$on("update-user-list", (ok) => {
       if (ok) {
@@ -280,8 +289,12 @@ export default class UsersListView extends Vue {
         case "admin":
           this.criteria.set("type", "admin");
           break;
+        case "demo":
+          this.criteria.set("type", "demo");
+          break;
       }
     }
+    setTimeout(this.loadData, 250);
     this.fetchLocations();
     bus.$on("remove-media-item", ({ user, index, mediaRef }) => {
       const item = this.users.find((u) => u._id === user);
@@ -321,6 +334,9 @@ export default class UsersListView extends Vue {
     } else {
       this.criteria.delete("gender");
     }
+    if (!this.criteria.has('type')) {
+      this.criteria.set("type", this.listMode);
+    }
     const filter = Object.fromEntries(this.criteria);
     const hasUsearch = this.criteria.has("usearch")
       ? notEmptyString(filter.usearch)
@@ -337,7 +353,6 @@ export default class UsersListView extends Vue {
             : user.nickName;
           return { ...user, fullName };
         });
-
         this.subtotal = result.total;
         if (result.grandTotal) {
           this.total = result.grandTotal;
@@ -353,6 +368,32 @@ export default class UsersListView extends Vue {
         this.dismiss();
       }
     });
+  }
+
+  getPreferenceValue(preferences: Preference[] = [], key = "") {
+    const pr = preferences.find(p => p.key === key);
+    if (pr instanceof Object) {
+      return pr.value
+    }
+  }
+
+  demoInfo(user: User) {
+    const parts = [];
+    if (user.preferences instanceof Array) {
+      const reg = this.getPreferenceValue(user.preferences, 'georegion');
+      if (notEmptyString(reg)) {
+        parts.push(toWords(reg));
+      }
+      const prof = this.getPreferenceValue(user.preferences, 'profession');
+      if (notEmptyString(prof)) {
+        parts.push(toWords(prof));
+      }
+       const jt = this.getPreferenceValue(user.preferences, 'jungian_type');
+      if (notEmptyString(jt)) {
+        parts.push(jt.toUpperCase());
+      }
+    }
+    return parts.join(', ');
   }
 
   loadOptions() {
@@ -412,6 +453,14 @@ export default class UsersListView extends Vue {
     return this.users.length > 0;
   }
 
+  get showPayments(): boolean {
+    return this.listMode.includes("member") || this.listMode.length < 2;
+  }
+
+  get showRegion(): boolean {
+    return this.listMode.includes("demo");
+  }
+
   get showSubtotal(): boolean {
     return this.subtotal > 0 && this.subtotal !== this.total;
   }
@@ -467,8 +516,13 @@ export default class UsersListView extends Vue {
     }
   }
 
-  renderPlacenames(placenames: Placename[]) {
-    return extractCorePlacenames(placenames);
+  renderPlacenames(row: User) {
+    const pln = extractCorePlacenames(row.placenames);
+    if (notEmptyString(pln)) {
+      return pln;
+    } else {
+      return row.pob;
+    }
   }
 
   dismiss() {
@@ -775,6 +829,7 @@ export default class UsersListView extends Vue {
     if (newPath !== path) {
       this.$router.push(newPath);
       this.criteria.set("type", newVal);
+      this.users = [];
       this.loadData();
     }
   }
