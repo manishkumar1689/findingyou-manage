@@ -95,7 +95,7 @@
           />
         </b-field>
       </fieldset>
-      <fieldset class="column">
+      <fieldset class="column second">
         <b-field label="Profile image" class="profile image column">
           <b-upload name="file" v-model="file">
             <a class="button is-primary">
@@ -1487,6 +1487,23 @@ td.edit {
   }
   @media (min-width: 90em) {
     min-width: 36em;
+  }
+}
+
+.user-form > .row.twin > fieldset.second {
+  .field.column.image {
+    display: block;
+    label.upload {
+      float: left;
+    }
+    img {
+      float: right;
+      margin-left: 0.75em;
+    }
+  }
+  .profile-text {
+    clear: both;
+    padding-top: 1rem;
   }
 }
 
