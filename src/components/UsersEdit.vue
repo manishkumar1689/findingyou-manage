@@ -88,6 +88,14 @@
             alt="Profile Image"
           />
         </b-field>
+         <b-field label="Profile text (bio)" class="profile-text row">
+          <b-input
+            type="textarea"
+            cols="80"
+            rows="3"
+            v-model="profileText"
+            />
+        </b-field>
         <b-field label="Status" class="wrap">
           <b-switch size="is-small" v-model="active">Active</b-switch>
           <b-switch size="is-small" v-model="test">Test account</b-switch>
@@ -458,6 +466,7 @@ export default class UserEdit extends Vue {
   placenames = [];
   gender = "-";
   pob = "";
+  profileText = "";
   preferenceMap: any = {};
   profiles = [];
   preview = "";
@@ -532,6 +541,11 @@ export default class UserEdit extends Vue {
       Object.keys(this.roleState).forEach((rk) => {
         this.roleState[rk] = false;
       });
+    }
+    if (this.current.profiles instanceof Array && this.current.profiles.length > 0) {
+      if (this.current.profiles[0] instanceof Object && notEmptyString(this.current.profiles[0].text)) {
+        this.profileText = this.current.profiles[0].text;
+      }
     }
     this.active = this.current.active;
     this.test = this.current.test;
@@ -976,7 +990,9 @@ export default class UserEdit extends Vue {
       test: this.test,
       admin: this.user._id,
     };
-
+    if (notEmptyString(this.profileText)) {
+      edited.publicProfileText = this.profileText;
+    }
     if (this.detailEditMode) {
       edited.preferences = [];
       Object.entries(this.preferenceMap).forEach(([key, val]) => {

@@ -1,3 +1,4 @@
+
 <template>
   <div class="main-view" :class="wrapperClasses">
     <h1 class="main-title">
@@ -815,13 +816,19 @@ export default class UsersListView extends Vue {
     const currParts = path.substring(1).split("/");
     const currSub = currParts.length > 1 ? currParts[1] : "";
     const pathParts = ["/users"];
+    let hasId = false;
     if (newVal instanceof Object) {
       const { _id } = newVal;
       if (notEmptyString(_id, 10)) {
         pathParts.push("edit", _id);
+        hasId = true;
       }
     }
+    if (!hasId && pathParts.length < 2) {
+      pathParts.push(this.listMode);
+    }
     const newPath = pathParts.join("/");
+    
     if (newPath !== path && currSub !== "new") {
       this.$router.push(newPath);
     }
