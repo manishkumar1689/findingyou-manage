@@ -1491,6 +1491,7 @@ td.edit {
 }
 
 .user-form > .row.twin > fieldset.second {
+  display: block;
   .field.column.image {
     display: block;
     label.upload {
@@ -1504,6 +1505,7 @@ td.edit {
   .profile-text {
     clear: both;
     padding-top: 1rem;
+    width: 100%;
   }
 }
 
