@@ -67,35 +67,6 @@
             >{{ role.name }}</b-switch
           >
         </b-field>
-        <b-field label="Profile image" class="profile image column">
-          <b-upload name="file" v-model="file">
-            <a class="button is-primary">
-              <b-icon icon="upload"></b-icon>
-              <span>Choose file</span>
-            </a>
-          </b-upload>
-          <b-button
-            v-if="mayUpload"
-            size="is-medium"
-            left-icon="upload"
-            @click="upload"
-            >Upload</b-button
-          >
-          <em v-if="mayUpload" class="new-file">{{ file.name }}</em>
-          <img
-            v-if="hasProfileImage"
-            :src="profileImageThumb"
-            alt="Profile Image"
-          />
-        </b-field>
-         <b-field label="Profile text (bio)" class="profile-text row">
-          <b-input
-            type="textarea"
-            cols="80"
-            rows="3"
-            v-model="profileText"
-            />
-        </b-field>
         <b-field label="Status" class="wrap">
           <b-switch size="is-small" v-model="active">Active</b-switch>
           <b-switch size="is-small" v-model="test">Test account</b-switch>
@@ -125,6 +96,35 @@
         </b-field>
       </fieldset>
       <fieldset class="column">
+        <b-field label="Profile image" class="profile image column">
+          <b-upload name="file" v-model="file">
+            <a class="button is-primary">
+              <b-icon icon="upload"></b-icon>
+              <span>Choose file</span>
+            </a>
+          </b-upload>
+          <b-button
+            v-if="mayUpload"
+            size="is-medium"
+            left-icon="upload"
+            @click="upload"
+            >Upload</b-button
+          >
+          <em v-if="mayUpload" class="new-file">{{ file.name }}</em>
+          <img
+            v-if="hasProfileImage"
+            :src="profileImageThumb"
+            alt="Profile Image"
+          />
+        </b-field>
+         <b-field label="Profile text (bio)" class="profile-text row">
+          <b-input
+            type="textarea"
+            cols="80"
+            rows="3"
+            v-model="profileText"
+            />
+        </b-field>
         <template v-if="hasStatuses">
           <div class="status-item" v-for="st in status" :key="st.itemKey">
             <h4>{{ st.key }}</h4>
