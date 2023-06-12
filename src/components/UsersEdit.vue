@@ -117,7 +117,15 @@
             alt="Profile Image"
           />
         </b-field>
-         <b-field label="Profile text (bio)" class="profile-text row">
+        <b-field v-if="hasProfileImage" class="row caption clear" label="Caption / Credits">
+          <b-input
+            type="textarea"
+            cols="80"
+            rows="3"
+            v-model="publicCaptions[0]"
+            />
+        </b-field>
+         <b-field label="Profile text (bio)" class="profile-text row clear">
           <b-input
             type="textarea"
             cols="80"
@@ -502,6 +510,8 @@ export default class UserEdit extends Vue {
   likes: LikeRow[] = [];
   genderOnly = false;
 
+  publicCaptions: string[] = [];
+
   created() {
     if (this.current instanceof Object) {
       this.sync();
@@ -509,6 +519,7 @@ export default class UserEdit extends Vue {
   }
 
   async sync() {
+    this.publicCaptions = [];
     if (notEmptyString(this.current.fullName)) {
       this.fullName = this.current.fullName;
     } else {
@@ -586,6 +597,11 @@ export default class UserEdit extends Vue {
           : [];
         return { ...po, itemKey, mediaItems, hasMediaItems };
       });
+      if (this.profiles.length > 0 && this.profiles[0] instanceof Object && this.profiles[0].mediaItems instanceof Array) {
+        for (const mi of this.profiles[0].mediaItems) {
+          this.publicCaptions.push(mi.title);
+        }
+      }
     }
     if (this.current.preferences instanceof Array) {
       const pm: Map<string, any> = new Map();
@@ -992,6 +1008,9 @@ export default class UserEdit extends Vue {
     };
     if (notEmptyString(this.profileText)) {
       edited.publicProfileText = this.profileText;
+    }
+    if (this.publicCaptions.length > 0 && notEmptyString(this.publicCaptions[0])) {
+      edited.publicCaptions = this.publicCaptions;
     }
     if (this.detailEditMode) {
       edited.preferences = [];
@@ -1501,10 +1520,11 @@ td.edit {
       float: right;
       margin-left: 0.75em;
     }
+    margin-bottom: 1rem;
+    min-height: 4rem;
   }
-  .profile-text {
+  .clear {
     clear: both;
-    padding-top: 1rem;
     width: 100%;
   }
 }
