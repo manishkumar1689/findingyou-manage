@@ -524,6 +524,7 @@ export default class UserEdit extends Vue {
 
   async sync() {
     this.publicCaptions = [];
+    this.blocked = false;
     if (notEmptyString(this.current.fullName)) {
       this.fullName = this.current.fullName;
     } else {
@@ -563,7 +564,9 @@ export default class UserEdit extends Vue {
       }
     }
     this.active = this.current.active;
-    this.blocked = this.roleState.blocked;
+    if (this.roleState.blocked) {
+      this.blocked = this.roleState.blocked;
+    }
     this.test = this.current.test;
     this.password = '';
     this.cpassword = '';
