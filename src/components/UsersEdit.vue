@@ -642,15 +642,15 @@ export default class UserEdit extends Vue {
     return buildCustomLocOptions(this.customLocations);
   }
 
-  get toggleEditLabel() {
+  get toggleEditLabel(): string {
     return this.detailEditMode ? 'Dismiss' : 'Edit details';
   }
 
-  get validRoles() {
+  get validRoles(): string[] {
     return Object.entries(this.roleState).filter(entry => entry[1]).map(entry => entry[0]);
   }
 
-  get roleClasses() {
+  get roleClasses(): string[] {
     const cls = this.validRoles.map(k => sanitize(k, '-'));
     if (this.hasAdminRole) {
       cls.push('admin-role');
@@ -663,12 +663,11 @@ export default class UserEdit extends Vue {
     return cls;
   }
 
-  get hasAdminRole() {
+  get hasAdminRole(): boolean {
     return this.validRoles.some(k => k.includes('admin') || k.includes('editor'));
   }
 
   roleOptionClass(roleKey = ""): string[] {
-    console.log(this.roleState, roleKey);
     const activeClass = Object.keys(this.roleState).includes(roleKey) && this.roleState[roleKey] ? 'active' : 'inactive';
     return [sanitize(roleKey), activeClass]
   }
