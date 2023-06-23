@@ -68,7 +68,7 @@
             >{{ role.name }}</b-switch
           >
         </b-field>
-        <b-field label="Status" class="wrap">
+        <b-field label="Status" class="wrap user-status">
           <b-switch size="is-small" v-model="active">Active</b-switch>
           <b-switch size="is-small" v-model="blocked">Blocked</b-switch>
           <b-switch size="is-small" v-model="test">Test account</b-switch>
@@ -1604,6 +1604,16 @@ td.edit {
   .clear {
     clear: both;
     width: 100%;
+  }
+}
+
+#main .edit-form .column .user-status {
+  label.switch {
+    margin-right: 0.25em;
+    .control-label {
+      margin: 0 0.25em 0 0;
+      padding-left: 0;
+    }
   }
 }
 
