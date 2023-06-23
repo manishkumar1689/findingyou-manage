@@ -65,7 +65,7 @@
     <b-table
       v-if="hasUsers"
       :data="users"
-      :row-class="(row, index) => assignRowClasses(index)"
+      :row-class="(row, index) => assignRowClasses(index, row)"
       :paginated="true"
       backend-pagination
       :current-page="page"
@@ -691,10 +691,18 @@ export default class UsersListView extends Vue {
     return "Members and Admins";
   }
 
-  assignRowClasses(index: number) {
+  assignRowClasses(index: number, row: any = null) {
     const cls = [["index", index].join("-"), ["user", index].join("-")];
     if (this.selectedRowIndices.includes(index)) {
       cls.push("selected");
+    }
+    if (row instanceof Object && row.roles instanceof Array)  {
+      if (row.roles.includes('blocked')) {
+        cls.push('blocked');
+      }
+      if (row.active !== true) {
+        cls.push('inactive');
+      }
     }
     return cls;
   }
@@ -869,3 +877,15 @@ export default class UsersListView extends Vue {
   }
 }
 </script>
+<style lang="scss">
+@import "@/styles/variables.scss";
+#main table tr {
+  &.blocked {
+    background-color: rgba($danger, 0.125);
+  }
+  &.inactive {
+    background-color: rgba($medium-grey, 0.125);
+  }
+}
+
+</style>

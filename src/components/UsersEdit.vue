@@ -58,17 +58,19 @@
             </option>
           </b-select>
         </b-field>
-        <b-field label="Roles" class="user-roles row switch-column">
+        <b-field label="Roles" class="user-roles row switch-column" :class="roleClasses">
           <b-switch
             v-for="role in roleOptions"
             :key="role.itemKey"
             size="is-small"
             v-model="roleState[role.key]"
+            :class="roleOptionClass(role.key)"
             >{{ role.name }}</b-switch
           >
         </b-field>
         <b-field label="Status" class="wrap">
           <b-switch size="is-small" v-model="active">Active</b-switch>
+          <b-switch size="is-small" v-model="blocked">Blocked</b-switch>
           <b-switch size="is-small" v-model="test">Test account</b-switch>
           <b-switch v-if="!isNew" size="is-small" v-model="mayEditPassword"
             >Edit password</b-switch
@@ -153,7 +155,8 @@
       </li>
     </ul>
     <div class="actions">
-      <b-button @click="save" type="is-success" size="is-medium">{{topSaveLabel}}</b-button>
+      <b-button @click="save" type="is-info" size="is-medium">{{topSaveLabel}}</b-button>
+      <b-button @click="saveReturn" type="is-success" size="is-medium">{{saveAndReturn}}</b-button>
     </div>
     <div v-if="isSaved" class="info row horizontal twin">
       <div class="primary-column column vertical">
@@ -387,6 +390,7 @@ import { Component, Prop, Watch, Vue } from "vue-property-decorator";
 import { State } from "vuex-class";
 import birthDatePicker from "vue-birth-datepicker";
 import {
+  updateUser,
   deleteFile,
   fetchCustomLocations,
   fetchUserChart,
@@ -432,7 +436,6 @@ import { extractCorePlacenames } from "../api/helpers";
 import { Chart } from "../api/models/Chart";
 import { KeyName, LikeRow, PreferenceOption, Role, SimpleLocation, SuggestedPlace } from "../api/interfaces";
 import { Geo } from "../api/interfaces/users";
-import { updateUser } from "../api/methods";
 import { bus } from "../main";
 import defaultRoleKeys from "@/api/mappings/default-roles";
 import genderOptions from "@/api/mappings/gender-options";
@@ -466,6 +469,7 @@ export default class UserEdit extends Vue {
   identifier = "";
   mode = "";
   active = false;
+  blocked = false;
   roles: string[] = [];
   test = false;
   status = [];
@@ -559,6 +563,7 @@ export default class UserEdit extends Vue {
       }
     }
     this.active = this.current.active;
+    this.blocked = this.roleState.blocked;
     this.test = this.current.test;
     this.password = '';
     this.cpassword = '';
@@ -639,6 +644,33 @@ export default class UserEdit extends Vue {
 
   get toggleEditLabel() {
     return this.detailEditMode ? 'Dismiss' : 'Edit details';
+  }
+
+  get validRoles() {
+    return Object.entries(this.roleState).filter(entry => entry[1]).map(entry => entry[0]);
+  }
+
+  get roleClasses() {
+    const cls = this.validRoles.map(k => sanitize(k, '-'));
+    if (this.hasAdminRole) {
+      cls.push('admin-role');
+    } else {
+      cls.push('member-role');
+    }
+    if (this.current.roles.includes('blocked') && cls.includes('blocked') === true) {
+      cls.push('blocked-user');
+    }
+    return cls;
+  }
+
+  get hasAdminRole() {
+    return this.validRoles.some(k => k.includes('admin') || k.includes('editor'));
+  }
+
+  roleOptionClass(roleKey = ""): string[] {
+    console.log(this.roleState, roleKey);
+    const activeClass = Object.keys(this.roleState).includes(roleKey) && this.roleState[roleKey] ? 'active' : 'inactive';
+    return [sanitize(roleKey), activeClass]
   }
 
   fetchChart() {
@@ -782,6 +814,11 @@ export default class UserEdit extends Vue {
   get topSaveLabel() {
     return this.detailEditMode ? 'Save' : 'Save core fields';
   }
+
+  get saveAndReturn() {
+    return 'Save and return';
+  }
+
 
   get bottomSaveLabel() {
     return this.detailEditMode ? 'Save user and chart details' : '';
@@ -989,7 +1026,7 @@ export default class UserEdit extends Vue {
     return this.roleOpts.length > 0 ? this.roleOpts : defaultRoleKeys;
   }
 
-  save() {
+  save(returnMode = false) {
     this.errorMsgs = [];
     this.roles = Object.entries(this.roleState)
       .filter((entry) => entry[1])
@@ -1113,12 +1150,18 @@ export default class UserEdit extends Vue {
           this.toast(`updated account for ${this.fullName}`);
         });
       }
-      setTimeout(() => {
-        bus.$emit("update-user-list", true);
-      }, 1000);
+      if (returnMode === true) {
+        setTimeout(() => {
+          bus.$emit("update-user-list", true);
+        }, 1000);
+      }
     } else {
       this.setErrorMsgs(errorTypes);
     }
+  }
+
+  saveReturn() {
+    this.save(true);
   }
 
   setErrorMsgs(errorTypes: string[] = []) {
@@ -1439,6 +1482,23 @@ export default class UserEdit extends Vue {
     }
   }
 
+  @Watch("blocked")
+  changeBlocked(newVal) {
+    if (newVal === true) {
+      this.roleState['blocked'] = true;
+      this.active = false;
+    } else if (newVal === false) {
+      this.roleState['blocked'] = false;
+    }
+  }
+
+  @Watch("active")
+  changeActive(newVal) {
+    if (newVal === true) {
+      this.blocked = false;
+    }
+  }
+
   @Watch("roleState", { deep: true })
   changeRoleState(newVal) {
     if (newVal instanceof Object) {
@@ -1506,6 +1566,25 @@ td.edit {
   }
   @media (min-width: 90em) {
     min-width: 36em;
+  }
+}
+
+.user-roles {
+  label.blocked {
+    display: none;
+  }
+  &.member-role {
+    label {
+      &.superadmin,
+      &.admin,
+      &.editor {
+        opacity: 0.66667;
+        pointer-events: none;
+      }
+    }
+  }
+  &.blocked-user {
+    background-color: rgba($danger, 0.125);
   }
 }
 
