@@ -528,11 +528,13 @@ export default class UsersListView extends Vue {
       return pln;
     } else if (row.roles.includes('demo')) {
       return row.pob;
-    }  else if (!(row.geo.lat === 0 && row.geo.lat === 0)) {
-      return [degAsDm(row.geo.lat, "lat"), degAsDm(row.geo.lng, "lng")].join(', ');
-    } else {
-      return 'N/A';
+    }  else if (row.geo instanceof Object && Object.keys(row.geo).includes('lat')) {
+      const isNull = (row.geo.lat === 0 && row.geo.lng === 0);
+      if (!isNull) {
+        return [degAsDm(row.geo.lat, "lat"), degAsDm(row.geo.lng, "lng")].join(', ');
+      }
     }
+    return 'N/A';
   }
 
   dismiss() {
