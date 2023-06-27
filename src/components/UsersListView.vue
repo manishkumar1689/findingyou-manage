@@ -84,7 +84,7 @@
         <b-table-column
           class="placenames"
           field="placenames"
-          label="Placenames"
+          label="Current location"
         >
           <span
             class="text-label"
@@ -181,7 +181,7 @@ import {
   fetchCustomLocations,
   saveUserCustomLocation,
 } from "../api/methods";
-import { renderRolesFromKeys, smartCastInt } from "../api/converters";
+import { degAsDm, renderRolesFromKeys, smartCastInt } from "../api/converters";
 import { emptyString, notEmptyString } from "../api/validators";
 import { FilterSet } from "../api/composables/FilterSet";
 import { UserState } from "../store/types";
@@ -522,12 +522,16 @@ export default class UsersListView extends Vue {
     }
   }
 
-  renderPlacenames(row: User) {
+  renderPlacenames(row: User): string {
     const pln = extractCorePlacenames(row.placenames);
     if (notEmptyString(pln)) {
       return pln;
-    } else {
+    } else if (row.roles.includes('demo')) {
       return row.pob;
+    }  else if (!(row.geo.lat === 0 && row.geo.lat === 0)) {
+      return [degAsDm(row.geo.lat, "lat"), degAsDm(row.geo.lng, "lng")].join(', ');
+    } else {
+      return 'N/A';
     }
   }
 
