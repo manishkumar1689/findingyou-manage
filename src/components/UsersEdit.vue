@@ -223,6 +223,24 @@
                     {{ dob }}
                   </span>
                 </p>
+                <p class="age" v-else-if="hasAge">
+                  <span class="age item">
+                    N/A
+                  </span>
+                  <span class="birth-date" title="Only DOB is known. No chart has been generated">
+                    (
+                      <em class="age item">
+                    {{ age }}
+                  </em>
+                  <em class="dob item">
+                    {{ dob }}
+                  </em>
+                    )
+                  </span>
+                </p>
+                <p class="age" v-else>
+                  N/A
+                </p>
                 <p v-if="hasChart">
                   <span class="lat">{{ chart.geo.lat | toDMSLat }} </span>
                   <span class="lng">{{ chart.geo.lng | toDMSLng }} </span>
@@ -633,6 +651,14 @@ export default class UserEdit extends Vue {
       this.fetchChart();
     }
     this.fetchLocations();
+    setTimeout(() => {
+      if (!this.hasChart) {    
+        if (this.current.dob instanceof Date) {
+          this.dateVal = this.current.dob.getTime();
+          this.timeVal = this.current.dob.toISOString().split("T").pop().split(".").shift();
+        } 
+      }
+    })
   }
 
   fetchLocations() {
@@ -784,7 +810,7 @@ export default class UserEdit extends Vue {
   }
 
   get hasChart() {
-    return this.chart instanceof Chart;
+    return this.chart instanceof Chart && this.chart.jd > 0 && this.chart.grahas.length > 6;
   }
 
   get showCustomLocations() {
@@ -880,14 +906,18 @@ export default class UserEdit extends Vue {
     return extractCorePlacenames(this.current.placenames);
   }
 
-  get age() {
-    return this.hasChart ? getAge(this.chart.datetime) : 0;
+  get age(): number {
+    return this.hasChart ? getAge(this.chart.datetime) : this.current.dob instanceof Date ? getAge(this.current.dob) : 0;
   }
 
-  get dob() {
+  get hasAge(): boolean {
+    return this.age > 0;
+  }
+
+  get dob(): string {
     return this.hasChart
       ? mediumDateOnly(this.chart.datetime, this.chart.tzOffset)
-      : "";
+      : this.current.dob instanceof Date ? mediumDateOnly(this.current.dob) : '';
   }
 
   get modeOptions() {
@@ -1463,6 +1493,7 @@ export default class UserEdit extends Vue {
   @Watch("current")
   changeCurrent(newVal) {
     if (newVal instanceof Object) {
+      this.chart = new Chart();
       this.sync();
       this.deselectUser();
       this.likes = [];

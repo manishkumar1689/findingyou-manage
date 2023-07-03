@@ -182,7 +182,7 @@ import {
   saveUserCustomLocation,
 } from "../api/methods";
 import { degAsDm, renderRolesFromKeys, smartCastInt } from "../api/converters";
-import { emptyString, notEmptyString } from "../api/validators";
+import { emptyString, notEmptyString, validDateTimeString } from "../api/validators";
 import { FilterSet } from "../api/composables/FilterSet";
 import { UserState } from "../store/types";
 import { User, defaultUser, Preference } from "../api/interfaces/users";
@@ -357,7 +357,8 @@ export default class UsersListView extends Vue {
           const fullName = notEmptyString(user.fullName)
             ? user.fullName
             : user.nickName;
-          return { ...user, fullName };
+          const dob = notEmptyString(user.dob) && validDateTimeString(user.dob as string) ? new Date(user.dob) : null;
+          return { ...user, dob, fullName };
         });
         this.subtotal = result.total;
         if (result.grandTotal) {
