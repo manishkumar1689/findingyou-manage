@@ -252,7 +252,7 @@
 
         <div class="edit-actions">
           <b-button @click="toggleEditMode" :type="detailToggleDisplayMode" size="is-medium">{{toggleEditLabel}}</b-button>
-          <b-button v-if="detailEditMode" @click="save" type="is-success" size="is-medium">{{bottomSaveLabel}}</b-button>
+          <b-button v-if="detailEditMode" @click="save" type="is-success" :disabled="mayNotSaveChart" size="is-medium">{{bottomSaveLabel}}</b-button>
         </div>
         
         <dl class="twin-column bold-labels compact">
@@ -418,7 +418,8 @@ import {
   fetchPlacenames,
   quickMatchUser,
   swipeUser,
-  getLikeabilityByUser
+  getLikeabilityByUser,
+  getTzData
 } from "../api/methods";
 import {
   getAge,
@@ -461,7 +462,7 @@ import { MediaItem } from "@/api/models/MediaItem";
 import { GeoLoc } from "@/api/models/GeoLoc";
 import { buildCustomLocOptions } from "@/api/mappings/custom-locations";
 import UserBlockList from "./tables/UserBlockList.vue";
-import { julToDateParts, julToUnixMillisecs } from "@/api/julian-date";
+import { currentJulianDate, julToDateParts, julToUnixMillisecs } from "@/api/julian-date";
 import { ChartInput } from "@/api/models/ChartForm";
 
 const defaultRoleStates = Object.fromEntries(
@@ -512,9 +513,9 @@ export default class UserEdit extends Vue {
   file = null;
 
 
-  dateVal = 0;
+  dateVal: number | null = null;
 
-  timeVal = "12:00:00";
+  timeVal = "--:--:--";
 
   tzHrs = 0;
 
@@ -735,6 +736,11 @@ export default class UserEdit extends Vue {
       isNumeric(this.current.geo.lat) &&
       isNumeric(this.current.geo.lng)
     );
+  }
+
+  get mayNotSaveChart() {
+    const maySave = notEmptyString(this.timeVal) && /^\s*[012]?[0-9]:[0-5][0-9](:[0-5][0-9])?\s*$/.test(this.timeVal) && typeof this.dateVal === "number";
+    return !maySave;
   }
 
   get statusLog() {
@@ -1301,6 +1307,14 @@ export default class UserEdit extends Vue {
     if (this.placenames.length > 0 && emptyString(this.pob)) {
       this.pob = this.placenames[this.placenames.length - 1];
     }
+    getTzData(new GeoLoc(this.geo), currentJulianDate().toISOSimple()).then(result => {
+      if (result instanceof Object) {
+        const { tzOffset } = result;
+        if (typeof tzOffset === "number") {
+          this.tzHrs = tzOffset / 3600;
+        }
+      }
+    })
   }
 
   upload() {
