@@ -1162,12 +1162,14 @@ export const renderRolesFromKeys = (roles = []) => {
     .join(", ");
 };
 
-export const msToDatePart = (msVal = 0, hrsOffset = 0) => {
-  const dt = new Date(msVal);
-  const hours = Math.floor(hrsOffset);
+export const msToDatePart = (msVal = 0) => {
+  /* const tzOffset = hrsOffset * 60 * 60 * 1000; */
+  const systemOffset = new Date().getTimezoneOffset() * 60 * 1000;
+  const dt = new Date(msVal + systemOffset);
+  /* const hours = Math.floor(hrsOffset);
   const mins = (hrsOffset - hours) * 60;
   dt.setHours(hours);
   dt.setMinutes(mins);
-  dt.setSeconds(0);
+  dt.setSeconds(0); */
   return dt.toISOString().split("T").shift();
 };

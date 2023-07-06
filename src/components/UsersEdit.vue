@@ -431,6 +431,7 @@ import {
   msToDatePart,
   sanitize,
   smartCastInt,
+  julToMediumDate,
 } from "../api/converters";
 import {
   emptyString,
@@ -544,6 +545,8 @@ export default class UserEdit extends Vue {
   async sync() {
     this.publicCaptions = [];
     this.blocked = false;
+    this.dateVal = null;
+    this.timeVal = '--:--:--';
     if (notEmptyString(this.current.fullName)) {
       this.fullName = this.current.fullName;
     } else {
@@ -922,7 +925,7 @@ export default class UserEdit extends Vue {
 
   get dob(): string {
     return this.hasChart
-      ? mediumDateOnly(this.chart.datetime, this.chart.tzOffset)
+      ? julToMediumDate(this.chart.jd, this.chart.tzOffset)
       : this.current.dob instanceof Date ? mediumDateOnly(this.current.dob) : '';
   }
 
@@ -1101,7 +1104,8 @@ export default class UserEdit extends Vue {
         }
       })
       if (this.birthGeo) {
-        const datetime = msToDatePart(this.dateVal, this.tzHrs) + 'T' + this.timeVal;
+        //const datetime = msToDatePart(this.dateVal, this.tzHrs) + 'T' + this.timeVal;
+        const datetime = msToDatePart(this.dateVal) + 'T' + this.timeVal;
         const tzOffset = this.tzHrs * 3600;
         const pob = notEmptyString(this.pob) ? this.pob.split(",").shift() : '';
         const inData = {
