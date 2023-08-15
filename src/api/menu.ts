@@ -7,6 +7,7 @@ export const mainMenuItems = [
     reload: true,
   },
   { to: "/astro/pp-table", label: "5 Pakṣi Table", reload: true },
+  { to: "/astro/json-grid", label: "API Testing",  size: 'small', reload: true },
   { to: "/users", label: "Members and Admins" },
   { to: "/user-blocks", label: "Blocked users", size: "small" },
   { to: "/reported-users", label: "Reported users", size: "small" },
