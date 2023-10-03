@@ -1436,7 +1436,7 @@ export default class UserEdit extends Vue {
   handleClearLikes() {
 
     this.$buefy.dialog.confirm({
-      message: `Are you sure you wish to clear all likes and passes associated "${this.fullName}"`,
+      message: `Are you sure you wish to clear all likes and passes connected with "${this.fullName}"`,
       cancelText: "Keep",
       confirmText: "Clear all",
       type: "is-danger",
@@ -1447,7 +1447,7 @@ export default class UserEdit extends Vue {
   resetLikeTimestamps() {
     clearLikes(this.current._id, true, true).then(result => {
       if (result.valid) {
-        this.toast(`Like bucket limits have been reset`);
+        this.toast(`Like and superlike bucket limits have been reset`);
       }
     });
   }
