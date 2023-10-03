@@ -1727,6 +1727,25 @@ export const getLikeabilityByUser = async (userId: string): Promise<any[]> => {
   }
 };
 
+export const clearLikes = async (userId: string, timestampsOnly = false, mutual = true): Promise<{valid: boolean; cleared: number}> => {
+  if (notEmptyString(userId, 20)) {
+    const uri = ["user", "clear-likes", userId].join("/");
+    const value = timestampsOnly ? -2 : mutual ? 2 : 1;
+    const payload = {
+      ts: 0,
+      value
+    };
+    const result = await putData(uri, payload);
+    if (result instanceof Object) {
+      const { data } = result;
+      if (data instanceof Object) {
+        return data;
+      }
+    }
+  }
+  return { valid: false, cleared: 0 };
+};
+
 export const getReportedUsers = async (
   page = 1,
   search = "",

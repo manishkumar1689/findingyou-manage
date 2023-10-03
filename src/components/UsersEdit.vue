@@ -1,5 +1,5 @@
 <template>
-  <form class="edit-form user-form" v-if="isValid">
+  <form class="edit-form user-form" :class="formClasses" v-if="isValid">
     <div class="close" @click="dismiss">
       <b-icon icon="close"></b-icon>
     </div>
@@ -365,8 +365,10 @@
             <b-button @click="deselectUser">Clear</b-button>
           </template>
       </b-field>
-      <b-field label="Likeability" class="row fetch-likes">
-          <b-button @click="fetchLikes">Get ratings</b-button>
+      <b-field v-if="!isNew" label="Likeability" class="row fetch-likes">
+          <b-button @click="fetchLikes" type="is-info">Get ratings</b-button>
+          <b-button @click="handleClearLikes" type="is-warning">Clear all likes + passes</b-button>
+          <b-button @click="resetLikeTimestamps" type="is-success" title="Allow the user to like and super-like other users again">Reset bucket limits only</b-button>
       </b-field>
       <b-table
             v-if="hasLikeability"
@@ -419,7 +421,8 @@ import {
   quickMatchUser,
   swipeUser,
   getLikeabilityByUser,
-  getTzData
+  getTzData,
+  clearLikes
 } from "../api/methods";
 import {
   getAge,
@@ -764,6 +767,16 @@ export default class UserEdit extends Vue {
 
   get isNew() {
     return emptyString(this.current._id, 12);
+  }
+
+  get formClasses(): string[] {
+    const cls = this.isNew ? ['new-user'] : ['existing-user'];
+    if (this.detailEditMode) {
+      cls.push('detail-mode');
+    } else {
+      cls.push('basic-mode');
+    }
+    return cls;
   }
 
   get profileImage() {
@@ -1420,6 +1433,34 @@ export default class UserEdit extends Vue {
     }
   }
 
+  handleClearLikes() {
+
+    this.$buefy.dialog.confirm({
+      message: `Are you sure you wish to clear all likes and passes associated "${this.fullName}"`,
+      cancelText: "Keep",
+      confirmText: "Clear all",
+      type: "is-danger",
+      onConfirm: () => this.clearLikeability(),
+    });
+  }
+
+  resetLikeTimestamps() {
+    clearLikes(this.current._id, true, true).then(result => {
+      if (result.valid) {
+        this.toast(`Like bucket limits have been reset`);
+      }
+    });
+  }
+
+  clearLikeability() {
+    clearLikes(this.current._id, false, true).then(result => {
+      if (result.valid) {
+        this.toast(`${result.cleared} likes or passes cleared`);
+        this.likes = [];
+      }
+    })
+  }
+
   ratingTypeLabel(row: LikeRow, num = 1) {
     const word = this.ratingNumTOWord(num);
     return row.mode === 'to' ? `${word} ${row.name}` : `Let ${row.name} ${word.toLowerCase()} ${this.current.nickName}`;
@@ -1666,6 +1707,15 @@ td.edit {
       margin: 0 0.25em 0 0;
       padding-left: 0;
     }
+  }
+}
+
+#main .edit-form.basic-mode .info .twin-column.preferences {
+  height: 20em;
+  overflow-y: auto;
+  dt,
+  dd {
+    margin-bottom: 0;
   }
 }
 
